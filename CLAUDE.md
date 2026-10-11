@@ -14,7 +14,12 @@ is James Maes. Read `docs/BRIEF.md` first. When `docs/REQUIREMENTS.md`,
   (wait for approval), plan, then build phase by phase.
 - Every phase ends with something that runs on a real iPhone.
 - Small commits, conventional commit messages, tests with every phase.
-- Commit as the repo owner. No AI attribution trailers.
+- Commit as the repo owner, signed (`-S`) and signed off (`-s`, DCO), with a
+  `Co-Authored-By: Claude <model> <noreply@anthropic.com>` trailer for AI-assisted
+  work (K22-AI-02; owner decision 2026-10-11).
+- Work on `main` until the first published version, then switch to topic branches
+  and pull requests (owner-approved deviation from K22-AI-10 / K22-SDLC-10/12,
+  recorded in `docs/standards-conformance.md`). Never push without asking.
 - Never commit secrets, signing assets, or tokens. The OAuth client is public
   (PKCE), so there is no client secret to begin with.
 - Do not invent backend behaviour. The contract is the KoF22 Site API v1 in
@@ -24,6 +29,25 @@ is James Maes. Read `docs/BRIEF.md` first. When `docs/REQUIREMENTS.md`,
   (`Packages/KoF22Kit/Sources/KoF22Kit/Mock`) follow any contract change.
 - Push back on technical direction when there is a concrete reason, then
   follow the owner's decision.
+
+## Standards
+
+This repository follows the KofTwentyTwo standards v1.0.0
+(https://github.com/KofTwentyTwo/standards), Internal tier, with the status in
+`docs/standards-conformance.md`. In practice:
+
+- Kingsrook style via `.swift-format` (3-space indent, else/catch on a new line) and
+  `.swiftlint.yml` (`--strict`): `make format`, `make format-check`, `make lint`.
+- Every type and function has a `///` header comment; in-body comments are flower
+  boxes; every file starts with the MIT SPDX license header.
+- No force unwraps or `try!` (use `URL(literal:)` for constant URLs), no magic numbers
+  in expressions (named constants, `Theme` tokens in UI), no `print`.
+- Errors are never swallowed: log through `Log` (os.Logger) or surface them; `try?`
+  only where failure is expected, with a comment saying why.
+- Warnings are errors. Generated code is excluded by path only.
+- `make coverage` must stay at 100% line coverage for `Sources/KoF22Kit`.
+- Decisions that are expensive to reverse get an ADR in `docs/adr/`; attack-surface
+  changes update `docs/security/threat-model.md`.
 
 ## Technical constraints
 

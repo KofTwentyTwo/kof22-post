@@ -1,0 +1,17 @@
+{
+   "schemaVersion": 1,
+   "badge": {
+      "applicability": "not-applicable",
+      "reason": "Internal tier: private, single-user app without public releases. An OpenSSF Best Practices badge applies to public Product repositories; reassess before the first public release.",
+      "projectUrl": null,
+      "evidence": "docs/security/best-practices.md"
+   },
+   "fuzzing": {
+      "applicability": "not-applicable",
+      "reason": "No complex parser of untrusted input is implemented in this repository: JSON is decoded by Foundation through generated Codable types, images are decoded by Apple ImageIO, and the only hand-written parsing (OAuth callback query, share-sheet items, URL routes) is small and covered by negative unit tests.",
+      "targets": [],
+      "command": "",
+      "workflow": "",
+      "evidence": "docs/security/fuzzing.md"
+   }
+}
