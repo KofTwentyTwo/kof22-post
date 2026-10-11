@@ -44,6 +44,12 @@ public struct ComposeView: View {
         .scrollDismissesKeyboard(.interactively)
         .background(Theme.background)
         .safeAreaInset(edge: .bottom) { actionBar }
+        .toolbar {
+            ToolbarItemGroup(placement: .keyboard) {
+                Spacer()
+                Button("Done") { focus = nil }.accessibilityIdentifier("keyboard.done")
+            }
+        }
         .onAppear { if model.composition.body.isEmpty { focus = .body } }
         .onChange(of: pickerItems) { _, items in
             guard !items.isEmpty else { return }

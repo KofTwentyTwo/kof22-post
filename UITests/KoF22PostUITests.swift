@@ -19,6 +19,33 @@ final class KoF22PostUITests: XCTestCase {
         XCTAssertTrue(app.textViews["compose.body"].waitForExistence(timeout: 10))
     }
 
+    /// The composer opens with the keyboard up, covering the tab bar. Switching
+    /// the editor to Preview drops focus, like a user would.
+    private func tab(_ name: String) {
+        if app.keyboards.count > 0, app.buttons["Preview"].exists {
+            app.buttons["Preview"].tap()
+        }
+        app.tabBars.buttons[name].tap()
+    }
+
+    /// Settings is a lazy Form: scroll until the mock offline toggle exists, then flip it.
+    private func toggleOffline() {
+        tab("Settings")
+        let offline = app.switches["settings.offline"]
+        for _ in 0..<5 where !offline.exists { app.swipeUp() }
+        XCTAssertTrue(offline.waitForExistence(timeout: 5))
+        let control = offline.switches.firstMatch
+        (control.exists ? control : offline).tap()
+    }
+
+    private func write(_ text: String) {
+        if app.buttons["Write"].exists { app.buttons["Write"].tap() }
+        let body = app.textViews["compose.body"]
+        XCTAssertTrue(body.waitForExistence(timeout: 5))
+        body.tap()
+        body.typeText(text)
+    }
+
     func testSignInOpensComposer() {
         signIn()
         XCTAssertTrue(app.buttons["compose.post"].exists)
@@ -26,9 +53,7 @@ final class KoF22PostUITests: XCTestCase {
 
     func testPostAppearsInOutboxAndPosts() {
         signIn()
-        let body = app.textViews["compose.body"]
-        body.tap()
-        body.typeText("Hello from the UI test")
+        write("Hello from the UI test")
         app.buttons["compose.post"].tap()
 
         // Lands on the Outbox and is sent by the mock backend.
@@ -36,35 +61,30 @@ final class KoF22PostUITests: XCTestCase {
         XCTAssertTrue(sent.waitForExistence(timeout: 15))
         XCTAssertTrue(app.staticTexts["Hello from the UI test"].exists)
 
-        app.tabBars.buttons["Posts"].tap()
+        tab("Posts")
         XCTAssertTrue(app.staticTexts["Hello from the UI test"].waitForExistence(timeout: 10))
     }
 
     func testOfflinePostIsQueuedThenSent() {
         signIn()
-        app.tabBars.buttons["Settings"].tap()
-        let offline = app.switches["settings.offline"]
-        XCTAssertTrue(offline.waitForExistence(timeout: 5))
-        offline.switches.firstMatch.tap()
+        toggleOffline()
 
-        app.tabBars.buttons["Compose"].tap()
-        let body = app.textViews["compose.body"]
-        body.tap()
-        body.typeText("Written on a plane")
+        tab("Compose")
+        write("Written on a plane")
         app.buttons["compose.post"].tap()
         XCTAssertTrue(app.staticTexts["In progress"].waitForExistence(timeout: 10))
         XCTAssertTrue(app.staticTexts["Offline"].waitForExistence(timeout: 10))
 
-        app.tabBars.buttons["Settings"].tap()
-        offline.switches.firstMatch.tap()
-        app.tabBars.buttons["Outbox"].tap()
-        app.buttons["outbox.sendNow"].tap()
+        toggleOffline()
+        tab("Outbox")
+        let sendNow = app.buttons["outbox.sendNow"]
+        if sendNow.waitForExistence(timeout: 3) { sendNow.tap() }
         XCTAssertTrue(app.staticTexts["Sent"].waitForExistence(timeout: 15))
     }
 
     func testSignOutReturnsToSignIn() {
         signIn()
-        app.tabBars.buttons["Settings"].tap()
+        tab("Settings")
         let signOut = app.buttons["settings.signOut"]
         XCTAssertTrue(signOut.waitForExistence(timeout: 5))
         signOut.tap()

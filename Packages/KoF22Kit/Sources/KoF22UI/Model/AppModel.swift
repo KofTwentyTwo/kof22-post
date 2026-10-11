@@ -183,6 +183,7 @@ public final class AppModel {
             }
         case "outbox": selectedTab = .outbox
         case "posts": selectedTab = .posts
+        case "settings": selectedTab = .settings
         default: break
         }
     }

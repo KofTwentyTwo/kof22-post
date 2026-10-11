@@ -53,12 +53,14 @@ extension UIColor {
 /// The underscore cursor from the site: 1.5 s cycle, hard on/off.
 public struct BlinkingCursor: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    /// UI tests wait for the app to go idle, which a running timeline prevents.
+    private static let isStatic = ProcessInfo.processInfo.arguments.contains("-uitest")
 
     public init() {}
 
     public var body: some View {
-        TimelineView(.periodic(from: .now, by: 0.75)) { context in
-            let visible = reduceMotion || Int(context.date.timeIntervalSinceReferenceDate / 0.75) % 2 == 0
+        TimelineView(.periodic(from: .now, by: Self.isStatic ? 3600 : 0.75)) { context in
+            let visible = reduceMotion || Self.isStatic || Int(context.date.timeIntervalSinceReferenceDate / 0.75) % 2 == 0
             Text("_")
                 .font(Theme.mono(.body, weight: .bold))
                 .foregroundStyle(Theme.accent)

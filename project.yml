@@ -122,6 +122,7 @@ targets:
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.kof22.post.uitests
+        GENERATE_INFOPLIST_FILE: YES
         TEST_TARGET_NAME: KoF22Post
 
 schemes:

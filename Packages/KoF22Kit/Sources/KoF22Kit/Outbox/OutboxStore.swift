@@ -116,6 +116,19 @@ public actor OutboxStore {
         }
     }
 
+    /// "Send now": everything queued or failed becomes due immediately.
+    public func retryAll() throws {
+        let queued = OutboxState.queued.rawValue
+        let failed = OutboxState.failed.rawValue
+        let descriptor = FetchDescriptor<OutboxItem>(predicate: #Predicate { $0.stateRaw == queued || $0.stateRaw == failed })
+        for item in try modelContext.fetch(descriptor) where !item.isConflict {
+            item.state = .queued
+            item.nextAttemptAt = nil
+            item.attempts = 0
+        }
+        try modelContext.save()
+    }
+
     public func delete(_ id: UUID) throws {
         guard let item = try item(id) else { return }
         for photo in item.composition.photos {

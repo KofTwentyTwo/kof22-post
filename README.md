@@ -1,39 +1,53 @@
 # KoF22 Post
 
 Native iPhone app for posting to [kof22.com](https://kof22.com). Built for one
-user, mainly for fast short-form posts to the Field Notes blog (text, photos,
-links), with longer posts to the other blogs as a secondary use.
+user, mainly for fast short-form posts to the Field Notes blog (`quick-bits`:
+text, photos, links), with longer posts to the other blogs as a secondary use.
 
 ## Status
 
-Pre-code. The kickoff brief is in `docs/BRIEF.md`. Next steps, in order:
+Phase 1 is done: the whole app runs against an in-process **mock of the Site API
+v1 contract**, because `api.kof22.com` is not published yet. Switch to the live
+API in Settings once it is. See `docs/PLAN.md`.
 
-1. Clarifying questions and answers.
-2. `docs/REQUIREMENTS.md` and `docs/DESIGN.md`, approved by the owner.
-3. `docs/PLAN.md`, then phase-by-phase build where every phase runs on a phone.
+## Run it on your iPhone
 
-## Stack (intended)
+1. `brew install xcodegen`
+2. Create `Config/Local.xcconfig` with `DEVELOPMENT_TEAM = <your team id>`
+   (git-ignored), then `make project`.
+3. Open `KoF22Post.xcodeproj` and run the `KoF22Post` scheme on your phone.
+   Xcode registers the App Group and keychain group with automatic signing.
+4. Tap **Sign in (mock)**. Posts stay on the device in mock mode.
 
-- Swift 6, strict concurrency, SwiftUI, latest stable Xcode.
-- API client generated from the live OpenAPI spec at
-  `https://api.kof22.com/v1/openapi.json` with swift-openapi-generator.
-- OAuth2 Authorization Code + PKCE against Authentik, tokens in the Keychain.
-- SwiftData for drafts, outbox and cached posts. Offline-first with background
-  uploads and idempotency keys.
-- Share Extension, App Intents / Shortcuts, widget or Control for quick compose.
-- Swift Testing and XCUITest with a mock server or recorded fixtures.
-- No analytics, no tracking, minimal dependencies.
+## Commands
+
+| Command | What it does |
+|---|---|
+| `make project` | Regenerate `KoF22Post.xcodeproj` from `project.yml` |
+| `make build` | Build for the iPhone 18 Pro simulator |
+| `make test-kit` | Core unit tests (`swift test`, macOS, about 1 s) |
+| `make test-ui` | XCUITests on the simulator against the mock |
+| `make test` | Both |
+| `make generate` | Regenerate the API client from `openapi/openapi.yaml` |
+| `make update-spec` | Download the live spec from api.kof22.com and regenerate |
 
 ## Repository layout
 
 ```
-docs/   brief, requirements, design, plan
+App/              app target (entry point, App Intents)
+ShareExtension/   share sheet composer
+Widgets/          Control and widget
+Shared/           code compiled into app and widget (OpenComposeIntent)
+Packages/KoF22Kit KoF22API (generated client), KoF22Kit (core), KoF22UI (screens)
+openapi/          pinned Site API spec + generator config
+scripts/          spec assembly/update, icon renderer
+Tools/OpenAPIGen  pins the swift-openapi-generator CLI
+UITests/          XCUITests
+docs/             brief, requirements, design, plan
 ```
-
-The Xcode project will live at the repo root once created.
 
 ## Secrets
 
-None are committed. OAuth uses a public native client with PKCE, so the app
-needs no client secret. Signing and TestFlight credentials stay in Xcode and
-the CI secret store.
+None are committed. OAuth uses the public native client `kof22-post-ios` with
+PKCE, so there is no client secret. Your team ID lives only in the git-ignored
+`Config/Local.xcconfig`.

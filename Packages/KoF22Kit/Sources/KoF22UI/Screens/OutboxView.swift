@@ -30,7 +30,12 @@ public struct OutboxView: View {
             .navigationTitle("Outbox")
             .toolbar {
                 if !items([.queued, .failed]).isEmpty {
-                    Button("Send now") { app.kickOutbox() }.accessibilityIdentifier("outbox.sendNow")
+                    Button("Send now") {
+                        Task {
+                            try? await app.store.retryAll()
+                            await app.processor.drain()
+                        }
+                    }.accessibilityIdentifier("outbox.sendNow")
                 }
             }
             .sheet(item: $editingDraft) { draft in

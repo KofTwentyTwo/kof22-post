@@ -191,3 +191,17 @@ import UniformTypeIdentifiers
         #expect(OutboxProcessor.backoff(attempt: 20) == 900)
     }
 }
+
+extension OutboxTests {
+    @Test func sendNowIgnoresBackoff() async throws {
+        let f = try await makeFixture()
+        await f.backend.setSimulateOffline(true)
+        let id = try await f.store.enqueue(PostComposition(body: "now"), operation: .create)
+        await f.processor.drain()
+        await f.backend.setSimulateOffline(false)
+        #expect(try await f.store.due().isEmpty)
+        try await f.store.retryAll()
+        await f.processor.drain()
+        #expect(try await f.store.snapshot(id)?.state == .sent)
+    }
+}
