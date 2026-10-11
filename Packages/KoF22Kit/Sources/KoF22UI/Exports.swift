@@ -1,1 +1,1 @@
-import KoF22Kit
+@_exported import KoF22Kit

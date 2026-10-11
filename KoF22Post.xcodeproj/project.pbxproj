@@ -1,0 +1,729 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		08131CA1338AEB6B118AC1B6 /* ShareViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32B789C278ED82328DE1E758 /* ShareViewController.swift */; };
+		3856433A59151474DB1F9A35 /* PostIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2EFB31D74BD6163C4CAACEE /* PostIntents.swift */; };
+		3EE4FF7C6E1E56143D41E5A6 /* KoF22PostApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16F80E918228C7C40CABA50E /* KoF22PostApp.swift */; };
+		491A1C5AFFE7A9B88B151B0B /* KoF22UI in Frameworks */ = {isa = PBXBuildFile; productRef = 9EC66D2ABDFBBE22DA75F380 /* KoF22UI */; };
+		93DAD4D8FF407D7B9FEFE110 /* KoF22UI in Frameworks */ = {isa = PBXBuildFile; productRef = 0DCB2309583D89A84A4E1949 /* KoF22UI */; };
+		A20D3D6C6C6AF00B2FAF7FEF /* OpenComposeIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 945C65084A9C21521A33A3CD /* OpenComposeIntent.swift */; };
+		AC8884A44E6BF2689C8F0913 /* KoF22Widgets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 268923C54911E60BB53CA45C /* KoF22Widgets.swift */; };
+		C7C22D1D32A68C98AD643700 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DFE2FA9665C6186ABCA16120 /* Assets.xcassets */; };
+		F220283177C691DE5CBB836E /* KoF22PostWidgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 829660B6CA99A77026782DB0 /* KoF22PostWidgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		F32E7081CB64F51557F5F870 /* OpenComposeIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 945C65084A9C21521A33A3CD /* OpenComposeIntent.swift */; };
+		F710446887190E2A3E7E7B88 /* KoF22PostUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0DB1745C73CE4C81270B514 /* KoF22PostUITests.swift */; };
+		FECB319DC47212048831E29C /* KoF22PostShare.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 1CABD8A5CD65232771317D9D /* KoF22PostShare.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		59C7E2CDB9622935A6B0569B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1D60BCC1D2AB893BE47F4375 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 75D87772BF41683A97F2A10D;
+			remoteInfo = KoF22PostShare;
+		};
+		92CF013FEDA0F7249F2A9DDB /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1D60BCC1D2AB893BE47F4375 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 2D24DF602FF52C8C60EA01DD;
+			remoteInfo = KoF22Post;
+		};
+		B0D5F5A3C588EFD5DA5067AD /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1D60BCC1D2AB893BE47F4375 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 1CC655303D88EB6F7654B8BF;
+			remoteInfo = KoF22PostWidgets;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		582B7A277406C04F4649F9D5 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				FECB319DC47212048831E29C /* KoF22PostShare.appex in Embed Foundation Extensions */,
+				F220283177C691DE5CBB836E /* KoF22PostWidgets.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		16F80E918228C7C40CABA50E /* KoF22PostApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KoF22PostApp.swift; sourceTree = "<group>"; };
+		1CABD8A5CD65232771317D9D /* KoF22PostShare.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = KoF22PostShare.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		268923C54911E60BB53CA45C /* KoF22Widgets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KoF22Widgets.swift; sourceTree = "<group>"; };
+		2FAAD08196AACA911B447BD7 /* KoF22Post.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = KoF22Post.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		32B789C278ED82328DE1E758 /* ShareViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareViewController.swift; sourceTree = "<group>"; };
+		54237BE767C742BA94263A54 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		829660B6CA99A77026782DB0 /* KoF22PostWidgets.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = KoF22PostWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		8539F25C77C57264C66A0BA8 /* KoF22Post.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = KoF22Post.entitlements; sourceTree = "<group>"; };
+		8DDE628ACC92B813CB0D7595 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		945C65084A9C21521A33A3CD /* OpenComposeIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenComposeIntent.swift; sourceTree = "<group>"; };
+		A2EFB31D74BD6163C4CAACEE /* PostIntents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostIntents.swift; sourceTree = "<group>"; };
+		B27217B9C8F1CA4F1CCEA6C9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		CDCEB8F78433182D3FE77FD4 /* KoF22PostUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = KoF22PostUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		D0DB1745C73CE4C81270B514 /* KoF22PostUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KoF22PostUITests.swift; sourceTree = "<group>"; };
+		DAD65B6393FA4C16C9C87824 /* KoF22PostWidgets.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = KoF22PostWidgets.entitlements; sourceTree = "<group>"; };
+		DFE2FA9665C6186ABCA16120 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		EA50FB4E2DCEB5606D184D95 /* Base.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Base.xcconfig; sourceTree = "<group>"; };
+		F4332FAF6BE12BCA7C62DCB0 /* KoF22PostShare.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = KoF22PostShare.entitlements; sourceTree = "<group>"; };
+		FDDD1EC72823FC0228B1194B /* KoF22Kit */ = {isa = PBXFileReference; lastKnownFileType = folder; name = KoF22Kit; path = Packages/KoF22Kit; sourceTree = SOURCE_ROOT; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		79AEC7311A1CD80153BE434D /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				491A1C5AFFE7A9B88B151B0B /* KoF22UI in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8C758AB6F208F137D9591281 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				93DAD4D8FF407D7B9FEFE110 /* KoF22UI in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		0FC8DD3E33A6FCB4A49E737C /* ShareExtension */ = {
+			isa = PBXGroup;
+			children = (
+				8DDE628ACC92B813CB0D7595 /* Info.plist */,
+				F4332FAF6BE12BCA7C62DCB0 /* KoF22PostShare.entitlements */,
+				32B789C278ED82328DE1E758 /* ShareViewController.swift */,
+			);
+			path = ShareExtension;
+			sourceTree = "<group>";
+		};
+		2586E29D931176E4D189A66A /* Widgets */ = {
+			isa = PBXGroup;
+			children = (
+				B27217B9C8F1CA4F1CCEA6C9 /* Info.plist */,
+				DAD65B6393FA4C16C9C87824 /* KoF22PostWidgets.entitlements */,
+				268923C54911E60BB53CA45C /* KoF22Widgets.swift */,
+			);
+			path = Widgets;
+			sourceTree = "<group>";
+		};
+		3F1E6013719DAA5A5FC6615B /* App */ = {
+			isa = PBXGroup;
+			children = (
+				DFE2FA9665C6186ABCA16120 /* Assets.xcassets */,
+				54237BE767C742BA94263A54 /* Info.plist */,
+				8539F25C77C57264C66A0BA8 /* KoF22Post.entitlements */,
+				16F80E918228C7C40CABA50E /* KoF22PostApp.swift */,
+				A2EFB31D74BD6163C4CAACEE /* PostIntents.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		4C2B6B54AF352546E38937FA /* Config */ = {
+			isa = PBXGroup;
+			children = (
+				EA50FB4E2DCEB5606D184D95 /* Base.xcconfig */,
+			);
+			path = Config;
+			sourceTree = "<group>";
+		};
+		4EA5BE8FB91C843ED2BD6B7B /* UITests */ = {
+			isa = PBXGroup;
+			children = (
+				D0DB1745C73CE4C81270B514 /* KoF22PostUITests.swift */,
+			);
+			path = UITests;
+			sourceTree = "<group>";
+		};
+		B13B0FE4F35E587C6ADFC800 /* Packages */ = {
+			isa = PBXGroup;
+			children = (
+				FDDD1EC72823FC0228B1194B /* KoF22Kit */,
+			);
+			path = Packages;
+			sourceTree = "<group>";
+		};
+		BA5C32B0719A7D670D955016 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				2FAAD08196AACA911B447BD7 /* KoF22Post.app */,
+				1CABD8A5CD65232771317D9D /* KoF22PostShare.appex */,
+				CDCEB8F78433182D3FE77FD4 /* KoF22PostUITests.xctest */,
+				829660B6CA99A77026782DB0 /* KoF22PostWidgets.appex */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		DAB82554602B5B5D833B8F88 = {
+			isa = PBXGroup;
+			children = (
+				3F1E6013719DAA5A5FC6615B /* App */,
+				4C2B6B54AF352546E38937FA /* Config */,
+				B13B0FE4F35E587C6ADFC800 /* Packages */,
+				DBC3F5722BD0EE2B1C6EA5CC /* Shared */,
+				0FC8DD3E33A6FCB4A49E737C /* ShareExtension */,
+				4EA5BE8FB91C843ED2BD6B7B /* UITests */,
+				2586E29D931176E4D189A66A /* Widgets */,
+				BA5C32B0719A7D670D955016 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		DBC3F5722BD0EE2B1C6EA5CC /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				945C65084A9C21521A33A3CD /* OpenComposeIntent.swift */,
+			);
+			path = Shared;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		1CC655303D88EB6F7654B8BF /* KoF22PostWidgets */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 56EAEBA8055F0AD96556A433 /* Build configuration list for PBXNativeTarget "KoF22PostWidgets" */;
+			buildPhases = (
+				3465578275C1E52FE0088D4D /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = KoF22PostWidgets;
+			packageProductDependencies = (
+			);
+			productName = KoF22PostWidgets;
+			productReference = 829660B6CA99A77026782DB0 /* KoF22PostWidgets.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+		2D24DF602FF52C8C60EA01DD /* KoF22Post */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F2E2C0EECF0E9C3690E64D44 /* Build configuration list for PBXNativeTarget "KoF22Post" */;
+			buildPhases = (
+				F497E621AE651C927FE88F3F /* Sources */,
+				6165C3FD3093837E3D4BBD95 /* Resources */,
+				79AEC7311A1CD80153BE434D /* Frameworks */,
+				582B7A277406C04F4649F9D5 /* Embed Foundation Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				728DEB47BCE5E0C253DCD8B8 /* PBXTargetDependency */,
+				CC6B474FB6AFED4FC3378E66 /* PBXTargetDependency */,
+			);
+			name = KoF22Post;
+			packageProductDependencies = (
+				9EC66D2ABDFBBE22DA75F380 /* KoF22UI */,
+			);
+			productName = KoF22Post;
+			productReference = 2FAAD08196AACA911B447BD7 /* KoF22Post.app */;
+			productType = "com.apple.product-type.application";
+		};
+		75D87772BF41683A97F2A10D /* KoF22PostShare */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 533535E8D0C5391E84E177AF /* Build configuration list for PBXNativeTarget "KoF22PostShare" */;
+			buildPhases = (
+				91197F0351654C84B068EA03 /* Sources */,
+				8C758AB6F208F137D9591281 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = KoF22PostShare;
+			packageProductDependencies = (
+				0DCB2309583D89A84A4E1949 /* KoF22UI */,
+			);
+			productName = KoF22PostShare;
+			productReference = 1CABD8A5CD65232771317D9D /* KoF22PostShare.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+		93A5D551F5ADEA25E59474F8 /* KoF22PostUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 801F28D1D9ED8FD8FE017609 /* Build configuration list for PBXNativeTarget "KoF22PostUITests" */;
+			buildPhases = (
+				53F6865F7C6BB60988446C63 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				35FE32639210C005AA899BA0 /* PBXTargetDependency */,
+			);
+			name = KoF22PostUITests;
+			packageProductDependencies = (
+			);
+			productName = KoF22PostUITests;
+			productReference = CDCEB8F78433182D3FE77FD4 /* KoF22PostUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		1D60BCC1D2AB893BE47F4375 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					1CC655303D88EB6F7654B8BF = {
+						DevelopmentTeam = "";
+						ProvisioningStyle = Automatic;
+					};
+					2D24DF602FF52C8C60EA01DD = {
+						DevelopmentTeam = "";
+						ProvisioningStyle = Automatic;
+					};
+					75D87772BF41683A97F2A10D = {
+						DevelopmentTeam = "";
+						ProvisioningStyle = Automatic;
+					};
+					93A5D551F5ADEA25E59474F8 = {
+						DevelopmentTeam = "";
+						ProvisioningStyle = Automatic;
+						TestTargetID = 2D24DF602FF52C8C60EA01DD;
+					};
+				};
+			};
+			buildConfigurationList = 9ADF8E35E57B62200A4FE4F7 /* Build configuration list for PBXProject "KoF22Post" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = DAB82554602B5B5D833B8F88;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				F3DB5F3A61A352083AAD4C16 /* XCLocalSwiftPackageReference "Packages/KoF22Kit" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = BA5C32B0719A7D670D955016 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				2D24DF602FF52C8C60EA01DD /* KoF22Post */,
+				75D87772BF41683A97F2A10D /* KoF22PostShare */,
+				1CC655303D88EB6F7654B8BF /* KoF22PostWidgets */,
+				93A5D551F5ADEA25E59474F8 /* KoF22PostUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		6165C3FD3093837E3D4BBD95 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C7C22D1D32A68C98AD643700 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		3465578275C1E52FE0088D4D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AC8884A44E6BF2689C8F0913 /* KoF22Widgets.swift in Sources */,
+				F32E7081CB64F51557F5F870 /* OpenComposeIntent.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		53F6865F7C6BB60988446C63 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F710446887190E2A3E7E7B88 /* KoF22PostUITests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		91197F0351654C84B068EA03 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				08131CA1338AEB6B118AC1B6 /* ShareViewController.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F497E621AE651C927FE88F3F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3EE4FF7C6E1E56143D41E5A6 /* KoF22PostApp.swift in Sources */,
+				A20D3D6C6C6AF00B2FAF7FEF /* OpenComposeIntent.swift in Sources */,
+				3856433A59151474DB1F9A35 /* PostIntents.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		35FE32639210C005AA899BA0 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 2D24DF602FF52C8C60EA01DD /* KoF22Post */;
+			targetProxy = 92CF013FEDA0F7249F2A9DDB /* PBXContainerItemProxy */;
+		};
+		728DEB47BCE5E0C253DCD8B8 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 75D87772BF41683A97F2A10D /* KoF22PostShare */;
+			targetProxy = 59C7E2CDB9622935A6B0569B /* PBXContainerItemProxy */;
+		};
+		CC6B474FB6AFED4FC3378E66 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 1CC655303D88EB6F7654B8BF /* KoF22PostWidgets */;
+			targetProxy = B0D5F5A3C588EFD5DA5067AD /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		10301E43CDE58E210D3139EE /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.kof22.post.uitests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = KoF22Post;
+			};
+			name = Debug;
+		};
+		17C552E8BCEC06309262A4D4 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = Widgets/KoF22PostWidgets.entitlements;
+				INFOPLIST_FILE = Widgets/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.kof22.post.widgets;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		1B93A572E6C5AE19B0DAD0C4 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = App/KoF22Post.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				INFOPLIST_FILE = App/Info.plist;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.social-networking";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.kof22.post;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		2FE7B737B53C2BAC9D55410F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = ShareExtension/KoF22PostShare.entitlements;
+				INFOPLIST_FILE = ShareExtension/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.kof22.post.share;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		30F70B92999C8FEEFF1E7FF5 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = ShareExtension/KoF22PostShare.entitlements;
+				INFOPLIST_FILE = ShareExtension/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.kof22.post.share;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		4146F0A179343C3F31D72EAE /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.kof22.post.uitests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = KoF22Post;
+			};
+			name = Release;
+		};
+		B8D3DE6EC22960550C2AF26B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = EA50FB4E2DCEB5606D184D95 /* Base.xcconfig */;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 27.0;
+				MARKETING_VERSION = 0.1.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		C4A4DDECCB872A4E5813B31C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = App/KoF22Post.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				INFOPLIST_FILE = App/Info.plist;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.social-networking";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.kof22.post;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		E7BFC32AFD3B4CED3B40CC49 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = Widgets/KoF22PostWidgets.entitlements;
+				INFOPLIST_FILE = Widgets/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.kof22.post.widgets;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		E98C43B2B54FDF5D553B65E2 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = EA50FB4E2DCEB5606D184D95 /* Base.xcconfig */;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 27.0;
+				MARKETING_VERSION = 0.1.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		533535E8D0C5391E84E177AF /* Build configuration list for PBXNativeTarget "KoF22PostShare" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				2FE7B737B53C2BAC9D55410F /* Debug */,
+				30F70B92999C8FEEFF1E7FF5 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		56EAEBA8055F0AD96556A433 /* Build configuration list for PBXNativeTarget "KoF22PostWidgets" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				17C552E8BCEC06309262A4D4 /* Debug */,
+				E7BFC32AFD3B4CED3B40CC49 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		801F28D1D9ED8FD8FE017609 /* Build configuration list for PBXNativeTarget "KoF22PostUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				10301E43CDE58E210D3139EE /* Debug */,
+				4146F0A179343C3F31D72EAE /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		9ADF8E35E57B62200A4FE4F7 /* Build configuration list for PBXProject "KoF22Post" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B8D3DE6EC22960550C2AF26B /* Debug */,
+				E98C43B2B54FDF5D553B65E2 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		F2E2C0EECF0E9C3690E64D44 /* Build configuration list for PBXNativeTarget "KoF22Post" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C4A4DDECCB872A4E5813B31C /* Debug */,
+				1B93A572E6C5AE19B0DAD0C4 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		F3DB5F3A61A352083AAD4C16 /* XCLocalSwiftPackageReference "Packages/KoF22Kit" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/KoF22Kit;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		0DCB2309583D89A84A4E1949 /* KoF22UI */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = KoF22UI;
+		};
+		9EC66D2ABDFBBE22DA75F380 /* KoF22UI */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = KoF22UI;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 1D60BCC1D2AB893BE47F4375 /* Project object */;
+}

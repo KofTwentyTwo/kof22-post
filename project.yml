@@ -1,0 +1,141 @@
+# Source of truth for KoF22Post.xcodeproj. Regenerate with `make project`.
+name: KoF22Post
+options:
+  bundleIdPrefix: com.kof22
+  deploymentTarget:
+    iOS: "27.0"
+  createIntermediateGroups: true
+  groupSortPosition: top
+configs:
+  Debug: debug
+  Release: release
+configFiles:
+  Debug: Config/Base.xcconfig
+  Release: Config/Base.xcconfig
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    MARKETING_VERSION: "0.1.0"
+    CURRENT_PROJECT_VERSION: "1"
+    ENABLE_USER_SCRIPT_SANDBOXING: YES
+    SWIFT_EMIT_LOC_STRINGS: YES
+    TARGETED_DEVICE_FAMILY: "1"
+packages:
+  KoF22Kit:
+    path: Packages/KoF22Kit
+targets:
+  KoF22Post:
+    type: application
+    platform: iOS
+    sources:
+      - App
+      - Shared
+    dependencies:
+      - package: KoF22Kit
+        product: KoF22UI
+      - target: KoF22PostShare
+      - target: KoF22PostWidgets
+    entitlements:
+      path: App/KoF22Post.entitlements
+      properties:
+        com.apple.security.application-groups: [group.com.kof22.post]
+        keychain-access-groups: ["$(AppIdentifierPrefix)com.kof22.post.shared"]
+    info:
+      path: App/Info.plist
+      properties:
+        CFBundleDisplayName: KoF22 Post
+        UILaunchScreen:
+          UIColorName: ""
+        UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
+        UIApplicationSceneManifest:
+          UIApplicationSupportsMultipleScenes: false
+        CFBundleURLTypes:
+          - CFBundleURLName: com.kof22.post
+            CFBundleURLSchemes: [com.kof22.post]
+        NSCameraUsageDescription: Take a photo for a post.
+        UIBackgroundModes: [fetch, processing]
+        BGTaskSchedulerPermittedIdentifiers: [com.kof22.post.outbox]
+        KoF22KeychainGroup: "$(AppIdentifierPrefix)com.kof22.post.shared"
+        ITSAppUsesNonExemptEncryption: false
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.kof22.post
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.social-networking
+
+  KoF22PostShare:
+    type: app-extension
+    platform: iOS
+    sources: [ShareExtension]
+    dependencies:
+      - package: KoF22Kit
+        product: KoF22UI
+    entitlements:
+      path: ShareExtension/KoF22PostShare.entitlements
+      properties:
+        com.apple.security.application-groups: [group.com.kof22.post]
+        keychain-access-groups: ["$(AppIdentifierPrefix)com.kof22.post.shared"]
+    info:
+      path: ShareExtension/Info.plist
+      properties:
+        CFBundleDisplayName: KoF22 Post
+        KoF22KeychainGroup: "$(AppIdentifierPrefix)com.kof22.post.shared"
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.share-services
+          NSExtensionPrincipalClass: "$(PRODUCT_MODULE_NAME).ShareViewController"
+          NSExtensionAttributes:
+            NSExtensionActivationRule:
+              NSExtensionActivationSupportsImageWithMaxCount: 20
+              NSExtensionActivationSupportsWebURLWithMaxCount: 1
+              NSExtensionActivationSupportsText: true
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.kof22.post.share
+
+  KoF22PostWidgets:
+    type: app-extension
+    platform: iOS
+    sources:
+      - Widgets
+      - Shared
+    entitlements:
+      path: Widgets/KoF22PostWidgets.entitlements
+      properties:
+        com.apple.security.application-groups: [group.com.kof22.post]
+    info:
+      path: Widgets/Info.plist
+      properties:
+        CFBundleDisplayName: KoF22 Post
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.kof22.post.widgets
+
+  KoF22PostUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources: [UITests]
+    dependencies:
+      - target: KoF22Post
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.kof22.post.uitests
+        TEST_TARGET_NAME: KoF22Post
+
+schemes:
+  KoF22Post:
+    build:
+      targets:
+        KoF22Post: all
+        KoF22PostUITests: [test]
+    test:
+      gatherCoverageData: true
+      targets:
+        - KoF22PostUITests
+        - package: KoF22Kit/KoF22KitTests
+    run:
+      config: Debug
+    archive:
+      config: Release

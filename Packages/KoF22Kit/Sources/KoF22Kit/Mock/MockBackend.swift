@@ -92,6 +92,7 @@ public actor MockBackend {
                        headers: [String: String], body: Data?) async throws -> Response {
         if latency > .zero { try await Task.sleep(for: latency) }
         if simulateOffline { throw URLError(.notConnectedToInternet) }
+        reload()
         promoteScheduled()
         let segments = path.split(separator: "/").map(String.init)
         defer { save() }
@@ -115,6 +116,7 @@ public actor MockBackend {
 
     /// Receives the bytes PUT to a presigned upload URL.
     public func receiveUpload(id: String, from fileURL: URL) throws {
+        reload()
         guard var upload = state.uploads[id] else { throw APIError(status: 403, code: "forbidden", message: "Unknown upload URL") }
         guard upload.expiresAt > now() else { throw APIError(status: 403, code: "forbidden", message: "Upload URL expired") }
         let name = "upload-\(id)"
@@ -556,6 +558,15 @@ public actor MockBackend {
 
     private func validation(_ issues: [APIError.Detail]) -> Response {
         problem(422, "validation_failed", issues.first.map { "\($0.field) \($0.issue)" } ?? "Validation failed", details: issues)
+    }
+
+    /// The app and the Share Extension share the state file; read it fresh so one
+    /// process never overwrites the other's posts with a stale copy.
+    private func reload() {
+        guard let directory,
+              let data = try? Data(contentsOf: directory.appending(path: "state.json")),
+              let saved = try? Self.decoder.decode(State.self, from: data) else { return }
+        state = saved
     }
 
     private func save() {
