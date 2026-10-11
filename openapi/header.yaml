@@ -1,0 +1,11 @@
+openapi: 3.0.3
+info:
+  title: KoF22 Site API
+  version: 1.0.0
+  description: >-
+    Assembled locally from the backend's hand-written contract
+    (Website-Backend src/main/resources/site-api/openapi-extensions.yaml) until
+    https://api.kof22.com/v1/openapi.yaml is published. `make update-spec`
+    replaces this file with the live document.
+servers:
+  - url: https://api.kof22.com
