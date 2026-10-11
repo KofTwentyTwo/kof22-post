@@ -91,7 +91,7 @@ struct OutboxRow: View {
                 icon
                 Text(item.summary).font(.body.weight(.medium)).foregroundStyle(Theme.heading).lineLimit(2)
                 Spacer()
-                Text(item.updatedAt, style: .relative).font(Theme.mono(.caption2)).foregroundStyle(Theme.muted)
+                Text(item.updatedAt.formatted(.relative(presentation: .named))).font(Theme.mono(.caption2)).foregroundStyle(Theme.muted)
             }
             detail
         }
@@ -130,7 +130,7 @@ struct OutboxRow: View {
                 Text(item.phase ?? "Sending").font(.caption).foregroundStyle(Theme.body)
             case .queued:
                 if let next = item.nextAttemptAt, next > .now {
-                    Text("Retrying \(next, style: .relative)").font(.caption).foregroundStyle(Theme.muted)
+                    Text("Retrying \(next.formatted(.relative(presentation: .named)))").font(.caption).foregroundStyle(Theme.muted)
                 } else {
                     Text("Waiting to send").font(.caption).foregroundStyle(Theme.muted)
                 }
