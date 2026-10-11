@@ -18,9 +18,18 @@ opt_in_rules:
   - prefer_self_in_static_references
   - sorted_imports
   - unowned_variable_capture
+  - todo
+# Local adjustments to the standards v1.0.0 file, each matching the standard's own
+# intent (reported upstream):
+# - unused_declaration and unused_import only run under `swiftlint analyze`, so they
+#   are listed as analyzer rules instead of opt-in rules.
+# - statement_position uses uncuddled_else so SwiftLint agrees with swift-format's
+#   lineBreakBeforeControlFlowKeywords (else/catch on a new line, K22-CODE-SW-01).
+analyzer_rules:
   - unused_declaration
   - unused_import
-  - todo
+statement_position:
+  statement_mode: uncuddled_else
 custom_rules:
   no_print:
     name: "Structured logging"

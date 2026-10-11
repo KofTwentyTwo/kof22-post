@@ -27,23 +27,23 @@ extension Components.Schemas.BlogRef: Identifiable {}
 extension Components.Schemas.AuthoringTag: Identifiable {}
 
 extension Components.Schemas.PostStatus {
-    public var label: String {
-        switch self {
-        case .draft: "Draft"
-        case .scheduled: "Scheduled"
-        case .published: "Published"
-        }
-    }
+   public var label: String {
+      switch self {
+      case .draft: "Draft"
+      case .scheduled: "Scheduled"
+      case .published: "Published"
+      }
+   }
 }
 
 extension Components.Schemas.AuthoringLimits {
-    /// Used before `/me` has loaded (values from the backend's `AuthoringService`).
-    public static let fallback = AuthoringLimits(
-        maxBodyLength: 10_000,
-        maxTitleLength: 100,
-        maxTags: 10,
-        maxPhotosPerPost: 20,
-        maxPhotoBytes: 26_214_400,
-        photoContentTypes: ["image/jpeg", "image/png"]
-    )
+   /// Used before `/me` has loaded (values from the backend's `AuthoringService`).
+   public static let fallback = AuthoringLimits(
+      maxBodyLength: 10_000,
+      maxTitleLength: 100,
+      maxTags: 10,
+      maxPhotosPerPost: 20,
+      maxPhotoBytes: 26_214_400,
+      photoContentTypes: ["image/jpeg", "image/png"]
+   )
 }

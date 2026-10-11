@@ -9,8 +9,8 @@ NSColor(red: 0.035, green: 0.035, blue: 0.043, alpha: 1).setFill()
 NSRect(x: 0, y: 0, width: size, height: size).fill()
 let dots: [NSColor] = [.systemRed, .systemYellow, .systemGreen]
 for (i, color) in dots.enumerated() {
-    color.withAlphaComponent(0.85).setFill()
-    NSBezierPath(ovalIn: NSRect(x: 150 + Double(i) * 95, y: size - 230, width: 64, height: 64)).fill()
+   color.withAlphaComponent(0.85).setFill()
+   NSBezierPath(ovalIn: NSRect(x: 150 + Double(i) * 95, y: size - 230, width: 64, height: 64)).fill()
 }
 let green = NSColor(red: 0.204, green: 0.827, blue: 0.6, alpha: 1)
 let font = NSFont.monospacedSystemFont(ofSize: 430, weight: .bold)
