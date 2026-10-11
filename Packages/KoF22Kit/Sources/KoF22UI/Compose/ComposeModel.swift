@@ -111,6 +111,11 @@ public final class ComposeModel: Identifiable {
                 break
             }
             do {
+                // With full library access, read the original (with its metadata) from Photos.
+                if let id = item.itemIdentifier, let (data, ext) = await Permissions.shared.originalData(assetIdentifier: id) {
+                    composition.photos.append(ComposedPhoto(fileName: try Self.store(data, ext: ext)))
+                    continue
+                }
                 guard let data = try await item.loadTransferable(type: Data.self) else { continue }
                 let ext = item.supportedContentTypes.first?.preferredFilenameExtension ?? "jpg"
                 composition.photos.append(ComposedPhoto(fileName: try Self.store(data, ext: ext)))
@@ -142,6 +147,22 @@ public final class ComposeModel: Identifiable {
         guard let index = composition.photos.firstIndex(where: { $0.id == photo.id }) else { return }
         composition.photos[index] = photo
         changed()
+    }
+
+    // MARK: Location
+
+    public private(set) var isLocating = false
+
+    /// Fills the location label from the current position (prompts for access).
+    public func useCurrentLocation() async {
+        isLocating = true
+        defer { isLocating = false }
+        do {
+            composition.locationLabel = try await Permissions.shared.currentPlaceLabel()
+            changed()
+        } catch {
+            message = error.localizedDescription
+        }
     }
 
     public var photosMissingAltText: Int { composition.photos.filter { $0.altText.isEmpty }.count }

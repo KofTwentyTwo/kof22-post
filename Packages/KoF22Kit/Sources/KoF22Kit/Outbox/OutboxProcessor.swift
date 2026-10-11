@@ -136,7 +136,7 @@ public actor OutboxProcessor {
                 $0.phase = "Uploading photo \(done + 1) of \(pending.count)"
                 $0.progress = Double(done) / Double(pending.count + 1)
             }
-            guard let source = photo.localURL(in: photosDirectory), FileManager.default.fileExists(atPath: source.path()) else {
+            guard let source = photo.localURL(in: photosDirectory), FileManager.default.fileExists(atPath: source.path(percentEncoded: false)) else {
                 throw APIError(status: 410, code: "photo_missing", message: "A photo for this post is no longer on the device")
             }
             let prepared = try MediaProcessor.prepare(

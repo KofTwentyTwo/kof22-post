@@ -19,6 +19,9 @@ public struct ComposeView: View {
     @State private var arranging = false
     @State private var showDetails = false
     @State private var confirmDiscard = false
+    @State private var showPhotoPicker = false
+    @State private var photoAccessPrompt = false
+    private let permissions = Permissions.shared
 
     enum Field { case body, title, tags, link, location }
 
@@ -58,6 +61,16 @@ public struct ComposeView: View {
                 pickerItems = []
             }
         }
+        .photosPicker(isPresented: $showPhotoPicker, selection: $pickerItems,
+                      maxSelectionCount: max(model.limits.maxPhotosPerPost - model.composition.photos.count, 1),
+                      matching: .images, photoLibrary: .shared())
+        .alert("Allow full photo access", isPresented: $photoAccessPrompt) {
+            Button("Open Settings") { permissions.openSettings() }
+            Button("Pick anyway") { showPhotoPicker = true }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("KoF22 Post works best with access to all photos, so it can upload originals and keep their location when you ask. Choose \"Full Access\" in Settings › Privacy › Photos.")
+        }
         .sheet(item: $editingPhoto) { photo in
             PhotoDetailSheet(photo: photo, onSave: model.update, onRemove: model.removePhoto)
         }
@@ -84,23 +97,41 @@ public struct ComposeView: View {
     // MARK: Sections
 
     private var header: some View {
-        HStack {
+        VStack(alignment: .leading, spacing: 8) {
             PromptLabel("~/blogs/\(model.composition.blog)", cursor: focus == nil && model.composition.isEmpty)
-            Spacer()
+            blogPicker
+        }
+    }
+
+    /// Which blog this post goes to; changeable for new posts and edits.
+    private var blogPicker: some View {
+        HStack(spacing: 8) {
+            Text("Post to").font(Theme.mono(.caption)).foregroundStyle(Theme.muted)
             Menu {
                 Picker("Blog", selection: $model.composition.blog) {
-                    ForEach(app.blogs) { blog in Text(blog.name).tag(blog.slug) }
+                    ForEach(app.blogs) { blog in
+                        Text(blog.name).tag(blog.slug)
+                    }
                 }
-                Toggle("Title", isOn: $model.showTitle)
-                Toggle("Link & location", isOn: $showDetails)
             } label: {
-                Label(app.blogs.first { $0.slug == model.composition.blog }?.name ?? model.composition.blog,
-                      systemImage: "chevron.up.chevron.down")
-                    .font(Theme.mono(.caption, weight: .medium))
-                    .foregroundStyle(Theme.accent)
+                HStack(spacing: 4) {
+                    Text(app.blogs.first { $0.slug == model.composition.blog }?.name ?? model.composition.blog)
+                    Image(systemName: "chevron.up.chevron.down").font(.caption2)
+                }
+                .font(Theme.mono(.callout, weight: .semibold))
+                .foregroundStyle(Theme.accent)
+                .padding(.horizontal, 10)
+                .padding(.vertical, 5)
+                .overlay(Capsule().stroke(Theme.accent.opacity(0.4)))
             }
-            .accessibilityLabel("Blog and options")
+            .onChange(of: model.composition.blog) { _, _ in
+                model.changed()
+                model.tagInputChanged()
+            }
+            .accessibilityLabel("Blog: \(app.blogs.first { $0.slug == model.composition.blog }?.name ?? model.composition.blog)")
+            .accessibilityHint("Choose which blog to post to")
             .accessibilityIdentifier("compose.blogMenu")
+            Spacer()
         }
     }
 
@@ -125,11 +156,14 @@ public struct ComposeView: View {
             .accessibilityIdentifier("compose.previewToggle")
 
             if preview {
-                Group {
-                    if model.composition.body.isEmpty {
+                VStack(alignment: .leading, spacing: 10) {
+                    if model.composition.body.isEmpty && model.composition.photos.isEmpty {
                         Text("Nothing to preview").foregroundStyle(Theme.muted)
                     } else {
                         StructuredText(markdown: model.composition.body)
+                        ForEach(model.composition.photos) { photo in
+                            PhotoPreview(photo: photo)
+                        }
                     }
                 }
                 .frame(maxWidth: .infinity, minHeight: 160, alignment: .topLeading)
@@ -253,6 +287,12 @@ public struct ComposeView: View {
                 TextField("Location label (optional)", text: $model.composition.locationLabel)
                     .focused($focus, equals: .location)
                     .onChange(of: model.composition.locationLabel) { model.changed() }
+                if model.isLocating {
+                    ProgressView().controlSize(.small)
+                } else {
+                    Button { Task { await model.useCurrentLocation() } } label: { Image(systemName: "location.fill") }
+                        .accessibilityLabel("Use current location")
+                }
             }
             if !model.composition.photos.isEmpty {
                 Toggle(isOn: $model.composition.keepLocation) {
@@ -271,8 +311,12 @@ public struct ComposeView: View {
 
     private var actionBar: some View {
         HStack(spacing: 14) {
-            PhotosPicker(selection: $pickerItems, maxSelectionCount: max(model.limits.maxPhotosPerPost - model.composition.photos.count, 1),
-                         matching: .images) {
+            Button {
+                Task {
+                    let status = await permissions.requestPhotos()
+                    if status == .authorized { showPhotoPicker = true } else { photoAccessPrompt = true }
+                }
+            } label: {
                 Image(systemName: "photo.on.rectangle.angled")
             }
             .accessibilityLabel("Add photos")
@@ -282,10 +326,16 @@ public struct ComposeView: View {
                     .accessibilityLabel("Take photo")
             }
             Button { showDetails.toggle(); if showDetails { focus = .link } } label: { Image(systemName: "link") }
-                .accessibilityLabel("Add link or location")
+                .accessibilityLabel("Add link")
+            Button {
+                showDetails = true
+                Task { await model.useCurrentLocation() }
+            } label: { Image(systemName: "location") }
+                .accessibilityLabel("Add current location")
             Spacer()
             if !model.composition.isEmpty || onDone != nil {
                 Menu {
+                    Toggle("Title", isOn: $model.showTitle)
                     if !model.isEditing || model.composition.status != .published {
                         Button("Save as draft", systemImage: "doc") { submit(.draft) }
                     }

@@ -53,6 +53,10 @@ targets:
           - CFBundleURLName: com.kof22.post
             CFBundleURLSchemes: [com.kof22.post]
         NSCameraUsageDescription: Take a photo for a post.
+        NSPhotoLibraryUsageDescription: Choose photos for your posts and upload the originals, including their location when you ask to keep it.
+        NSLocationWhenInUseUsageDescription: Tag a post with where you are, such as "Chester, IL".
+        NSLocationTemporaryUsageDescriptionDictionary:
+          PostLocation: Precise location names the place you are posting from.
         UIBackgroundModes: [fetch, processing]
         BGTaskSchedulerPermittedIdentifiers: [com.kof22.post.outbox]
         KoF22KeychainGroup: "$(AppIdentifierPrefix)com.kof22.post.shared"
@@ -81,6 +85,10 @@ targets:
       properties:
         CFBundleDisplayName: KoF22 Post
         KoF22KeychainGroup: "$(AppIdentifierPrefix)com.kof22.post.shared"
+        NSPhotoLibraryUsageDescription: Choose photos for your posts.
+        NSLocationWhenInUseUsageDescription: Tag a post with where you are.
+        NSLocationTemporaryUsageDescriptionDictionary:
+          PostLocation: Precise location names the place you are posting from.
         NSExtension:
           NSExtensionPointIdentifier: com.apple.share-services
           NSExtensionPrincipalClass: "$(PRODUCT_MODULE_NAME).ShareViewController"

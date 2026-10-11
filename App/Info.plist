@@ -41,6 +41,15 @@
 	<string>$(AppIdentifierPrefix)com.kof22.post.shared</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Take a photo for a post.</string>
+	<key>NSLocationTemporaryUsageDescriptionDictionary</key>
+	<dict>
+		<key>PostLocation</key>
+		<string>Precise location names the place you are posting from.</string>
+	</dict>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Tag a post with where you are, such as "Chester, IL".</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Choose photos for your posts and upload the originals, including their location when you ask to keep it.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

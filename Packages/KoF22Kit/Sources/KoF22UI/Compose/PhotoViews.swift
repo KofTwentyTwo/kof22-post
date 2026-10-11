@@ -10,7 +10,7 @@ struct PhotoThumbnail: View {
 
     var body: some View {
         Group {
-            if let url = photo.localURL(), let image = UIImage(contentsOfFile: url.path()) {
+            if let url = photo.localURL(), let image = UIImage(contentsOfFile: url.path(percentEncoded: false)) {
                 Image(uiImage: image).resizable().scaledToFill()
             } else if let url = app.photoURL(photo.remoteURL) {
                 AsyncImage(url: url) { image in image.resizable().scaledToFill() } placeholder: { Theme.surface }
@@ -21,6 +21,27 @@ struct PhotoThumbnail: View {
         .frame(width: size, height: size)
         .clipShape(RoundedRectangle(cornerRadius: 8))
         .overlay(RoundedRectangle(cornerRadius: 8).stroke(Theme.border))
+    }
+}
+
+/// Full-width photo as it will appear in the post (used by Preview).
+struct PhotoPreview: View {
+    @Environment(AppModel.self) private var app
+    let photo: ComposedPhoto
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Group {
+                if let url = photo.localURL(), let image = UIImage(contentsOfFile: url.path(percentEncoded: false)) {
+                    Image(uiImage: image).resizable().scaledToFit()
+                } else if let url = app.photoURL(photo.remoteURL) {
+                    AsyncImage(url: url) { $0.resizable().scaledToFit() } placeholder: { Theme.surface.frame(height: 160) }
+                }
+            }
+            .clipShape(RoundedRectangle(cornerRadius: 8))
+            .accessibilityLabel(photo.altText.isEmpty ? "Photo" : photo.altText)
+            if !photo.caption.isEmpty { Text(photo.caption).font(.caption).foregroundStyle(Theme.muted) }
+        }
     }
 }
 

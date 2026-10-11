@@ -5,6 +5,8 @@ import SwiftUI
 public struct SettingsView: View {
     @Environment(AppModel.self) private var app
     @State private var confirmReset = false
+    private let permissions = Permissions.shared
+    @Environment(\.scenePhase) private var scenePhase
 
     public init() {}
 
@@ -23,6 +25,27 @@ public struct SettingsView: View {
                     Button("Sign out", role: .destructive) { Task { await app.signOut() } }
                         .accessibilityIdentifier("settings.signOut")
                 }
+
+                Section {
+                    LabeledContent("Photos", value: photoStatus)
+                    if permissions.photos == .notDetermined {
+                        Button("Allow full photo access") { Task { await permissions.requestPhotos() } }
+                    } else if !permissions.hasFullPhotoAccess {
+                        Button("Change in Settings") { permissions.openSettings() }
+                    }
+                    LabeledContent("Location", value: locationStatus)
+                    if permissions.location == .notDetermined {
+                        Button("Allow location") { Task { _ = try? await permissions.currentPlaceLabel() } }
+                    } else if !permissions.hasLocationAccess || !permissions.preciseLocation {
+                        Button("Change in Settings") { permissions.openSettings() }
+                    }
+                } header: {
+                    Text("Permissions")
+                } footer: {
+                    Text("Full photo access lets the app upload originals and keep their location when you ask. Location fills in where you are posting from.")
+                }
+                .onAppear { permissions.refresh() }
+                .onChange(of: scenePhase) { _, phase in if phase == .active { permissions.refresh() } }
 
                 Section("Blogs") {
                     ForEach(app.blogs) { blog in
@@ -71,6 +94,25 @@ public struct SettingsView: View {
             .confirmationDialog("Erase all mock posts and photos?", isPresented: $confirmReset, titleVisibility: .visible) {
                 Button("Reset", role: .destructive) { Task { await app.resetMockData() } }
             }
+        }
+    }
+}
+
+extension SettingsView {
+    var photoStatus: String {
+        switch permissions.photos {
+        case .authorized: "Full access"
+        case .limited: "Selected photos only"
+        case .denied, .restricted: "Off"
+        default: "Not asked yet"
+        }
+    }
+
+    var locationStatus: String {
+        switch permissions.location {
+        case .authorizedWhenInUse, .authorizedAlways: permissions.preciseLocation ? "Precise" : "Approximate"
+        case .denied, .restricted: "Off"
+        default: "Not asked yet"
         }
     }
 }

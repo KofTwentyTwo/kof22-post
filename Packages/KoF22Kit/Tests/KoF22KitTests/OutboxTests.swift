@@ -97,7 +97,7 @@ import UniformTypeIdentifiers
         let backend = MockBackend(directory: dir.appending(path: "mock"))
         let (service, _, _) = try await makeMockService(backend: backend)
         let notifier = RecordingNotifier()
-        let photos = dir.appending(path: "photos")
+        let photos = dir.appending(path: "Outbox Photos")
         try FileManager.default.createDirectory(at: photos, withIntermediateDirectories: true)
         let processor = OutboxProcessor(store: store, service: { service }, notifier: notifier, photosDirectory: photos)
         return Fixture(container: container, store: store, backend: backend, service: service, processor: processor,
@@ -123,7 +123,7 @@ import UniformTypeIdentifiers
         let first = try #require(URL(string: post.media[0].url))
         #expect(!MediaProcessor.hasGPS(first))
         // Local copies are removed once the post is accepted.
-        #expect(!FileManager.default.fileExists(atPath: f.photos.appending(path: "p1.heic").path()))
+        #expect(!FileManager.default.fileExists(atPath: f.photos.appending(path: "p1.heic").path(percentEncoded: false)))
         #expect(f.notifier.events == ["posted:Sunset"])
         #expect(try await f.store.cachedPosts().map(\.id) == [post.id])
     }
