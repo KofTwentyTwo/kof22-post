@@ -91,7 +91,7 @@ struct PostRow: View {
                         .font(Theme.mono(.caption2)).foregroundStyle(Theme.muted)
                 }
                 Text(post.title).font(Theme.mono(.subheadline, weight: .semibold)).foregroundStyle(Theme.heading).lineLimit(2)
-                Text(post.body).font(.callout).foregroundStyle(Theme.body).lineLimit(2)
+                Text(excerpt).font(.callout).foregroundStyle(Theme.body).lineLimit(2)
             }
             if let first = post.media.first, let url = app.photoURL(first.thumbnailUrl ?? first.url) {
                 AsyncImage(url: url) { $0.resizable().scaledToFill() } placeholder: { Theme.surface }
@@ -105,6 +105,12 @@ struct PostRow: View {
     }
 
     var displayDate: Date { post.publishedAt ?? post.publishAt ?? post.updatedAt ?? .now }
+
+    /// Inline markdown (bold, code, links) rendered; block syntax left as text.
+    var excerpt: AttributedString {
+        let options = AttributedString.MarkdownParsingOptions(interpretedSyntax: .inlineOnlyPreservingWhitespace)
+        return (try? AttributedString(markdown: post.body, options: options)) ?? AttributedString(post.body)
+    }
 }
 
 struct PostDetailView: View {
