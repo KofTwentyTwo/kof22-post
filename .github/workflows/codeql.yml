@@ -1,0 +1,29 @@
+# CodeQL security-extended (K22-CI-22) for Swift and the workflows themselves.
+# Swift needs a manual build on macOS with the same toolchain as ci.yml.
+name: codeql
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "29 6 * * 1"
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: codeql-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  codeql:
+    uses: KofTwentyTwo/standards/.github/workflows/codeql.yml@7c6936844323230546a9bcf6aa7610f5c43e1013 # v1.0.0
+    permissions:
+      contents: read
+      security-events: write
+    with:
+      languages: '["swift", "actions"]'
+      build-mode: manual
+      build-command: sudo xcode-select -s /Applications/Xcode_27.0.app && make build-ci
+      runs-on: macos-26

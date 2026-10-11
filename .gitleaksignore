@@ -1,0 +1,5 @@
+# Reviewed false positives (K22-REPO-04). Each line is a gitleaks fingerprint.
+# A synthetic test idempotency key ("key-12345678") in the first commit of the test
+# suite matches the generic-api-key rule. It is not a credential; the test now uses
+# a value that does not resemble a key. Reviewed by James Maes, 2026-10-11.
+9b93bd37a625568a01be7b59d5edc152e75c2b0e:Packages/KoF22Kit/Tests/KoF22KitTests/SiteServiceTests.swift:generic-api-key:21

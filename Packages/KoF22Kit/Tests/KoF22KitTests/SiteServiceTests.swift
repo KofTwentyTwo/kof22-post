@@ -18,7 +18,7 @@ import Testing
         let (service, _, _) = try await makeMockService()
         let post = try await service.createPost(
             PostCreate(body: "## Hello *world*\nmore", status: .published, tags: ["#Swift", "swift"]),
-            idempotencyKey: "key-12345678"
+            idempotencyKey: "test-create-derives-title"
         )
         #expect(post.title == "Hello world")
         #expect(post.status == .published)

@@ -1,0 +1,19 @@
+# Pull request gates (K22-CI-01): Conventional Commit title, DCO sign-off,
+# dependency review. Reusable workflow pinned to KofTwentyTwo/standards v1.0.0.
+name: pr-gates
+
+on:
+  pull_request:
+
+permissions: {}
+
+concurrency:
+  group: pr-gates-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  pr:
+    uses: KofTwentyTwo/standards/.github/workflows/pr.yml@7c6936844323230546a9bcf6aa7610f5c43e1013 # v1.0.0
+    permissions:
+      contents: read
+      pull-requests: read

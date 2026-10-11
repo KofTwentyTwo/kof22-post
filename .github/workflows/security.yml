@@ -1,0 +1,25 @@
+# Security scanning (K22-CI-20, -21, -23): gitleaks over full history, Trivy and
+# OSV on the lock files, zizmor and actionlint on workflows. Runs on every change
+# and weekly. Reusable workflow pinned to KofTwentyTwo/standards v1.0.0.
+name: security
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "23 6 * * 1"
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: security-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  security:
+    uses: KofTwentyTwo/standards/.github/workflows/security.yml@7c6936844323230546a9bcf6aa7610f5c43e1013 # v1.0.0
+    permissions:
+      contents: read
+      security-events: write

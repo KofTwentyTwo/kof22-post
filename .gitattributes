@@ -1,0 +1,10 @@
+# Text is stored and checked out as LF everywhere: these standards are consumed by
+# repositories on Windows, macOS, and Linux alike. Windows-only script formats that
+# require CRLF are the exception.
+* text=auto eol=lf
+*.cmd text eol=crlf
+*.bat text eol=crlf
+*.png binary
+*.ico binary
+*.pbxproj text eol=lf
+*.xcscheme text eol=lf

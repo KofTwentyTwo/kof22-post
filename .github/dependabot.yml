@@ -1,0 +1,43 @@
+# Dependabot (K22-DEP-20): weekly, grouped, with a cooldown so a compromised release
+# is caught by the community first. Security updates are not delayed by the cooldown.
+version: 2
+updates:
+  # Keeps SHA-pinned actions and the reusable standards workflows current (K22-CI-11).
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    cooldown:
+      default-days: 7
+    groups:
+      actions:
+        patterns: ["*"]
+    commit-message:
+      prefix: ci
+
+  # Swift packages used by the app (Packages/KoF22Kit/Package.resolved).
+  - package-ecosystem: swift
+    directory: /Packages/KoF22Kit
+    schedule:
+      interval: weekly
+      day: monday
+    cooldown:
+      default-days: 7
+      semver-major-days: 14
+    groups:
+      minor-and-patch:
+        update-types: [minor, patch]
+    commit-message:
+      prefix: build
+
+  # Build-only tool: the pinned swift-openapi-generator CLI.
+  - package-ecosystem: swift
+    directory: /Tools/OpenAPIGen
+    schedule:
+      interval: weekly
+      day: monday
+    cooldown:
+      default-days: 7
+    commit-message:
+      prefix: build
