@@ -195,7 +195,7 @@ scheme).
 
 ## Testing
 
-- **Swift Testing, `make test-kit`** (40 tests, macOS, no simulator, about 1 s). Covers:
+- **Swift Testing, `make test-kit`** (47 tests, macOS, no simulator, about 1 s). Covers:
   - PKCE with the RFC 7636 vector;
   - OAuth URL, callback, exchange, refresh and revoke;
   - single-flight refresh;

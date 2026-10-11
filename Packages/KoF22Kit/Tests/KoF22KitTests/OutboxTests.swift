@@ -1,4 +1,5 @@
 import Foundation
+import ImageIO
 import SwiftData
 import Testing
 import UniformTypeIdentifiers
@@ -203,5 +204,64 @@ extension OutboxTests {
         try await f.store.retryAll()
         await f.processor.drain()
         #expect(try await f.store.snapshot(id)?.state == .sent)
+    }
+}
+
+extension OutboxTests {
+    @Test func concurrentDrainWaitsForTheRunInProgress() async throws {
+        let f = try await makeFixture()
+        let id = try await f.store.enqueue(PostComposition(body: "wait for me"), operation: .create)
+        async let first: Void = f.processor.drain()
+        async let second: Void = f.processor.drain()
+        _ = await (first, second)
+        #expect(try await f.store.snapshot(id)?.state == .sent)
+    }
+
+    @Test func deletedItemIsNotSent() async throws {
+        let f = try await makeFixture()
+        let id = try await f.store.enqueue(PostComposition(body: "never mind"), operation: .create)
+        let listed = try await f.store.due()
+        try await f.store.delete(id)
+        await f.processor.process(listed[0], service: f.service)
+        #expect(try await f.service.myPosts(limit: 50).items.allSatisfy { $0.body != "never mind" })
+    }
+
+    @Test func draftHelpersNeverTouchQueuedItems() async throws {
+        let f = try await makeFixture()
+        let draft = try await f.store.saveLocalDraft(PostComposition(body: "draft"), id: nil)
+        try await f.store.enqueue(PostComposition(body: "final"), operation: .create, replacing: draft)
+        // Stale composer autosave and discard after the draft was posted elsewhere:
+        let other = try await f.store.saveLocalDraft(PostComposition(body: "stale edit"), id: draft)
+        #expect(other != draft)
+        try await f.store.deleteDraft(draft)
+        let item = try #require(try await f.store.snapshot(draft))
+        #expect(item.composition.body == "final")
+        #expect(item.state == .queued)
+    }
+
+    @Test func secondQueuedEditUsesTheVersionFromTheFirst() async throws {
+        let f = try await makeFixture()
+        let post = try await f.service.createPost(PostCreate(body: "v1"), idempotencyKey: "k-carry-1")
+        var one = PostComposition(post: post); one.body = "v2"
+        var two = PostComposition(post: post); two.body = "v3"
+        try await f.store.enqueue(one, operation: .update, serverPostID: post.id, ifMatch: post.version)
+        let second = try await f.store.enqueue(two, operation: .update, serverPostID: post.id, ifMatch: post.version)
+        await f.processor.drain()
+        #expect(try await f.store.snapshot(second)?.state == .sent)
+        #expect(try await f.service.post(id: post.id).body == "v3")
+    }
+}
+
+extension MediaProcessorTests {
+    @Test func strippingGPSKeepsOrientation() throws {
+        let dir = TestImages.temporaryDirectory()
+        let source = dir.appending(path: "rotated.jpg")
+        try TestImages.write(to: source, gps: true, orientation: 6)
+        let out = try MediaProcessor.prepare(source: source, keepLocation: false, acceptedTypes: ["image/jpeg"],
+                                             maxBytes: 1 << 24, workDirectory: dir.appending(path: "out"))
+        let image = CGImageSourceCreateWithURL(out.fileURL as CFURL, nil)!
+        let properties = CGImageSourceCopyPropertiesAtIndex(image, 0, nil) as! [CFString: Any]
+        #expect(properties[kCGImagePropertyOrientation] as? Int == 6)
+        #expect(!MediaProcessor.hasGPS(out.fileURL))
     }
 }

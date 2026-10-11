@@ -27,7 +27,7 @@ public actor OutboxProcessor {
     private let photosDirectory: URL
     private let workDirectory: URL
     private let now: @Sendable () -> Date
-    private var running = false
+    private var current: Task<Void, Never>?
     private var rerun = false
     private var limits: AuthoringLimits?
 
@@ -49,26 +49,39 @@ public actor OutboxProcessor {
         min(pow(2, Double(max(attempt - 1, 0))) * 5, 15 * 60)
     }
 
-    /// Sends everything that is due. Concurrent calls coalesce into one more pass.
+    /// Sends everything that is due and returns when the outbox is idle. A call
+    /// that arrives during a run asks for one more pass and waits for it, so
+    /// background tasks, the Share Extension and intents can rely on the await.
     public func drain() async {
-        if running { rerun = true; return }
-        running = true
-        defer { running = false }
-        repeat {
-            rerun = false
-            guard let service = await service() else { return }
-            let items = (try? await store.due(now: now())) ?? []
-            for item in items {
-                if Task.isCancelled { return }
-                await process(item, service: service)
-            }
-        } while rerun
-        try? await store.pruneSent()
+        if let current {
+            rerun = true
+            await current.value
+            return
+        }
+        let task = Task { await self.runPasses() }
+        current = task
+        await task.value
     }
 
-    func process(_ item: OutboxSnapshot, service: SiteService) async {
+    private func runPasses() async {
+        repeat {
+            rerun = false
+            guard let service = await service() else { break }
+            let items = (try? await store.due(now: now())) ?? []
+            for item in items {
+                if Task.isCancelled { break }
+                await process(item, service: service)
+            }
+            try? await store.pruneSent()
+        } while rerun
+        // No suspension between the last `rerun` check and this reset.
+        current = nil
+    }
+
+    func process(_ candidate: OutboxSnapshot, service: SiteService) async {
+        // Re-read and claim: the user may have deleted or edited it since `due()`.
+        guard let item = try? await store.claim(candidate.id) else { return }
         let id = item.id
-        try? await store.update(id) { $0.state = .sending; $0.phase = "Sending"; $0.lastError = nil }
         do {
             switch item.operation {
             case .delete:
@@ -93,6 +106,7 @@ public actor OutboxProcessor {
                     post = try await service.updatePost(id: postID, update, clearLink: clearLink, ifMatch: ifMatch)
                 }
                 try? await store.cache([post])
+                try? await store.carryForward(postID: post.id, version: post.version, excluding: id)
                 try await store.update(id) { item in
                     item.state = .sent
                     item.phase = nil

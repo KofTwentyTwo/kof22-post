@@ -118,7 +118,7 @@ struct PostDetailView: View {
     @Environment(\.dismiss) private var dismiss
     @State var post: Post
     let onDelete: (Int64) -> Void
-    @State private var editing = false
+    @State private var editor: ComposeModel?
     @State private var confirmDelete = false
     @State private var error: String?
 
@@ -165,7 +165,13 @@ struct PostDetailView: View {
                 ToolbarItem { Link(destination: url) { Image(systemName: "safari") }.accessibilityLabel("Open on kof22.com") }
                 ToolbarItem { ShareLink(item: url) }
             }
-            ToolbarItem { Button("Edit") { editing = true }.accessibilityIdentifier("post.edit") }
+            ToolbarItem {
+                Button("Edit") {
+                    editor = ComposeModel(app: app, composition: PostComposition(post: post),
+                                          mode: .edit(postID: post.id, version: post.version))
+                }
+                .accessibilityIdentifier("post.edit")
+            }
             ToolbarItem {
                 Button(role: .destructive) { confirmDelete = true } label: { Image(systemName: "trash") }
                     .accessibilityLabel("Delete post")
@@ -174,16 +180,15 @@ struct PostDetailView: View {
         .confirmationDialog("Delete this post from kof22.com?", isPresented: $confirmDelete, titleVisibility: .visible) {
             Button("Delete", role: .destructive) { delete() }
         }
-        .sheet(isPresented: $editing) {
+        .sheet(item: $editor) { composer in
             NavigationStack {
-                ComposeView(model: ComposeModel(app: app, composition: PostComposition(post: post),
-                                                mode: .edit(postID: post.id, version: post.version))) {
-                    editing = false
+                ComposeView(model: composer) {
+                    editor = nil
                     Task { await reload() }
                 }
                 .navigationTitle("Edit post")
                 .navigationBarTitleDisplayMode(.inline)
-                .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Cancel") { editing = false } } }
+                .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Cancel") { editor = nil } } }
             }
         }
         .task { await reload() }

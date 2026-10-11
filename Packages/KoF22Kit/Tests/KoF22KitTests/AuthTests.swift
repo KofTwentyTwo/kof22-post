@@ -111,3 +111,34 @@ import Testing
         await #expect(throws: AuthError.signedOut) { try await session.accessToken() }
     }
 }
+
+@Suite struct CrossProcessAuthTests {
+    @Test func usesTokensRotatedByAnotherProcessInsteadOfSigningOut() async throws {
+        let store = MemorySecureStore()
+        let expired = TokenSet(accessToken: "old", refreshToken: "r-old", idToken: nil, expiresAt: .now.addingTimeInterval(-10))
+        try store.save(JSONEncoder().encode(expired), for: "tokens.live")
+        // The refresh with the stale token fails; meanwhile the extension stored new tokens.
+        let rotated = TokenSet(accessToken: "fresh", refreshToken: "r-new", idToken: nil, expiresAt: .now.addingTimeInterval(1800))
+        let loader: HTTPLoader = { request in
+            try store.save(JSONEncoder().encode(rotated), for: "tokens.live")
+            return (Data(#"{"error":"invalid_grant"}"#.utf8),
+                    HTTPURLResponse(url: request.url!, statusCode: 400, httpVersion: nil, headerFields: nil)!)
+        }
+        let session = AuthSession(mode: .live, oauth: OAuthClient(config: .kof22, load: loader), store: store)
+        #expect(try await session.accessToken() == "fresh")
+        #expect(await session.isSignedIn)
+    }
+
+    @Test func picksUpTokensRefreshedByAnotherProcess() async throws {
+        let store = MemorySecureStore()
+        let expired = TokenSet(accessToken: "old", refreshToken: "r1", idToken: nil, expiresAt: .now.addingTimeInterval(-10))
+        try store.save(JSONEncoder().encode(expired), for: "tokens.live")
+        let stub = StubLoader([])
+        let session = AuthSession(mode: .live, oauth: OAuthClient(config: .kof22, load: stub.loader), store: store)
+        _ = await session.isSignedIn  // loads the expired copy into memory
+        let fresh = TokenSet(accessToken: "fresh", refreshToken: "r2", idToken: nil, expiresAt: .now.addingTimeInterval(1800))
+        try store.save(JSONEncoder().encode(fresh), for: "tokens.live")
+        #expect(try await session.accessToken() == "fresh")
+        #expect(stub.requestCount == 0)
+    }
+}

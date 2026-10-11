@@ -16,6 +16,8 @@ public actor AuthSession {
     private var tokens: TokenSet?
     private var loaded = false
     private var refreshTask: Task<TokenSet, any Error>?
+    /// Bumped on sign-out so a refresh that finishes afterwards is discarded.
+    private var generation = 0
 
     /// Refresh this long before the access token expires.
     static let refreshLeeway: TimeInterval = 60
@@ -74,16 +76,26 @@ public actor AuthSession {
         persist(try await oauth.exchange(code: code, pkce: pkce, now: now()))
     }
 
+    /// Re-reads the Keychain: the app and the Share Extension share tokens, and
+    /// the other process may have refreshed (and rotated) them.
+    private func reloadFromStore() -> TokenSet? {
+        loaded = false
+        return current()
+    }
+
     /// A non-expired access token, refreshing silently when needed.
     public func accessToken() async throws -> String {
-        guard let tokens = current() else { throw AuthError.signedOut }
+        guard var tokens = current() else { throw AuthError.signedOut }
+        if !tokens.expires(within: Self.refreshLeeway, now: now()) { return tokens.accessToken }
+        guard let stored = reloadFromStore() else { throw AuthError.signedOut }
+        tokens = stored
         if !tokens.expires(within: Self.refreshLeeway, now: now()) { return tokens.accessToken }
         return try await refreshed().accessToken
     }
 
     /// Called after a 401: refresh once even if the token looks valid.
     public func forceRefresh(rejected token: String) async throws -> String {
-        guard let tokens = current() else { throw AuthError.signedOut }
+        guard let tokens = reloadFromStore() else { throw AuthError.signedOut }
         if tokens.accessToken != token { return tokens.accessToken }
         return try await refreshed().accessToken
     }
@@ -97,6 +109,7 @@ public actor AuthSession {
         let mode = mode
         let oauth = oauth
         let instant = now()
+        let startedGeneration = generation
         let task = Task<TokenSet, any Error> {
             if mode == .mock {
                 return TokenSet(accessToken: "mock-access-\(UUID().uuidString)", refreshToken: refreshToken,
@@ -108,15 +121,22 @@ public actor AuthSession {
         defer { refreshTask = nil }
         do {
             let newTokens = try await task.value
+            guard startedGeneration == generation else { throw AuthError.signedOut }
             persist(newTokens)
             return newTokens
         } catch AuthError.sessionExpired {
+            // Another process may have rotated the refresh token while we used the old one.
+            if let latest = reloadFromStore(), latest.refreshToken != refreshToken {
+                return latest
+            }
             persist(nil)
             throw AuthError.sessionExpired
         }
     }
 
     public func signOut() async {
+        generation += 1
+        refreshTask = nil
         let tokens = current()
         persist(nil)
         guard mode == .live, let tokens else { return }

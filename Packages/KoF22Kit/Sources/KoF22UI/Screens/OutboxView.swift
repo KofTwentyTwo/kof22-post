@@ -6,7 +6,7 @@ import SwiftUI
 public struct OutboxView: View {
     @Environment(AppModel.self) private var app
     @Query(sort: \OutboxItem.updatedAt, order: .reverse) private var items: [OutboxItem]
-    @State private var editingDraft: OutboxItem?
+    @State private var draftComposer: ComposeModel?
 
     public init() {}
 
@@ -38,14 +38,14 @@ public struct OutboxView: View {
                     }.accessibilityIdentifier("outbox.sendNow")
                 }
             }
-            .sheet(item: $editingDraft) { draft in
+            // The model is created once on tap; building it in the sheet body would
+            // reset the composer every time the @Query above redraws this view.
+            .sheet(item: $draftComposer) { composer in
                 NavigationStack {
-                    ComposeView(model: ComposeModel(app: app, composition: draft.composition, draftID: draft.id)) {
-                        editingDraft = nil
-                    }
-                    .navigationTitle("Draft")
-                    .navigationBarTitleDisplayMode(.inline)
-                    .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Close") { editingDraft = nil } } }
+                    ComposeView(model: composer) { draftComposer = nil }
+                        .navigationTitle("Draft")
+                        .navigationBarTitleDisplayMode(.inline)
+                        .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Close") { draftComposer = nil } } }
                 }
             }
         }
@@ -58,7 +58,11 @@ public struct OutboxView: View {
                 ForEach(rows) { item in
                     OutboxRow(item: item)
                         .contentShape(Rectangle())
-                        .onTapGesture { if item.state == .localDraft { editingDraft = item } }
+                        .onTapGesture {
+                            if item.state == .localDraft {
+                                draftComposer = ComposeModel(app: app, composition: item.composition, draftID: item.id)
+                            }
+                        }
                         .swipeActions {
                             if item.state != .sending {
                                 Button("Delete", role: .destructive) { Task { try? await app.store.delete(item.id) } }

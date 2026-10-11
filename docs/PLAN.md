@@ -11,7 +11,7 @@ Each phase ends with something that runs on the iPhone (Mock mode until `api.kof
 - Outbox with idempotent retries, offline queueing, conflict handling, notifications.
 - My posts: list, filter, detail, edit, delete, open on kof22.com.
 - Share Extension, Post to Field Notes and New Field Note intents, Control, widget.
-- Tests: 40 Swift Testing unit tests, 4 XCUITests.
+- Tests: 47 Swift Testing unit tests, 5 XCUITests.
 
 **Try it:** set your team in `Config/Local.xcconfig`, `make project`, run on the phone, "Sign in (mock)".
 

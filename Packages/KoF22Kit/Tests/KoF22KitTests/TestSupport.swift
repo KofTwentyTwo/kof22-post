@@ -12,7 +12,7 @@ enum TestImages {
     }
 
     /// Writes a small image of `type` with optional GPS metadata.
-    static func write(to url: URL, type: UTType = .jpeg, width: Int = 64, height: Int = 48, gps: Bool) throws {
+    static func write(to url: URL, type: UTType = .jpeg, width: Int = 64, height: Int = 48, gps: Bool, orientation: Int? = nil) throws {
         let context = CGContext(data: nil, width: width, height: height, bitsPerComponent: 8, bytesPerRow: 0,
                                 space: CGColorSpaceCreateDeviceRGB(), bitmapInfo: CGImageAlphaInfo.noneSkipLast.rawValue)!
         context.setFillColor(CGColor(red: 0.2, green: 0.8, blue: 0.6, alpha: 1))
@@ -20,6 +20,7 @@ enum TestImages {
         let image = context.makeImage()!
         let destination = CGImageDestinationCreateWithURL(url as CFURL, type.identifier as CFString, 1, nil)!
         var properties: [CFString: Any] = [:]
+        if let orientation { properties[kCGImagePropertyOrientation] = orientation }
         if gps {
             properties[kCGImagePropertyGPSDictionary] = [
                 kCGImagePropertyGPSLatitude: 39.96, kCGImagePropertyGPSLatitudeRef: "N",

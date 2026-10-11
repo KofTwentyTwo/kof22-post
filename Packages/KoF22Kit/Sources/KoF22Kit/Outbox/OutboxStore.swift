@@ -43,7 +43,9 @@ public actor OutboxStore {
     @discardableResult
     public func enqueue(_ composition: PostComposition, operation: OutboxOperation, serverPostID: Int64? = nil,
                         ifMatch: String? = nil, replacing draftID: UUID? = nil) throws -> UUID {
-        if let draftID, let draft = try item(draftID) {
+        // Only a local draft can be turned into a queued item; anything else is
+        // already on its way and must not be overwritten.
+        if let draftID, let draft = try item(draftID), draft.state == .localDraft {
             draft.composition = composition
             draft.operationRaw = operation.rawValue
             draft.serverPostID = serverPostID
@@ -63,7 +65,7 @@ public actor OutboxStore {
     /// Autosave for the composer. Returns the draft's id.
     @discardableResult
     public func saveLocalDraft(_ composition: PostComposition, id: UUID?) throws -> UUID {
-        if let id, let existing = try item(id) {
+        if let id, let existing = try item(id), existing.state == .localDraft {
             existing.composition = composition
             existing.updatedAt = .now
             try modelContext.save()
@@ -73,6 +75,39 @@ public actor OutboxStore {
         modelContext.insert(item)
         try modelContext.save()
         return item.id
+    }
+
+    /// Deletes the item only while it is still a local draft (composer discard).
+    public func deleteDraft(_ id: UUID) throws {
+        guard let item = try item(id), item.state == .localDraft else { return }
+        try delete(id)
+    }
+
+    /// Marks a due item as sending and returns its current state, or nil when it
+    /// was deleted or changed state since it was listed.
+    public func claim(_ id: UUID) throws -> OutboxSnapshot? {
+        guard let item = try item(id), item.state == .queued || item.state == .sending else { return nil }
+        item.state = .sending
+        item.phase = "Sending"
+        item.lastError = nil
+        item.updatedAt = .now
+        try modelContext.save()
+        return OutboxSnapshot(item)
+    }
+
+    /// After a post changes on the server, later queued edits/deletes of the same
+    /// post must use the new version instead of failing with 412.
+    public func carryForward(postID: Int64, version: String, excluding id: UUID) throws {
+        let queued = OutboxState.queued.rawValue
+        let failed = OutboxState.failed.rawValue
+        let descriptor = FetchDescriptor<OutboxItem>(
+            predicate: #Predicate { ($0.stateRaw == queued || $0.stateRaw == failed) && $0.serverPostID == postID }
+        )
+        for item in try modelContext.fetch(descriptor) where item.id != id && item.operation != .create {
+            item.ifMatch = version
+            item.isConflict = false
+        }
+        try modelContext.save()
     }
 
     public func snapshot(_ id: UUID) throws -> OutboxSnapshot? {

@@ -81,7 +81,10 @@ public enum MediaProcessor {
         guard let destination = CGImageDestinationCreateWithURL(url as CFURL, type.identifier as CFString, 1, nil) else {
             throw MediaError.encodeFailed
         }
+        // Merge an empty set into the existing metadata so everything else (orientation,
+        // EXIF) survives; without the merge flag ImageIO drops orientation.
         let options: [CFString: Any] = [kCGImageDestinationMetadata: CGImageMetadataCreateMutable(),
+                                        kCGImageDestinationMergeMetadata: true,
                                         kCGImageMetadataShouldExcludeGPS: true]
         var error: Unmanaged<CFError>?
         if !CGImageDestinationCopyImageSource(destination, image, options as CFDictionary, &error) {

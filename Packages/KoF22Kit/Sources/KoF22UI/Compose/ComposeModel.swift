@@ -7,7 +7,7 @@ import UniformTypeIdentifiers
 
 @MainActor
 @Observable
-public final class ComposeModel {
+public final class ComposeModel: Identifiable {
     public enum Mode: Equatable {
         case new
         case edit(postID: Int64, version: String)
@@ -165,7 +165,7 @@ public final class ComposeModel {
             try? await Task.sleep(for: .seconds(1))
             guard !Task.isCancelled else { return }
             if snapshot.isEmpty {
-                if let existing { try? await store.delete(existing) ; draftID = nil }
+                if let existing { try? await store.deleteDraft(existing); draftID = nil }
                 return
             }
             draftID = try? await store.saveLocalDraft(snapshot, id: existing)
@@ -213,7 +213,7 @@ public final class ComposeModel {
 
     public func discard() async {
         autosaveTask?.cancel()
-        if let draftID { try? await app.store.delete(draftID) }
+        if let draftID { try? await app.store.deleteDraft(draftID) }
         else { for photo in composition.photos { if let url = photo.localURL() { try? FileManager.default.removeItem(at: url) } } }
         reset()
     }
