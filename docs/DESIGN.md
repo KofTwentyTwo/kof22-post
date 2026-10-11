@@ -9,7 +9,8 @@ The app targets **KoF22 Site API v1** (semver 1.0.0), implemented in Website-Bac
 `src/main/resources/site-api/openapi-extensions.yaml`. Its own header says it is "the contract the
 iOS client (swift-openapi-generator) is generated from".
 
-`api.kof22.com` does not resolve yet: Website-CD has no ingress for it. Until it does:
+`api.kof22.com` went live on 2026-10-11 (23:12 UTC). Since then `openapi/openapi.yaml` is the live
+document (`make update-spec`); the authoring contract was identical to the fragment below. Before that:
 
 - `openapi/openapi.yaml` is **assembled** from that fragment by `scripts/assemble-spec.sh`, which adds
   `openapi`, `info` and `servers` and substitutes `${authBase}`. The file header records the source
@@ -219,11 +220,11 @@ scheme).
 
 ## Open items for the owner
 
-1. **Authentik:** confirm the `kof22-post-ios` public provider exists with redirect URI
+1. **Authentik:** create the `kof22-post-ios` public provider (its discovery URL returned 404 on
+   2026-10-11) with redirect URI
    `com.kof22.post://oauth/callback`, and that your account has `kof22:publish`, a publisher group
    and an author row (the backend checks all three).
-2. **API host:** add the `api.kof22.com` ingress and DNS in Website-CD. The Traefik prefix maps to
-   `/site-api`.
+2. **API host:** done, `api.kof22.com` is live (v1 1.0.0).
 3. **HEIC:** set `SITE_API_HEIC_CONVERTER` on the backend if you want HEIC kept end to end. The app
    adapts automatically.
 4. **Apple ID / team:** put the team in `Config/Local.xcconfig`. Once the team is known, set

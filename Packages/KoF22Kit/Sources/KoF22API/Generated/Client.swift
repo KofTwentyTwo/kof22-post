@@ -10,7 +10,194 @@ public import struct Foundation.Data
 public import struct Foundation.Date
 #endif
 import HTTPTypes
-/// Assembled locally from the backend's hand-written contract (Website-Backend src/main/resources/site-api/openapi-extensions.yaml) until https://api.kof22.com/v1/openapi.yaml is published. `make update-spec` replaces this file with the live document.
+/// The public API of [kof22.com](https://www.kof22.com): read the site's published content, search it, subscribe to its feeds, send a message, and (for the site owner's apps) publish posts.
+///
+/// ## Overview
+///
+/// - **Base URL:** `https://api.kof22.com/v1`. Every path below is relative to it.
+/// - **Format:** JSON (UTF-8). Feeds are XML or JSON Feed; the sitemap is XML.
+/// - **Reads are anonymous.** No key, no cookie. Only published and active records are visible; drafts, private fields (author email, photo GPS, storage keys, unprocessed originals) and internal tables are never reachable.
+/// - **Writes:** `POST /contact` is anonymous and abuse-guarded. Authoring endpoints (`/me/...`) need an OAuth2 bearer token from the KoF22 identity provider (see *Authentication*).
+///
+/// ## Quick start
+///
+/// ```bash
+/// # the five newest Field Notes posts
+/// curl "https://api.kof22.com/v1/blog/query?slug=quick-bits"
+/// curl "https://api.kof22.com/v1/post/query?blogId=1&orderBy=publishDate%20desc&pageSize=5"
+///
+/// # one post, with its tag links and photos nested
+/// curl "https://api.kof22.com/v1/post/42"
+///
+/// # search published content
+/// curl "https://api.kof22.com/v1/search?q=raspberry%20pi"
+/// ```
+///
+/// ## Resources
+///
+/// | Resource | Path | Description |
+/// |----------|------|-------------|
+/// | `site` | `/site` | Site identity (name and description). |
+/// | `page` | `/page` | Published pages; sections are nested in `sections` (ordered by sortOrder). |
+/// | `pageSection` | nested | A content block inside a page. |
+/// | `sectionType` | `/sectionType` | Page section types (resolve `sectionTypeId` to a `code`). |
+/// | `blog` | `/blog` | Blogs (for example `quick-bits` Field Notes and `ideas-into-systems`). |
+/// | `post` | `/post` | Published posts; tag links in `tags`, ordered photos in `media`. |
+/// | `postTagLink` | nested | A tag applied to a post (resolve `tagId` with /tag). |
+/// | `postMedia` | nested | A photo attached to a post, in display order. |
+/// | `tag` | `/tag` | Blog tags. |
+/// | `author` | `/author` | Active authors (public profile only; never email). |
+/// | `menu` | `/menu` | Active navigation menus; items are nested in `items`. |
+/// | `menuItem` | nested | An active navigation item (tree via `parentId`). |
+/// | `media` | `/media` | Active media assets with public rendition URLs. |
+/// | `mediaType` | `/mediaType` | Media types. |
+/// | `photo` | `/photo` | Published photos (renditions and camera EXIF; never GPS or the unprocessed original). |
+/// | `photoTagLink` | nested | A tag applied to a photo (resolve `tagId` with /photoTag). |
+/// | `photoTag` | `/photoTag` | Photo tags. |
+/// | `album` | `/album` | Published photo albums. |
+/// | `albumFolder` | `/albumFolder` | Published album folders (tree via `parentId`). |
+/// | `project` | `/project` | Published projects. |
+/// | `projectCategory` | `/projectCategory` | Published project categories (SOFTWARE or PERSONAL section). |
+/// | `projectUpdate` | `/projectUpdate` | Published project updates (journal entries). |
+/// | `redirect` | `/redirect` | Active URL redirects for the website. |
+/// | `redirectType` | `/redirectType` | Redirect types (HTTP status per type). |
+/// | `snippet` | `/snippet` | Active reusable content snippets (looked up by `shortName`). |
+/// | `stream` | `/stream` | The public activity stream: posts, projects, updates, albums and photos, newest first. |
+///
+///
+/// Nested resources (`sections`, `items`, `tags`, `media`) are returned inside their parent and have no endpoints of their own.
+///
+/// ## Querying
+///
+/// Every resource has `GET /{resource}/{id}` and `GET /{resource}/query`.
+///
+/// | Parameter | Meaning |
+/// |-----------|---------|
+/// | `field=value` | Filter on any listed field (equals). |
+/// | `field=!value` | Not equal. Prefix `!` also negates `IN`, `LIKE`, `BETWEEN` and `EMPTY`. |
+/// | `field=>=2026-01-01T00:00:00Z` | Also `<=`, `<`, `>`. |
+/// | `field=IN 1,2,3` / `field=BETWEEN a,b` | Lists and ranges. |
+/// | `field=LIKE %pi%` / `field=EMPTY` | Pattern match / null or blank. |
+/// | `booleanOperator=OR` | Combine filters with OR (default AND). |
+/// | `orderBy=publishDate desc,id desc` | Sort (comma-separated). |
+/// | `pageNo` / `pageSize` | Paging: `pageSize` 1 to 1000, default 50. |
+/// | `includeCount=true` | Adds the total `count` to the response. |
+///
+/// Query responses look like `{"records":[...],"count":123,"pageNo":1,"pageSize":50}`.
+///
+/// ## Search
+///
+/// `GET /search?q=term` searches published posts, pages, projects, albums and photos (OpenSearch-backed, re-checked against the database so only public records come back). Optional `type=post,page,project,album,photo` and `limit` (1-50, default 20). Each result has `type`, `id`, `title`, `url` (on www.kof22.com), `snippet` and `score`.
+///
+/// ## Feeds and sitemap
+///
+/// | Feed | Path |
+/// |------|------|
+/// | RSS 2.0 | `/feeds/{blogSlug}/rss.xml` |
+/// | Atom 1.0 | `/feeds/{blogSlug}/atom.xml` |
+/// | JSON Feed 1.1 | `/feeds/{blogSlug}/feed.json` |
+/// | Sitemap | `/sitemap.xml` (every public URL on www.kof22.com) |
+///
+/// Feeds carry the 50 newest published posts of a blog and are cached for five minutes.
+///
+/// ## Contact
+///
+/// `POST /contact` with `{"name","email","subject","message"}` sends a message to the site owner. It is validated server-side, rate limited, and protected by a honeypot field (`website`, leave it empty) and a minimum fill time (`startedAt`, the epoch milliseconds when your form was shown). No third-party captcha. Success is `202 Accepted`.
+///
+/// ## Authentication
+///
+/// Reads and `/contact` need nothing. The authoring endpoints (`/me`, `/me/posts`, `/me/uploads`, `/me/tags`, `/me/link-preview`) require `Authorization: Bearer <access token>` issued by the KoF22 Authentik provider for the **KoF22 Post** app (OAuth2 Authorization Code with PKCE, public client `kof22-post-ios`, scopes `openid profile email offline_access kof22:publish`). The token must carry the `kof22:publish` grant and the user must be a site publisher; otherwise the API answers `401` (missing or invalid token) or `403` (not allowed).
+///
+/// | Endpoint | URL |
+/// |----------|-----|
+/// | Authorize | `https://auth.kof22.com/application/o/authorize/` |
+/// | Token | `https://auth.kof22.com/application/o/token/` |
+/// | Revoke | `https://auth.kof22.com/application/o/revoke/` |
+/// | User info | `https://auth.kof22.com/application/o/userinfo/` |
+/// | Issuer / JWKS | `https://auth.kof22.com/application/o/kof22-post-ios/` (`jwks/`) |
+///
+/// Access tokens last 30 minutes; refresh tokens (granted with `offline_access`) last 90 days.
+///
+/// ## Authoring (KoF22 Post)
+///
+/// - `GET /me` - who am I, my author profile, and the blogs I can post to (default `quick-bits`).
+/// - `GET /me/posts` - my posts with `status` (`draft`, `scheduled`, `published`), cursor paginated.
+/// - `POST /me/posts` - create a draft, publish now, or schedule (`status`, `publishAt`).
+/// - `GET`, `PATCH`, `DELETE /me/posts/{id}` - read, update (needs `If-Match`), delete.
+/// - `POST /me/uploads` then `PUT` the bytes to the returned `uploadUrl`, then `POST /me/uploads/{uploadId}/complete` - photo upload. EXIF GPS is stripped unless `keepLocation` is true; renditions are generated.
+/// - `GET /me/tags?q=` - tag autocomplete. `POST /me/link-preview` - server-side link preview.
+///
+/// Writes that create something accept an `Idempotency-Key` header (retry-safe: the same key and body replays the first response). Updates and deletes use `ETag` / `If-Match` (`412` on a stale version, `428` when missing on update). Publishing uses the same path as the CMS: audits, change events and search re-indexing happen as for Admin edits, and the website shows the post immediately.
+///
+/// ## Errors
+///
+/// Every error has the same JSON envelope:
+///
+/// ```json
+/// {"error": {"code": "validation_failed", "message": "title is too long", "status": 422,
+///            "details": [{"field": "title", "issue": "max 100 characters"}]}}
+/// ```
+///
+/// | Status | Meaning |
+/// |--------|---------|
+/// | `400` | Malformed request or query. |
+/// | `401` | Missing, expired or invalid bearer token. |
+/// | `403` | Authenticated but not allowed (scope or group). |
+/// | `404` | Not found, or not public. |
+/// | `409` | Conflict (for example an Idempotency-Key still in flight, or a duplicate slug). |
+/// | `412` / `428` | Stale or missing `If-Match` on update. |
+/// | `413` | Upload or body too large. |
+/// | `415` | Unsupported media type. |
+/// | `422` | Validation failed. |
+/// | `429` | Rate limited; honour `Retry-After`. |
+///
+/// ## Rate limits
+///
+/// Limits are enforced at the edge (Traefik) and again in the application. Today the edge limits are **aggregate per host** (30 requests per second with bursts of 120 for the whole API, and 10 contact submissions per minute) because the ingress does not yet see real client IPs; per-client limits will replace them without a contract change. The application additionally limits contact submissions and authoring calls per client and per user. A `429` always carries `Retry-After`. Please cache: reads change rarely.
+///
+/// ## Versioning
+///
+/// The **major** version is in the path (`/v1`). The full **semantic version** of the contract is in the OpenAPI `info.version` and in [`/versions.json`](https://api.kof22.com/versions.json):
+///
+/// - **Patch** (1.0.x): fixes and documentation, no contract change.
+/// - **Minor** (1.x.0): additive only (new resources, fields, endpoints or optional parameters). Clients must ignore unknown fields.
+/// - **Major** (`/v2`): any breaking change. `/v1` then stays available with `Deprecation` and `Sunset` headers before removal.
+///
+/// ### Changelog
+///
+/// **1.0.0** (2026-10-11)
+///
+/// - First release of the KoF22 Site API at https://api.kof22.com/v1.
+/// - Curated read resources with nested associations (published and active records only).
+/// - Search, contact form, RSS/Atom/JSON feeds per blog and sitemap.xml.
+/// - Authoring for the KoF22 Post iOS app: quick posts, photo uploads, tags, link previews (OAuth2 PKCE).
+/// - Replaces /public-api/v1, which is now deprecated (Deprecation and Sunset headers).
+///
+///
+///
+/// ### Deprecated: `/public-api/v1`
+///
+/// The old table-shaped API at `https://admin.kof22.com/public-api/v1` still works but is deprecated: its responses carry `Deprecation`, `Sunset` and a `Link` to this API. Move to `/v1` here; it will be removed after the sunset date.
+///
+/// ## Generating a client SDK
+///
+/// The spec is OpenAPI 3.0.3 at [`/v1/openapi.json`](https://api.kof22.com/v1/openapi.json) (and `openapi.yaml`). Every operation has a stable `operationId` and every schema is named, so generators produce clean code:
+///
+/// ```bash
+/// # Swift (swift-openapi-generator): put openapi.yaml next to openapi-generator-config.yaml
+/// curl -o Sources/KoF22API/openapi.yaml https://api.kof22.com/v1/openapi.yaml
+///
+/// # TypeScript
+/// npx @openapitools/openapi-generator-cli generate -i https://api.kof22.com/v1/openapi.json -g typescript-fetch -o ./kof22-client
+///
+/// # Python
+/// npx @openapitools/openapi-generator-cli generate -i https://api.kof22.com/v1/openapi.json -g python -o ./kof22-client-python
+/// ```
+///
+/// ## Support
+///
+/// Email **[james@kof22.com](mailto:james@kof22.com)** with the request path, the time (UTC), the HTTP status and the error body.
+///
 public struct Client: APIProtocol {
     /// The underlying HTTP client.
     private let client: UniversalClient

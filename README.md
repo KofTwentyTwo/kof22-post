@@ -6,9 +6,9 @@ text, photos, links), with longer posts to the other blogs as a secondary use.
 
 ## Status
 
-Phase 1 is done: the whole app runs against an in-process **mock of the Site API
-v1 contract**, because `api.kof22.com` is not published yet. Switch to the live
-API in Settings once it is. See `docs/PLAN.md`.
+Phase 1 is done. The API client is generated from the live Site API v1 spec at
+`api.kof22.com`; the app defaults to an in-process **mock** of that contract.
+Live mode (Settings) needs the Authentik `kof22-post-ios` provider. See `docs/PLAN.md`.
 
 ## Run it on your iPhone
 

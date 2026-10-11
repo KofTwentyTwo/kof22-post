@@ -241,7 +241,9 @@ extension APIProtocol {
 
 /// Server URLs defined in the OpenAPI document.
 public enum Servers {
+    /// Production
     public enum Server1 {
+        /// Production
         public static func url() throws -> Foundation.URL {
             try Foundation.URL(
                 validatingOpenAPIServerURL: "https://api.kof22.com",
@@ -249,6 +251,7 @@ public enum Servers {
             )
         }
     }
+    /// Production
     @available(*, deprecated, renamed: "Servers.Server1.url")
     public static func server1() throws -> Foundation.URL {
         try Foundation.URL(

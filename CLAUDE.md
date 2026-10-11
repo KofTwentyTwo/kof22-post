@@ -19,10 +19,9 @@ is James Maes. Read `docs/BRIEF.md` first. When `docs/REQUIREMENTS.md`,
   (PKCE), so there is no client secret to begin with.
 - Do not invent backend behaviour. The contract is the KoF22 Site API v1 in
   Website-Backend (`siteapi/`, `src/main/resources/site-api/openapi-extensions.yaml`).
-  Until `https://api.kof22.com/v1/openapi.yaml` is reachable, `openapi/openapi.yaml`
-  is assembled from that fragment (`scripts/assemble-spec.sh`, owner-approved
-  2026-10-11). When the live spec responds, run `make update-spec` and make the
-  mock (`Packages/KoF22Kit/Sources/KoF22Kit/Mock`) follow any change.
+  `openapi/openapi.yaml` is the live spec from `https://api.kof22.com/v1/openapi.yaml`
+  (`make update-spec`). After every update, make the mock
+  (`Packages/KoF22Kit/Sources/KoF22Kit/Mock`) follow any contract change.
 - Push back on technical direction when there is a concrete reason, then
   follow the owner's decision.
 
@@ -40,7 +39,7 @@ is James Maes. Read `docs/BRIEF.md` first. When `docs/REQUIREMENTS.md`,
 - Apple Developer team: a new Apple ID will be created before release. Bundle
   IDs are `com.kof22.post`, `.share`, `.widgets`; App Group `group.com.kof22.post`.
 - Authentik provider `kof22-post-ios` (redirect `com.kof22.post://oauth/callback`)
-  is documented by the backend but not yet confirmed to exist.
+  is documented by the API but its discovery URL returned 404 on 2026-10-11.
 - CI provider: Xcode Cloud recommended (see `docs/REQUIREMENTS.md`), not set up.
 
 Settled decisions are in the table at the top of `docs/REQUIREMENTS.md`.

@@ -17,9 +17,10 @@ Each phase ends with something that runs on the iPhone (Mock mode until `api.kof
 
 ## Phase 2: Live API
 
-Blocked on `api.kof22.com` DNS/ingress and the Authentik `kof22-post-ios` provider.
+`api.kof22.com` is live and the client is generated from it (2026-10-11; no contract changes).
+Blocked on the Authentik `kof22-post-ios` provider (discovery URL 404).
 
-- `make update-spec`; fix anything the compiler flags in the app and the mock.
+- ~~`make update-spec`; fix anything the compiler flags in the app and the mock.~~ Done.
 - Sign in with the real account, post to Field Notes, verify on www.kof22.com.
 - Contract test: run the mock-backed suite against recorded live responses (fixtures only).
 
