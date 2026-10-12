@@ -21,9 +21,10 @@ Live mode (Settings) needs the Authentik `kof22-post-ios` provider. See `docs/PL
 
 ## Install
 
-There is no TestFlight or App Store build yet. Install by building from source onto
-your iPhone (below). TestFlight distribution is planned once the Apple Developer team
-is configured (`docs/PLAN.md`, phase 3).
+Builds reach the owner's iPhone through **TestFlight**: Xcode Cloud archives `main`
+with cloud signing and uploads to App Store Connect (app "KoF22 Postr"), and the
+TestFlight app installs it. `ci_scripts/ci_post_clone.sh` prepares the Xcode Cloud
+build. You can also build from source onto a connected iPhone (below).
 
 ## Usage
 
@@ -43,8 +44,9 @@ Toolchain: macOS with Xcode 27 (Swift 6.4, iOS 27 SDK), XcodeGen, SwiftLint.
 Dependencies are Swift packages resolved by Xcode from `Packages/KoF22Kit/Package.resolved`.
 
 1. `brew install xcodegen swiftlint pre-commit gitleaks`
-2. Create `Config/Local.xcconfig` with `DEVELOPMENT_TEAM = <your team id>`
-   (git-ignored), then `make project`.
+2. `make project`. The Apple Developer team (UC9R3P8ZUU) is set in
+   `Config/Base.xcconfig`; to sign with another team, put `DEVELOPMENT_TEAM = <id>` in
+   `Config/Local.xcconfig` (git-ignored).
 3. Open `KoF22Post.xcodeproj` and run the `KoF22Post` scheme on your phone, or
    `make build` for the simulator.
 4. `pre-commit install --hook-type pre-commit --hook-type commit-msg` once per clone.

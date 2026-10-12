@@ -1,5 +1,6 @@
-// Shared build settings. Signing is per developer: create Config/Local.xcconfig
-// (git-ignored) with DEVELOPMENT_TEAM = <your team id> to run on a device.
-DEVELOPMENT_TEAM =
+// Shared build settings. The Apple Developer team is public information (it is
+// embedded in every signed build) and Xcode Cloud only sees committed settings.
+// Override locally in Config/Local.xcconfig (git-ignored) if you sign with another team.
+DEVELOPMENT_TEAM = UC9R3P8ZUU
 CODE_SIGN_STYLE = Automatic
 #include? "Local.xcconfig"

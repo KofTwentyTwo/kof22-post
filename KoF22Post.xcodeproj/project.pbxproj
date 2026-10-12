@@ -284,19 +284,19 @@
 				LastUpgradeCheck = 1430;
 				TargetAttributes = {
 					1CC655303D88EB6F7654B8BF = {
-						DevelopmentTeam = "";
+						DevelopmentTeam = UC9R3P8ZUU;
 						ProvisioningStyle = Automatic;
 					};
 					2D24DF602FF52C8C60EA01DD = {
-						DevelopmentTeam = "";
+						DevelopmentTeam = UC9R3P8ZUU;
 						ProvisioningStyle = Automatic;
 					};
 					75D87772BF41683A97F2A10D = {
-						DevelopmentTeam = "";
+						DevelopmentTeam = UC9R3P8ZUU;
 						ProvisioningStyle = Automatic;
 					};
 					93A5D551F5ADEA25E59474F8 = {
-						DevelopmentTeam = "";
+						DevelopmentTeam = UC9R3P8ZUU;
 						ProvisioningStyle = Automatic;
 						TestTargetID = 2D24DF602FF52C8C60EA01DD;
 					};
