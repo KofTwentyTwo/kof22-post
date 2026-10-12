@@ -26,4 +26,4 @@ jobs:
       languages: '["swift", "actions"]'
       build-mode: manual
       build-command: sudo xcode-select -s /Applications/Xcode_27.0.app && make build-ci
-      runs-on: macos-26
+      runs-on: xcode-27

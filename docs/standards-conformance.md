@@ -47,7 +47,7 @@ audit needs them recorded there (`K22-AGENT-04`).
 | K22-REPO-22, -30, -31, -32, -40, -41 | GitHub settings: squash-only merging with PR title/body, delete head branches, Dependabot alerts and security updates, secret scanning with push protection, private vulnerability reporting, immutable releases, read-only `GITHUB_TOKEN`, Actions cannot approve PRs, allowed actions restricted, wiki off, description/topics | Owner (repository settings are reserved to a person, K22-AI-10) |
 | K22-REPO-42 | List `kof22-post` in `MAINTAINERS.md` of KofTwentyTwo/standards | Owner, via a pull request to the standards repository |
 | K22-SEC-60 | Off-GitHub backup: confirm the weekly backup includes this repository now that it is on GitHub | Owner |
-| K22-CI-01 (runner) | `ci.yml` pins Xcode 27.0 on `macos-26` runners; verify the image provides it on the first run | First CI run |
+| K22-CI-01 (runner) | `ci.yml` and `codeql.yml` run on the `xcode-27` runner image (a GitHub preview image); move to the GA label when it ships | First CI run |
 | Upstream | Two fixes to the standards' Swift configuration: SwiftLint `unused_declaration`/`unused_import` belong in `analyzer_rules`, and `statement_position` needs `uncuddled_else` to agree with swift-format | Owner, issue or PR to KofTwentyTwo/standards |
 
 ## Narrow suppressions

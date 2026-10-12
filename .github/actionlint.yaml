@@ -1,0 +1,7 @@
+# actionlint configuration. GitHub's Xcode 27 runner image is in preview and its
+# label is not in actionlint's built-in list yet; declare it here so
+# `security / workflows` and the pre-commit hook accept it.
+self-hosted-runner:
+  labels:
+    - xcode-27
+    - xcode-27-xlarge
