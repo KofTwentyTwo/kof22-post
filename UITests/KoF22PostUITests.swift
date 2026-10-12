@@ -101,7 +101,14 @@ final class KoF22PostUITests: XCTestCase {
       write("Written on a plane")
       app.buttons["compose.post"].tap()
       XCTAssertTrue(app.staticTexts["In progress"].waitForExistence(timeout: Self.standardTimeout))
-      XCTAssertTrue(app.staticTexts["Offline"].waitForExistence(timeout: Self.standardTimeout))
+      /////////////////////////////////////////////////////////////////
+      // the row merges its texts into one accessibility label, so  //
+      // match any element whose label mentions being offline.       //
+      /////////////////////////////////////////////////////////////////
+      let offlineNotice = app.descendants(matching: .any)
+         .matching(NSPredicate(format: "label CONTAINS[c] %@", "offline"))
+         .firstMatch
+      XCTAssertTrue(offlineNotice.waitForExistence(timeout: Self.sendTimeout))
 
       toggleOffline()
       tab("Outbox")

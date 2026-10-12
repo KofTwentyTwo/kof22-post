@@ -63,19 +63,19 @@
 
 /* Begin PBXFileReference section */
 		16F80E918228C7C40CABA50E /* KoF22PostApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KoF22PostApp.swift; sourceTree = "<group>"; };
-		1CABD8A5CD65232771317D9D /* KoF22PostShare.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = KoF22PostShare.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		1CABD8A5CD65232771317D9D /* KoF22PostShare.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = KoF22PostShare.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		268923C54911E60BB53CA45C /* KoF22Widgets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KoF22Widgets.swift; sourceTree = "<group>"; };
-		2FAAD08196AACA911B447BD7 /* KoF22Post.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = KoF22Post.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		2FAAD08196AACA911B447BD7 /* KoF22Post.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = KoF22Post.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		32B789C278ED82328DE1E758 /* ShareViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareViewController.swift; sourceTree = "<group>"; };
 		54237BE767C742BA94263A54 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
-		829660B6CA99A77026782DB0 /* KoF22PostWidgets.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = KoF22PostWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		829660B6CA99A77026782DB0 /* KoF22PostWidgets.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = KoF22PostWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		8539F25C77C57264C66A0BA8 /* KoF22Post.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = KoF22Post.entitlements; sourceTree = "<group>"; };
 		8DDE628ACC92B813CB0D7595 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		945C65084A9C21521A33A3CD /* OpenComposeIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenComposeIntent.swift; sourceTree = "<group>"; };
 		A2EFB31D74BD6163C4CAACEE /* PostIntents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostIntents.swift; sourceTree = "<group>"; };
 		B27217B9C8F1CA4F1CCEA6C9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		B4350994DB5CC8DF4BE3754D /* ScreenshotTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenshotTests.swift; sourceTree = "<group>"; };
-		CDCEB8F78433182D3FE77FD4 /* KoF22PostUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = KoF22PostUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		CDCEB8F78433182D3FE77FD4 /* KoF22PostUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = KoF22PostUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		D0DB1745C73CE4C81270B514 /* KoF22PostUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KoF22PostUITests.swift; sourceTree = "<group>"; };
 		DAD65B6393FA4C16C9C87824 /* KoF22PostWidgets.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = KoF22PostWidgets.entitlements; sourceTree = "<group>"; };
 		DFE2FA9665C6186ABCA16120 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
