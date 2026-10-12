@@ -1,18 +1,32 @@
+/*
+ * Copyright (c) 2026 James Maes (KofTwentyTwo)
+ * SPDX-License-Identifier: MIT
+ */
+
 import Foundation
 import ImageIO
 import UniformTypeIdentifiers
 
+/// A photo file ready to upload, with the content type and size the upload ticket needs.
 public struct PreparedPhoto: Sendable, Equatable {
+   /// The prepared file in the work directory.
    public var fileURL: URL
+   /// The content type declared to the server.
    public var contentType: UploadCreate.ContentTypePayload
+   /// The file's size in bytes.
    public var byteSize: Int64
 }
 
+/// Why a photo could not be prepared.
 public enum MediaError: Error, LocalizedError, Equatable {
+   /// The file is not an image ImageIO can read.
    case unreadable
+   /// Writing the converted or stripped image failed.
    case encodeFailed
+   /// The photo stays over the byte limit even at the smallest allowed size.
    case tooLarge
 
+   /// A sentence for the outbox row.
    public var errorDescription: String? {
       switch self {
       case .unreadable: "The photo could not be read."
@@ -28,8 +42,26 @@ public enum MediaError: Error, LocalizedError, Equatable {
 ///   - formats the server does not accept (HEIC today) are converted to JPEG;
 ///   - a photo over the server's byte limit is re-encoded smaller until it fits.
 public enum MediaProcessor {
+   /// JPEG quality for format conversion; visually lossless for photos.
    static let jpegQuality = 0.92
 
+   /// JPEG quality once a photo has to shrink to fit the byte limit.
+   static let shrinkQuality = 0.85
+
+   /// The longest edge, in pixels, of the first shrink attempt.
+   static let firstShrinkPixelSize = 6_000
+
+   /// The smallest longest edge worth uploading; below this the photo is refused.
+   static let minimumShrinkPixelSize = 1_000
+
+   /// Each shrink attempt keeps three quarters of the previous longest edge.
+   static let shrinkNumerator = 3
+   /// See `shrinkNumerator`.
+   static let shrinkDenominator = 4
+
+   /// Copies or converts `source` into `workDirectory`. JPEG and PNG files the server
+   /// accepts pass through with only GPS removed; anything else becomes JPEG. A result
+   /// over `maxBytes` is re-encoded at smaller sizes until it fits.
    public static func prepare(
       source: URL,
       keepLocation: Bool,
@@ -43,8 +75,8 @@ public enum MediaProcessor {
       else { throw MediaError.unreadable }
 
       let accepted = Set(acceptedTypes)
-      let mime = type.preferredMIMEType ?? ""
-      let passThrough = accepted.contains(mime) && (type.conforms(to: .jpeg) || type.conforms(to: .png))
+      let serverAccepts = type.preferredMIMEType.map { accepted.contains($0) } == true
+      let passThrough = serverAccepts && (type.conforms(to: .jpeg) || type.conforms(to: .png))
       try FileManager.default.createDirectory(at: workDirectory, withIntermediateDirectories: true)
 
       var output: URL
@@ -66,47 +98,71 @@ public enum MediaProcessor {
       }
 
       var size = try fileSize(output)
-      var maxPixel = 6000
+      var maxPixel = firstShrinkPixelSize
       while size > maxBytes {
-         guard maxPixel >= 1000 else { throw MediaError.tooLarge }
-         try? FileManager.default.removeItem(at: output)
+         guard maxPixel >= minimumShrinkPixelSize else { throw MediaError.tooLarge }
+         removeLeftover(output)
          contentType = .imageJpeg
          output = workDirectory.appending(path: UUID().uuidString + ".jpg")
-         try encodeJPEG(image, keepLocation: keepLocation, maxPixelSize: maxPixel, quality: 0.85, to: output)
+         try encodeJPEG(image, keepLocation: keepLocation, maxPixelSize: maxPixel, quality: shrinkQuality, to: output)
          size = try fileSize(output)
-         maxPixel = maxPixel * 3 / 4
+         maxPixel = maxPixel * shrinkNumerator / shrinkDenominator
       }
       return PreparedPhoto(fileURL: output, contentType: contentType, byteSize: size)
    }
 
-   /// Rewrites metadata without recompressing the image data.
-   static func copyWithoutGPS(_ image: CGImageSource, type: UTType, to url: URL) throws {
+   /// Deletes an earlier attempt that was too large. Failure only leaves a stray file in
+   /// the work directory, so it is logged rather than thrown.
+   static func removeLeftover(_ url: URL) {
+      do {
+         try FileManager.default.removeItem(at: url)
+      }
+      catch {
+         Log.media.warning("Removing an oversized attempt failed: \(error.localizedDescription, privacy: .public)")
+      }
+   }
+
+   /// An image destination for one image of `type` at `url`.
+   static func makeDestination(_ url: URL, type: UTType) throws -> CGImageDestination {
       guard let destination = CGImageDestinationCreateWithURL(url as CFURL, type.identifier as CFString, 1, nil) else {
          throw MediaError.encodeFailed
       }
-      // Merge an empty set into the existing metadata so everything else (orientation,
-      // EXIF) survives; without the merge flag ImageIO drops orientation.
+      return destination
+   }
+
+   /// Rewrites metadata without recompressing the image data where ImageIO can, and
+   /// re-encodes when the lossless copy fails or leaves GPS data behind.
+   static func copyWithoutGPS(_ image: CGImageSource, type: UTType, to url: URL) throws {
+      let destination = try makeDestination(url, type: type)
+      ////////////////////////////////////////////////////////////
+      // merge an empty set into the existing metadata so all   //
+      // else (orientation, EXIF) survives; without the merge   //
+      // flag ImageIO drops orientation.                        //
+      ////////////////////////////////////////////////////////////
       let options: [CFString: Any] = [
          kCGImageDestinationMetadata: CGImageMetadataCreateMutable(),
          kCGImageDestinationMergeMetadata: true,
          kCGImageMetadataShouldExcludeGPS: true,
       ]
       var error: Unmanaged<CFError>?
-      if !CGImageDestinationCopyImageSource(destination, image, options as CFDictionary, &error) {
-         // Lossless copy is not supported for every format; fall back to re-encoding.
-         try? FileManager.default.removeItem(at: url)
-         guard let fallback = CGImageDestinationCreateWithURL(url as CFURL, type.identifier as CFString, 1, nil) else {
-            throw MediaError.encodeFailed
-         }
-         CGImageDestinationAddImageFromSource(fallback, image, 0, [kCGImagePropertyGPSDictionary: kCFNull] as CFDictionary)
-         guard CGImageDestinationFinalize(fallback) else { throw MediaError.encodeFailed }
-      }
+      let copied = CGImageDestinationCopyImageSource(destination, image, options as CFDictionary, &error)
+      if copied && !hasGPS(url) { return }
+      ////////////////////////////////////////////////////////////
+      // lossless copy is not supported for every format, and   //
+      // for PNG it leaves GPS fields in the XMP packet, so     //
+      // re-encode. The partial file may not exist; a failed    //
+      // removal is expected and the re-encode overwrites it.   //
+      ////////////////////////////////////////////////////////////
+      try? FileManager.default.removeItem(at: url)
+      let fallback = try makeDestination(url, type: type)
+      CGImageDestinationAddImageFromSource(fallback, image, 0, [kCGImagePropertyGPSDictionary: kCFNull] as CFDictionary)
+      guard CGImageDestinationFinalize(fallback) else { throw MediaError.encodeFailed }
    }
 
+   /// Encodes the first image of `image` as JPEG, optionally scaled so its longest edge is
+   /// at most `maxPixelSize`. Scaling bakes the orientation into the pixels.
    static func encodeJPEG(_ image: CGImageSource, keepLocation: Bool, maxPixelSize: Int?, quality: Double, to url: URL) throws {
-      guard let destination = CGImageDestinationCreateWithURL(url as CFURL, UTType.jpeg.identifier as CFString, 1, nil) else {
-         throw MediaError.encodeFailed
-      }
+      let destination = try makeDestination(url, type: .jpeg)
       var properties = (CGImageSourceCopyPropertiesAtIndex(image, 0, nil) as? [CFString: Any]) ?? [:]
       properties[kCGImageDestinationLossyCompressionQuality] = quality
       if !keepLocation { properties[kCGImagePropertyGPSDictionary] = kCFNull }
@@ -119,8 +175,11 @@ public enum MediaProcessor {
          guard let scaled = CGImageSourceCreateThumbnailAtIndex(image, 0, options as CFDictionary) else {
             throw MediaError.encodeFailed
          }
-         // The transform is baked in, so orientation resets to up.
-         properties[kCGImagePropertyOrientation] = 1
+         //////////////////////////////////////////////////////
+         // the transform is baked in, so orientation resets //
+         // to up.                                           //
+         //////////////////////////////////////////////////////
+         properties[kCGImagePropertyOrientation] = CGImagePropertyOrientation.up.rawValue
          properties[kCGImagePropertyPixelWidth] = nil
          properties[kCGImagePropertyPixelHeight] = nil
          CGImageDestinationAddImage(destination, scaled, properties as CFDictionary)
@@ -131,6 +190,7 @@ public enum MediaProcessor {
       guard CGImageDestinationFinalize(destination) else { throw MediaError.encodeFailed }
    }
 
+   /// The size of the file at `url` in bytes.
    static func fileSize(_ url: URL) throws -> Int64 {
       Int64(try url.resourceValues(forKeys: [.fileSizeKey]).fileSize ?? 0)
    }
