@@ -89,8 +89,10 @@ First release.
 
 ## Screenshots
 
-iPhone 6.9" display (1320 x 2868), in `docs/app-store/screenshots/iphone-6.9/`. Upload in
-this order (App Store Connect scales them for smaller iPhones):
+App Store Connect asks for the "iPhone with Dynamic Island (medium display)" set: 6.3"
+(1206 x 2622), in `docs/app-store/screenshots/iphone-6.3/`. A 6.9" set (1320 x 2868) is in
+`docs/app-store/screenshots/iphone-6.9/` for the large-display slot. The app is
+iPhone-only, so no iPad screenshots are needed. Upload in this order:
 
 1. `2-compose.png`: writing a post
 2. `3-preview.png`: Markdown preview
@@ -101,8 +103,8 @@ this order (App Store Connect scales them for smaller iPhones):
 7. `1-sign-in.png`: sign-in (mock or kof22.com)
 8. `8-settings.png`: settings and privacy
 
-Regenerate them with the `ScreenshotTests` UI test on the iPhone 18 Pro Max simulator
-in dark mode (`xcrun simctl ui <device> appearance dark`, status bar overridden to 9:41),
+Regenerate them with the `ScreenshotTests` UI test on the iPhone 18 Pro (6.3") and
+iPhone 18 Pro Max (6.9") simulators in dark mode (`xcrun simctl ui <device> appearance dark`, status bar overridden to 9:41),
 then export the attachments from the result bundle.
 
 ## App Review information
@@ -170,4 +172,12 @@ Free, all territories (or only where you want it). No in-app purchases.
 - Privacy policy and support links in Settings.
 - Version 1.0.0 shared by the app and both extensions.
 - Signing: Xcode Cloud cloud-managed App Store distribution; no local profiles needed.
+- iPhone only (`TARGETED_DEVICE_FAMILY` 1 on every target).
+
+## Build for submission
+
+A build archived with "TestFlight (Internal Testing Only)" cannot be attached to an App
+Store version (App Store Connect: "The specified pre-release build could not be added").
+The Xcode Cloud workflow's Archive action must use the distribution preparation
+"TestFlight and App Store". Then pick that build under the version's Build section.
 - Zero build warnings; tests and coverage gates green.
