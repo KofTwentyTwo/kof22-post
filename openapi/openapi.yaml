@@ -1,4 +1,4 @@
-# Downloaded from https://api.kof22.com/v1/openapi.yaml on 2026-10-11T23:12:05Z
+# Downloaded from https://api.kof22.com/v1/openapi.yaml on 2026-10-12T10:40:35Z
 openapi: 3.0.3
 info:
   title: KoF22 Site API
@@ -122,6 +122,26 @@ info:
 
     Writes that create something accept an `Idempotency-Key` header (retry-safe: the same key and body replays the first response). Updates and deletes use `ETag` / `If-Match` (`412` on a stale version, `428` when missing on update). Publishing uses the same path as the CMS: audits, change events and search re-indexing happen as for Admin edits, and the website shows the post immediately.
 
+    ## iOS app setup (KoF22 Post)
+
+    > **Status:** the `kof22-post-ios` Authentik client is being provisioned; until its discovery URL          (`https://auth.kof22.com/application/o/kof22-post-ios/.well-known/openid-configuration`) resolves, sign-in returns errors.
+
+    **Registered redirect URIs** (use one exactly; anything else is rejected by the identity provider):
+
+    | Redirect URI | Kind | Notes |
+    |--------------|------|-------|
+    | `com.kof22.post://oauth/callback` | Custom URL scheme | v1 of the app. Register the `com.kof22.post` scheme in the app's `Info.plist`. |
+    | `https://api.kof22.com/oauth/ios-callback` | Universal link | Needs the app's Associated Domains entitlement (`applinks:api.kof22.com`) and          [`/.well-known/apple-app-site-association`](https://api.kof22.com/.well-known/apple-app-site-association), which is served only once the          Apple Team ID is configured on the server via `SITE_API_IOS_APP_IDS` (e.g. `TEAMID.com.kof22.post`); until then it returns `404`.          If iOS does not hand the link to the app, the page offers the `com.kof22.post://oauth/callback` link with the same query. |
+
+    **Sign-in flow**
+
+    1. Generate a PKCE `code_verifier` (43-128 random URL-safe characters) and send `code_challenge = BASE64URL(SHA256(verifier))`          with `code_challenge_method=S256` (plain is not accepted). Also send a random, single-use `state` and reject any callback          whose `state` does not match.
+    2. Open the *Authorize* URL in an `ASWebAuthenticationSession` (not a `WKWebView` or an embedded browser) with          `callbackURLScheme` `com.kof22.post` (or, on iOS 17.4+, a `.https(host: "api.kof22.com", path: "/oauth/ios-callback")` callback).          Set `prefersEphemeralWebBrowserSession` as you prefer and a `presentationContextProvider`.
+    3. Exchange the returned `code` at the *Token* endpoint with `grant_type=authorization_code`, the same `redirect_uri`,          `client_id=kof22-post-ios` and the `code_verifier`. It is a public client: no client secret ships in the app.
+    4. Keep the access and refresh tokens in the Keychain; refresh with `grant_type=refresh_token` before the 30-minute access          token expires, and revoke on sign-out.
+
+    **Bearer tokens are only for the `/me` endpoints.** Send `Authorization: Bearer <access token>` to `/me` and `/me/...` only;          every other endpoint is anonymous and ignores it, so do not attach tokens to content, search or feed requests.
+
     ## Errors
 
     Every error has the same JSON envelope:
@@ -157,6 +177,10 @@ info:
     - **Major** (`/v2`): any breaking change. `/v1` then stays available with `Deprecation` and `Sunset` headers before removal.
 
     ### Changelog
+
+    **1.1.0** (2026-10-11)
+
+    - Documentation: iOS app setup (KoF22 Post) - registered redirect URIs, PKCE S256 and state, ASWebAuthenticationSession, bearer tokens for /me only.
 
     **1.0.0** (2026-10-11)
 
@@ -194,7 +218,7 @@ info:
     email: james@kof22.com
     name: KoF22
     url: https://www.kof22.com
-  version: 1.0.0
+  version: 1.1.0
   x-api-major-version: v1
 servers:
 - url: https://api.kof22.com

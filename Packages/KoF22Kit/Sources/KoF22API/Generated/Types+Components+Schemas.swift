@@ -12,6 +12,532 @@ public import struct Foundation.Date
 extension Components {
     /// Types generated from the `#/components/schemas` section of the OpenAPI document.
     public enum Schemas {
+        /// - Remark: Generated from `#/components/schemas/baseSearchResultFields`.
+        public struct BaseSearchResultFields: Codable, Hashable, Sendable {
+            /// Requested result page number
+            ///
+            /// - Remark: Generated from `#/components/schemas/baseSearchResultFields/pageNo`.
+            public var pageNo: Swift.Int?
+            /// Number of records that matched the search criteria
+            ///
+            /// - Remark: Generated from `#/components/schemas/baseSearchResultFields/count`.
+            public var count: Swift.Int?
+            /// Requested result page size
+            ///
+            /// - Remark: Generated from `#/components/schemas/baseSearchResultFields/pageSize`.
+            public var pageSize: Swift.Int?
+            /// Creates a new `BaseSearchResultFields`.
+            ///
+            /// - Parameters:
+            ///   - pageNo: Requested result page number
+            ///   - count: Number of records that matched the search criteria
+            ///   - pageSize: Requested result page size
+            public init(
+                pageNo: Swift.Int? = nil,
+                count: Swift.Int? = nil,
+                pageSize: Swift.Int? = nil
+            ) {
+                self.pageNo = pageNo
+                self.count = count
+                self.pageSize = pageSize
+            }
+            public enum CodingKeys: String, CodingKey {
+                case pageNo
+                case count
+                case pageSize
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/post`.
+        public struct Post: Codable, Hashable, Sendable {
+            /// Author for the Blog Post.  Values in this field come from the primary key of the Author table
+            ///
+            /// - Remark: Generated from `#/components/schemas/post/authorId`.
+            public var authorId: Swift.Int?
+            /// Blog for the Blog Post.  Values in this field come from the primary key of the Blogs table
+            ///
+            /// - Remark: Generated from `#/components/schemas/post/blogId`.
+            public var blogId: Swift.Int?
+            /// Content for the Blog Post.
+            ///
+            /// - Remark: Generated from `#/components/schemas/post/content`.
+            public var content: Swift.String?
+            /// Description for the Blog Post.
+            ///
+            /// - Remark: Generated from `#/components/schemas/post/description`.
+            public var description: Swift.String?
+            /// Excerpt for the Blog Post.
+            ///
+            /// - Remark: Generated from `#/components/schemas/post/excerpt`.
+            public var excerpt: Swift.String?
+            /// Featured Image URL for the Blog Post.
+            ///
+            /// - Remark: Generated from `#/components/schemas/post/featuredImage`.
+            public var featuredImage: Swift.String?
+            /// Featured Media for the Blog Post.  Values in this field come from the primary key of the Media table
+            ///
+            /// - Remark: Generated from `#/components/schemas/post/featuredMediaId`.
+            public var featuredMediaId: Swift.Int?
+            /// Id for the Blog Post.
+            ///
+            /// - Remark: Generated from `#/components/schemas/post/id`.
+            public var id: Swift.Int?
+            /// Is Featured for the Blog Post.
+            ///
+            /// - Remark: Generated from `#/components/schemas/post/isFeatured`.
+            public var isFeatured: Swift.Bool?
+            /// Link Description for the Blog Post.
+            ///
+            /// - Remark: Generated from `#/components/schemas/post/linkDescription`.
+            public var linkDescription: Swift.String?
+            /// Link Image URL for the Blog Post.
+            ///
+            /// - Remark: Generated from `#/components/schemas/post/linkImageUrl`.
+            public var linkImageUrl: Swift.String?
+            /// Link Title for the Blog Post.
+            ///
+            /// - Remark: Generated from `#/components/schemas/post/linkTitle`.
+            public var linkTitle: Swift.String?
+            /// Link URL for the Blog Post.
+            ///
+            /// - Remark: Generated from `#/components/schemas/post/linkUrl`.
+            public var linkUrl: Swift.String?
+            /// Location for the Blog Post.
+            ///
+            /// - Remark: Generated from `#/components/schemas/post/locationLabel`.
+            public var locationLabel: Swift.String?
+            /// Meta Description for the Blog Post.
+            ///
+            /// - Remark: Generated from `#/components/schemas/post/metaDescription`.
+            public var metaDescription: Swift.String?
+            /// Meta Keywords for the Blog Post.
+            ///
+            /// - Remark: Generated from `#/components/schemas/post/metaKeywords`.
+            public var metaKeywords: Swift.String?
+            /// Meta Title for the Blog Post.
+            ///
+            /// - Remark: Generated from `#/components/schemas/post/metaTitle`.
+            public var metaTitle: Swift.String?
+            /// Modify Date for the Blog Post.
+            ///
+            /// - Remark: Generated from `#/components/schemas/post/modifyDate`.
+            public var modifyDate: Foundation.Date?
+            /// Name for the Blog Post.
+            ///
+            /// - Remark: Generated from `#/components/schemas/post/name`.
+            public var name: Swift.String?
+            /// Publish Date for the Blog Post.
+            ///
+            /// - Remark: Generated from `#/components/schemas/post/publishDate`.
+            public var publishDate: Foundation.Date?
+            /// Read Time for the Blog Post.
+            ///
+            /// - Remark: Generated from `#/components/schemas/post/readTime`.
+            public var readTime: Swift.Int?
+            /// Slug for the Blog Post.
+            ///
+            /// - Remark: Generated from `#/components/schemas/post/slug`.
+            public var slug: Swift.String?
+            /// Title for the Blog Post.
+            ///
+            /// - Remark: Generated from `#/components/schemas/post/title`.
+            public var title: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/post/tags`.
+            public var tags: [Components.Schemas.PostTagLink]?
+            /// - Remark: Generated from `#/components/schemas/post/media`.
+            public var media: [Components.Schemas.PostMedia]?
+            /// Creates a new `Post`.
+            ///
+            /// - Parameters:
+            ///   - authorId: Author for the Blog Post.  Values in this field come from the primary key of the Author table
+            ///   - blogId: Blog for the Blog Post.  Values in this field come from the primary key of the Blogs table
+            ///   - content: Content for the Blog Post.
+            ///   - description: Description for the Blog Post.
+            ///   - excerpt: Excerpt for the Blog Post.
+            ///   - featuredImage: Featured Image URL for the Blog Post.
+            ///   - featuredMediaId: Featured Media for the Blog Post.  Values in this field come from the primary key of the Media table
+            ///   - id: Id for the Blog Post.
+            ///   - isFeatured: Is Featured for the Blog Post.
+            ///   - linkDescription: Link Description for the Blog Post.
+            ///   - linkImageUrl: Link Image URL for the Blog Post.
+            ///   - linkTitle: Link Title for the Blog Post.
+            ///   - linkUrl: Link URL for the Blog Post.
+            ///   - locationLabel: Location for the Blog Post.
+            ///   - metaDescription: Meta Description for the Blog Post.
+            ///   - metaKeywords: Meta Keywords for the Blog Post.
+            ///   - metaTitle: Meta Title for the Blog Post.
+            ///   - modifyDate: Modify Date for the Blog Post.
+            ///   - name: Name for the Blog Post.
+            ///   - publishDate: Publish Date for the Blog Post.
+            ///   - readTime: Read Time for the Blog Post.
+            ///   - slug: Slug for the Blog Post.
+            ///   - title: Title for the Blog Post.
+            ///   - tags:
+            ///   - media:
+            public init(
+                authorId: Swift.Int? = nil,
+                blogId: Swift.Int? = nil,
+                content: Swift.String? = nil,
+                description: Swift.String? = nil,
+                excerpt: Swift.String? = nil,
+                featuredImage: Swift.String? = nil,
+                featuredMediaId: Swift.Int? = nil,
+                id: Swift.Int? = nil,
+                isFeatured: Swift.Bool? = nil,
+                linkDescription: Swift.String? = nil,
+                linkImageUrl: Swift.String? = nil,
+                linkTitle: Swift.String? = nil,
+                linkUrl: Swift.String? = nil,
+                locationLabel: Swift.String? = nil,
+                metaDescription: Swift.String? = nil,
+                metaKeywords: Swift.String? = nil,
+                metaTitle: Swift.String? = nil,
+                modifyDate: Foundation.Date? = nil,
+                name: Swift.String? = nil,
+                publishDate: Foundation.Date? = nil,
+                readTime: Swift.Int? = nil,
+                slug: Swift.String? = nil,
+                title: Swift.String? = nil,
+                tags: [Components.Schemas.PostTagLink]? = nil,
+                media: [Components.Schemas.PostMedia]? = nil
+            ) {
+                self.authorId = authorId
+                self.blogId = blogId
+                self.content = content
+                self.description = description
+                self.excerpt = excerpt
+                self.featuredImage = featuredImage
+                self.featuredMediaId = featuredMediaId
+                self.id = id
+                self.isFeatured = isFeatured
+                self.linkDescription = linkDescription
+                self.linkImageUrl = linkImageUrl
+                self.linkTitle = linkTitle
+                self.linkUrl = linkUrl
+                self.locationLabel = locationLabel
+                self.metaDescription = metaDescription
+                self.metaKeywords = metaKeywords
+                self.metaTitle = metaTitle
+                self.modifyDate = modifyDate
+                self.name = name
+                self.publishDate = publishDate
+                self.readTime = readTime
+                self.slug = slug
+                self.title = title
+                self.tags = tags
+                self.media = media
+            }
+            public enum CodingKeys: String, CodingKey {
+                case authorId
+                case blogId
+                case content
+                case description
+                case excerpt
+                case featuredImage
+                case featuredMediaId
+                case id
+                case isFeatured
+                case linkDescription
+                case linkImageUrl
+                case linkTitle
+                case linkUrl
+                case locationLabel
+                case metaDescription
+                case metaKeywords
+                case metaTitle
+                case modifyDate
+                case name
+                case publishDate
+                case readTime
+                case slug
+                case title
+                case tags
+                case media
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/postSearchResult`.
+        public struct PostSearchResult: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/postSearchResult/value1`.
+            public var value1: Components.Schemas.BaseSearchResultFields
+            /// Creates a new `PostSearchResult`.
+            ///
+            /// - Parameters:
+            ///   - value1:
+            public init(value1: Components.Schemas.BaseSearchResultFields) {
+                self.value1 = value1
+            }
+            public init(from decoder: any Swift.Decoder) throws {
+                self.value1 = try .init(from: decoder)
+            }
+            public func encode(to encoder: any Swift.Encoder) throws {
+                try self.value1.encode(to: encoder)
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/blog`.
+        public struct Blog: Codable, Hashable, Sendable {
+            /// Description for the Blogs.
+            ///
+            /// - Remark: Generated from `#/components/schemas/blog/description`.
+            public var description: Swift.String?
+            /// Id for the Blogs.
+            ///
+            /// - Remark: Generated from `#/components/schemas/blog/id`.
+            public var id: Swift.Int?
+            /// Meta Description for the Blogs.
+            ///
+            /// - Remark: Generated from `#/components/schemas/blog/metaDescription`.
+            public var metaDescription: Swift.String?
+            /// Meta Keywords for the Blogs.
+            ///
+            /// - Remark: Generated from `#/components/schemas/blog/metaKeywords`.
+            public var metaKeywords: Swift.String?
+            /// Meta Title for the Blogs.
+            ///
+            /// - Remark: Generated from `#/components/schemas/blog/metaTitle`.
+            public var metaTitle: Swift.String?
+            /// Modify Date for the Blogs.
+            ///
+            /// - Remark: Generated from `#/components/schemas/blog/modifyDate`.
+            public var modifyDate: Foundation.Date?
+            /// Name for the Blogs.
+            ///
+            /// - Remark: Generated from `#/components/schemas/blog/name`.
+            public var name: Swift.String?
+            /// Short Name for the Blogs.
+            ///
+            /// - Remark: Generated from `#/components/schemas/blog/shortName`.
+            public var shortName: Swift.String?
+            /// Slug for the Blogs.
+            ///
+            /// - Remark: Generated from `#/components/schemas/blog/slug`.
+            public var slug: Swift.String?
+            /// Creates a new `Blog`.
+            ///
+            /// - Parameters:
+            ///   - description: Description for the Blogs.
+            ///   - id: Id for the Blogs.
+            ///   - metaDescription: Meta Description for the Blogs.
+            ///   - metaKeywords: Meta Keywords for the Blogs.
+            ///   - metaTitle: Meta Title for the Blogs.
+            ///   - modifyDate: Modify Date for the Blogs.
+            ///   - name: Name for the Blogs.
+            ///   - shortName: Short Name for the Blogs.
+            ///   - slug: Slug for the Blogs.
+            public init(
+                description: Swift.String? = nil,
+                id: Swift.Int? = nil,
+                metaDescription: Swift.String? = nil,
+                metaKeywords: Swift.String? = nil,
+                metaTitle: Swift.String? = nil,
+                modifyDate: Foundation.Date? = nil,
+                name: Swift.String? = nil,
+                shortName: Swift.String? = nil,
+                slug: Swift.String? = nil
+            ) {
+                self.description = description
+                self.id = id
+                self.metaDescription = metaDescription
+                self.metaKeywords = metaKeywords
+                self.metaTitle = metaTitle
+                self.modifyDate = modifyDate
+                self.name = name
+                self.shortName = shortName
+                self.slug = slug
+            }
+            public enum CodingKeys: String, CodingKey {
+                case description
+                case id
+                case metaDescription
+                case metaKeywords
+                case metaTitle
+                case modifyDate
+                case name
+                case shortName
+                case slug
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/blogSearchResult`.
+        public struct BlogSearchResult: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/blogSearchResult/value1`.
+            public var value1: Components.Schemas.BaseSearchResultFields
+            /// Creates a new `BlogSearchResult`.
+            ///
+            /// - Parameters:
+            ///   - value1:
+            public init(value1: Components.Schemas.BaseSearchResultFields) {
+                self.value1 = value1
+            }
+            public init(from decoder: any Swift.Decoder) throws {
+                self.value1 = try .init(from: decoder)
+            }
+            public func encode(to encoder: any Swift.Encoder) throws {
+                try self.value1.encode(to: encoder)
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/tag`.
+        public struct Tag: Codable, Hashable, Sendable {
+            /// Blog for the Tags.  Values in this field come from the primary key of the Blogs table
+            ///
+            /// - Remark: Generated from `#/components/schemas/tag/blogId`.
+            public var blogId: Swift.Int?
+            /// Description for the Tags.
+            ///
+            /// - Remark: Generated from `#/components/schemas/tag/description`.
+            public var description: Swift.String?
+            /// Id for the Tags.
+            ///
+            /// - Remark: Generated from `#/components/schemas/tag/id`.
+            public var id: Swift.Int?
+            /// Name for the Tags.
+            ///
+            /// - Remark: Generated from `#/components/schemas/tag/name`.
+            public var name: Swift.String?
+            /// Slug for the Tags.
+            ///
+            /// - Remark: Generated from `#/components/schemas/tag/slug`.
+            public var slug: Swift.String?
+            /// Creates a new `Tag`.
+            ///
+            /// - Parameters:
+            ///   - blogId: Blog for the Tags.  Values in this field come from the primary key of the Blogs table
+            ///   - description: Description for the Tags.
+            ///   - id: Id for the Tags.
+            ///   - name: Name for the Tags.
+            ///   - slug: Slug for the Tags.
+            public init(
+                blogId: Swift.Int? = nil,
+                description: Swift.String? = nil,
+                id: Swift.Int? = nil,
+                name: Swift.String? = nil,
+                slug: Swift.String? = nil
+            ) {
+                self.blogId = blogId
+                self.description = description
+                self.id = id
+                self.name = name
+                self.slug = slug
+            }
+            public enum CodingKeys: String, CodingKey {
+                case blogId
+                case description
+                case id
+                case name
+                case slug
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/tagSearchResult`.
+        public struct TagSearchResult: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/tagSearchResult/value1`.
+            public var value1: Components.Schemas.BaseSearchResultFields
+            /// Creates a new `TagSearchResult`.
+            ///
+            /// - Parameters:
+            ///   - value1:
+            public init(value1: Components.Schemas.BaseSearchResultFields) {
+                self.value1 = value1
+            }
+            public init(from decoder: any Swift.Decoder) throws {
+                self.value1 = try .init(from: decoder)
+            }
+            public func encode(to encoder: any Swift.Encoder) throws {
+                try self.value1.encode(to: encoder)
+            }
+        }
+        /// A tag applied to a post (resolve `tagId` with /tag).
+        ///
+        /// - Remark: Generated from `#/components/schemas/postTagLink`.
+        public struct PostTagLink: Codable, Hashable, Sendable {
+            /// Blog Tag for the Blog Post Tags.  Values in this field come from the primary key of the Tags table
+            ///
+            /// - Remark: Generated from `#/components/schemas/postTagLink/tagId`.
+            public var tagId: Swift.Int?
+            /// Creates a new `PostTagLink`.
+            ///
+            /// - Parameters:
+            ///   - tagId: Blog Tag for the Blog Post Tags.  Values in this field come from the primary key of the Tags table
+            public init(tagId: Swift.Int? = nil) {
+                self.tagId = tagId
+            }
+            public enum CodingKeys: String, CodingKey {
+                case tagId
+            }
+        }
+        /// A photo attached to a post, in display order.
+        ///
+        /// - Remark: Generated from `#/components/schemas/postMedia`.
+        public struct PostMedia: Codable, Hashable, Sendable {
+            /// Alt Text for the Blog Post Media.
+            ///
+            /// - Remark: Generated from `#/components/schemas/postMedia/altText`.
+            public var altText: Swift.String?
+            /// Caption for the Blog Post Media.
+            ///
+            /// - Remark: Generated from `#/components/schemas/postMedia/caption`.
+            public var caption: Swift.String?
+            /// Height for the Blog Post Media.
+            ///
+            /// - Remark: Generated from `#/components/schemas/postMedia/height`.
+            public var height: Swift.Int?
+            /// Media for the Blog Post Media.  Values in this field come from the primary key of the Media table
+            ///
+            /// - Remark: Generated from `#/components/schemas/postMedia/mediaId`.
+            public var mediaId: Swift.Int?
+            /// Sort Order for the Blog Post Media.
+            ///
+            /// - Remark: Generated from `#/components/schemas/postMedia/sortOrder`.
+            public var sortOrder: Swift.Int?
+            /// Thumbnail Url for the Blog Post Media.
+            ///
+            /// - Remark: Generated from `#/components/schemas/postMedia/thumbnailUrl`.
+            public var thumbnailUrl: Swift.String?
+            /// Url for the Blog Post Media.
+            ///
+            /// - Remark: Generated from `#/components/schemas/postMedia/url`.
+            public var url: Swift.String?
+            /// Width for the Blog Post Media.
+            ///
+            /// - Remark: Generated from `#/components/schemas/postMedia/width`.
+            public var width: Swift.Int?
+            /// Creates a new `PostMedia`.
+            ///
+            /// - Parameters:
+            ///   - altText: Alt Text for the Blog Post Media.
+            ///   - caption: Caption for the Blog Post Media.
+            ///   - height: Height for the Blog Post Media.
+            ///   - mediaId: Media for the Blog Post Media.  Values in this field come from the primary key of the Media table
+            ///   - sortOrder: Sort Order for the Blog Post Media.
+            ///   - thumbnailUrl: Thumbnail Url for the Blog Post Media.
+            ///   - url: Url for the Blog Post Media.
+            ///   - width: Width for the Blog Post Media.
+            public init(
+                altText: Swift.String? = nil,
+                caption: Swift.String? = nil,
+                height: Swift.Int? = nil,
+                mediaId: Swift.Int? = nil,
+                sortOrder: Swift.Int? = nil,
+                thumbnailUrl: Swift.String? = nil,
+                url: Swift.String? = nil,
+                width: Swift.Int? = nil
+            ) {
+                self.altText = altText
+                self.caption = caption
+                self.height = height
+                self.mediaId = mediaId
+                self.sortOrder = sortOrder
+                self.thumbnailUrl = thumbnailUrl
+                self.url = url
+                self.width = width
+            }
+            public enum CodingKeys: String, CodingKey {
+                case altText
+                case caption
+                case height
+                case mediaId
+                case sortOrder
+                case thumbnailUrl
+                case url
+                case width
+            }
+        }
         /// - Remark: Generated from `#/components/schemas/Error`.
         public struct _Error: Codable, Hashable, Sendable {
             /// - Remark: Generated from `#/components/schemas/Error/error`.

@@ -44,10 +44,11 @@ $(GENERATOR): Tools/OpenAPIGen/Package.swift
 	cd Tools/OpenAPIGen && swift build -c release --product swift-openapi-generator
 
 generate: $(GENERATOR)  ## Regenerate the API client from openapi/openapi.yaml
+	scripts/prepare-spec.sh build/openapi-for-generator.yaml
 	rm -f Packages/KoF22Kit/Sources/KoF22API/Generated/*.swift
-	$(GENERATOR) generate openapi/openapi.yaml --config openapi/openapi-generator-config.yaml \
+	$(GENERATOR) generate build/openapi-for-generator.yaml --config openapi/openapi-generator-config.yaml \
 		--output-directory Packages/KoF22Kit/Sources/KoF22API/Generated
 
-update-spec:        ## Pull the live spec from api.kof22.com and regenerate
-	scripts/update-spec.sh
-	$(MAKE) generate
+update-spec:        ## Show how the live spec differs; APPLY=1 replaces the copy and regenerates
+	APPLY=$(APPLY) scripts/update-spec.sh
+	@if [ "$(APPLY)" = "1" ]; then $(MAKE) generate; fi

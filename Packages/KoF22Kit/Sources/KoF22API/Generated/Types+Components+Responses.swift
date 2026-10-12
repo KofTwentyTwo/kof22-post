@@ -12,6 +12,221 @@ public import struct Foundation.Date
 extension Components {
     /// Types generated from the `#/components/responses` section of the OpenAPI document.
     public enum Responses {
+        public struct Error400: Sendable, Hashable {
+            /// - Remark: Generated from `#/components/responses/error400/content`.
+            @frozen public enum Body: Sendable, Hashable {
+                /// - Remark: Generated from `#/components/responses/error400/content/json`.
+                public struct JsonPayload: Codable, Hashable, Sendable {
+                    /// - Remark: Generated from `#/components/responses/error400/content/json/error`.
+                    public var error: Swift.String?
+                    /// Creates a new `JsonPayload`.
+                    ///
+                    /// - Parameters:
+                    ///   - error:
+                    public init(error: Swift.String? = nil) {
+                        self.error = error
+                    }
+                    public enum CodingKeys: String, CodingKey {
+                        case error
+                    }
+                }
+                /// - Remark: Generated from `#/components/responses/error400/content/application\/json`.
+                case json(Components.Responses.Error400.Body.JsonPayload)
+                /// The associated value of the enum case if `self` is `.json`.
+                ///
+                /// - Throws: An error if `self` is not `.json`.
+                /// - SeeAlso: `.json`.
+                public var json: Components.Responses.Error400.Body.JsonPayload {
+                    get throws {
+                        switch self {
+                        case let .json(body):
+                            return body
+                        }
+                    }
+                }
+            }
+            /// Received HTTP response body
+            public var body: Components.Responses.Error400.Body
+            /// Creates a new `Error400`.
+            ///
+            /// - Parameters:
+            ///   - body: Received HTTP response body
+            public init(body: Components.Responses.Error400.Body) {
+                self.body = body
+            }
+        }
+        public struct Error401: Sendable, Hashable {
+            /// - Remark: Generated from `#/components/responses/error401/content`.
+            @frozen public enum Body: Sendable, Hashable {
+                /// - Remark: Generated from `#/components/responses/error401/content/json`.
+                public struct JsonPayload: Codable, Hashable, Sendable {
+                    /// - Remark: Generated from `#/components/responses/error401/content/json/error`.
+                    public var error: Swift.String?
+                    /// Creates a new `JsonPayload`.
+                    ///
+                    /// - Parameters:
+                    ///   - error:
+                    public init(error: Swift.String? = nil) {
+                        self.error = error
+                    }
+                    public enum CodingKeys: String, CodingKey {
+                        case error
+                    }
+                }
+                /// - Remark: Generated from `#/components/responses/error401/content/application\/json`.
+                case json(Components.Responses.Error401.Body.JsonPayload)
+                /// The associated value of the enum case if `self` is `.json`.
+                ///
+                /// - Throws: An error if `self` is not `.json`.
+                /// - SeeAlso: `.json`.
+                public var json: Components.Responses.Error401.Body.JsonPayload {
+                    get throws {
+                        switch self {
+                        case let .json(body):
+                            return body
+                        }
+                    }
+                }
+            }
+            /// Received HTTP response body
+            public var body: Components.Responses.Error401.Body
+            /// Creates a new `Error401`.
+            ///
+            /// - Parameters:
+            ///   - body: Received HTTP response body
+            public init(body: Components.Responses.Error401.Body) {
+                self.body = body
+            }
+        }
+        public struct Error403: Sendable, Hashable {
+            /// - Remark: Generated from `#/components/responses/error403/content`.
+            @frozen public enum Body: Sendable, Hashable {
+                /// - Remark: Generated from `#/components/responses/error403/content/json`.
+                public struct JsonPayload: Codable, Hashable, Sendable {
+                    /// - Remark: Generated from `#/components/responses/error403/content/json/error`.
+                    public var error: Swift.String?
+                    /// Creates a new `JsonPayload`.
+                    ///
+                    /// - Parameters:
+                    ///   - error:
+                    public init(error: Swift.String? = nil) {
+                        self.error = error
+                    }
+                    public enum CodingKeys: String, CodingKey {
+                        case error
+                    }
+                }
+                /// - Remark: Generated from `#/components/responses/error403/content/application\/json`.
+                case json(Components.Responses.Error403.Body.JsonPayload)
+                /// The associated value of the enum case if `self` is `.json`.
+                ///
+                /// - Throws: An error if `self` is not `.json`.
+                /// - SeeAlso: `.json`.
+                public var json: Components.Responses.Error403.Body.JsonPayload {
+                    get throws {
+                        switch self {
+                        case let .json(body):
+                            return body
+                        }
+                    }
+                }
+            }
+            /// Received HTTP response body
+            public var body: Components.Responses.Error403.Body
+            /// Creates a new `Error403`.
+            ///
+            /// - Parameters:
+            ///   - body: Received HTTP response body
+            public init(body: Components.Responses.Error403.Body) {
+                self.body = body
+            }
+        }
+        public struct Error500: Sendable, Hashable {
+            /// - Remark: Generated from `#/components/responses/error500/content`.
+            @frozen public enum Body: Sendable, Hashable {
+                /// - Remark: Generated from `#/components/responses/error500/content/json`.
+                public struct JsonPayload: Codable, Hashable, Sendable {
+                    /// - Remark: Generated from `#/components/responses/error500/content/json/error`.
+                    public var error: Swift.String?
+                    /// Creates a new `JsonPayload`.
+                    ///
+                    /// - Parameters:
+                    ///   - error:
+                    public init(error: Swift.String? = nil) {
+                        self.error = error
+                    }
+                    public enum CodingKeys: String, CodingKey {
+                        case error
+                    }
+                }
+                /// - Remark: Generated from `#/components/responses/error500/content/application\/json`.
+                case json(Components.Responses.Error500.Body.JsonPayload)
+                /// The associated value of the enum case if `self` is `.json`.
+                ///
+                /// - Throws: An error if `self` is not `.json`.
+                /// - SeeAlso: `.json`.
+                public var json: Components.Responses.Error500.Body.JsonPayload {
+                    get throws {
+                        switch self {
+                        case let .json(body):
+                            return body
+                        }
+                    }
+                }
+            }
+            /// Received HTTP response body
+            public var body: Components.Responses.Error500.Body
+            /// Creates a new `Error500`.
+            ///
+            /// - Parameters:
+            ///   - body: Received HTTP response body
+            public init(body: Components.Responses.Error500.Body) {
+                self.body = body
+            }
+        }
+        public struct Error429: Sendable, Hashable {
+            /// - Remark: Generated from `#/components/responses/error429/content`.
+            @frozen public enum Body: Sendable, Hashable {
+                /// - Remark: Generated from `#/components/responses/error429/content/json`.
+                public struct JsonPayload: Codable, Hashable, Sendable {
+                    /// - Remark: Generated from `#/components/responses/error429/content/json/error`.
+                    public var error: Swift.String?
+                    /// Creates a new `JsonPayload`.
+                    ///
+                    /// - Parameters:
+                    ///   - error:
+                    public init(error: Swift.String? = nil) {
+                        self.error = error
+                    }
+                    public enum CodingKeys: String, CodingKey {
+                        case error
+                    }
+                }
+                /// - Remark: Generated from `#/components/responses/error429/content/application\/json`.
+                case json(Components.Responses.Error429.Body.JsonPayload)
+                /// The associated value of the enum case if `self` is `.json`.
+                ///
+                /// - Throws: An error if `self` is not `.json`.
+                /// - SeeAlso: `.json`.
+                public var json: Components.Responses.Error429.Body.JsonPayload {
+                    get throws {
+                        switch self {
+                        case let .json(body):
+                            return body
+                        }
+                    }
+                }
+            }
+            /// Received HTTP response body
+            public var body: Components.Responses.Error429.Body
+            /// Creates a new `Error429`.
+            ///
+            /// - Parameters:
+            ///   - body: Received HTTP response body
+            public init(body: Components.Responses.Error429.Body) {
+                self.body = body
+            }
+        }
         public struct BadRequest: Sendable, Hashable {
             /// - Remark: Generated from `#/components/responses/BadRequest/content`.
             @frozen public enum Body: Sendable, Hashable {

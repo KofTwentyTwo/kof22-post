@@ -11,6 +11,117 @@ public import struct Foundation.Date
 #endif
 /// A type that performs HTTP operations defined by the OpenAPI document.
 public protocol APIProtocol: Sendable {
+    /// Search for Blog Post records by query string
+    ///
+    /// Execute a query on this table, using query criteria as specified in query string parameters.
+    ///
+    /// * Pagination is managed via the `pageNo` & `pageSize` query string parameters.  pageNo starts at 1.  pageSize defaults to 50.
+    /// * By default, the response includes the total count of records that match the query criteria.  The count can be omitted by specifying `includeCount=false`
+    /// * By default, results are sorted by the table's primary key, descending.  This can be changed by specifying the `orderBy` query string parameter, following SQL ORDER BY syntax (e.g., `fieldName1 ASC, fieldName2 DESC`)
+    /// * By default, all given query criteria are combined using logical AND.  This can be changed by specifying the query string parameter `booleanOperator=OR`.
+    /// * Each field on the table can be used as a query criteria.  Each query criteria field can be specified on the query string any number of times.
+    /// * By default, all criteria use the equals operator (e.g., `myField=value` means records will be returned where myField equals value).  Alternative operators can be used as follows:
+    ///   * Equals: `myField=value`
+    ///   * Not Equals: `myField=!value`
+    ///   * Less Than: `myField=&lt;value`
+    ///   * Greater Than: `myField=&gt;value`
+    ///   * Less Than or Equals: `myField=&lt;=value`
+    ///   * Greater Than or Equals: `myField=&gt;=value`
+    ///   * Empty (or null): `myField=EMPTY`
+    ///   * Not Empty: `myField=!EMPTY`
+    ///   * Between: `myField=BETWEEN value1,value2` (two values must be given, separated by commas)
+    ///   * Not Between: `myField=!BETWEEN value1,value2` (two values must be given, separated by commas)
+    ///   * In: `myField=IN value1,value2,...,valueN` (one or more values must be given, separated by commas)
+    ///   * Not In: `myField=!IN value1,value2,...,valueN` (one or more values must be given, separated by commas)
+    ///   * Like: `myField=LIKE value` (using standard SQL % and _ wildcards)
+    ///   * Not Like: `myField=!LIKE value` (using standard SQL % and _ wildcards)
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/post/query`.
+    /// - Remark: Generated from `#/paths//v1/post/query/get(queryPost)`.
+    func queryPost(_ input: Operations.QueryPost.Input) async throws -> Operations.QueryPost.Output
+    /// Get one Blog Post by Id
+    ///
+    /// Get one record from this table, by specifying its primary key as a path parameter.
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/post/{id}`.
+    /// - Remark: Generated from `#/paths//v1/post/{id}/get(getPost)`.
+    func getPost(_ input: Operations.GetPost.Input) async throws -> Operations.GetPost.Output
+    /// Search for Blogs records by query string
+    ///
+    /// Execute a query on this table, using query criteria as specified in query string parameters.
+    ///
+    /// * Pagination is managed via the `pageNo` & `pageSize` query string parameters.  pageNo starts at 1.  pageSize defaults to 50.
+    /// * By default, the response includes the total count of records that match the query criteria.  The count can be omitted by specifying `includeCount=false`
+    /// * By default, results are sorted by the table's primary key, descending.  This can be changed by specifying the `orderBy` query string parameter, following SQL ORDER BY syntax (e.g., `fieldName1 ASC, fieldName2 DESC`)
+    /// * By default, all given query criteria are combined using logical AND.  This can be changed by specifying the query string parameter `booleanOperator=OR`.
+    /// * Each field on the table can be used as a query criteria.  Each query criteria field can be specified on the query string any number of times.
+    /// * By default, all criteria use the equals operator (e.g., `myField=value` means records will be returned where myField equals value).  Alternative operators can be used as follows:
+    ///   * Equals: `myField=value`
+    ///   * Not Equals: `myField=!value`
+    ///   * Less Than: `myField=&lt;value`
+    ///   * Greater Than: `myField=&gt;value`
+    ///   * Less Than or Equals: `myField=&lt;=value`
+    ///   * Greater Than or Equals: `myField=&gt;=value`
+    ///   * Empty (or null): `myField=EMPTY`
+    ///   * Not Empty: `myField=!EMPTY`
+    ///   * Between: `myField=BETWEEN value1,value2` (two values must be given, separated by commas)
+    ///   * Not Between: `myField=!BETWEEN value1,value2` (two values must be given, separated by commas)
+    ///   * In: `myField=IN value1,value2,...,valueN` (one or more values must be given, separated by commas)
+    ///   * Not In: `myField=!IN value1,value2,...,valueN` (one or more values must be given, separated by commas)
+    ///   * Like: `myField=LIKE value` (using standard SQL % and _ wildcards)
+    ///   * Not Like: `myField=!LIKE value` (using standard SQL % and _ wildcards)
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/blog/query`.
+    /// - Remark: Generated from `#/paths//v1/blog/query/get(queryBlog)`.
+    func queryBlog(_ input: Operations.QueryBlog.Input) async throws -> Operations.QueryBlog.Output
+    /// Get one Blogs by Id
+    ///
+    /// Get one record from this table, by specifying its primary key as a path parameter.
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/blog/{id}`.
+    /// - Remark: Generated from `#/paths//v1/blog/{id}/get(getBlog)`.
+    func getBlog(_ input: Operations.GetBlog.Input) async throws -> Operations.GetBlog.Output
+    /// Search for Tags records by query string
+    ///
+    /// Execute a query on this table, using query criteria as specified in query string parameters.
+    ///
+    /// * Pagination is managed via the `pageNo` & `pageSize` query string parameters.  pageNo starts at 1.  pageSize defaults to 50.
+    /// * By default, the response includes the total count of records that match the query criteria.  The count can be omitted by specifying `includeCount=false`
+    /// * By default, results are sorted by the table's primary key, descending.  This can be changed by specifying the `orderBy` query string parameter, following SQL ORDER BY syntax (e.g., `fieldName1 ASC, fieldName2 DESC`)
+    /// * By default, all given query criteria are combined using logical AND.  This can be changed by specifying the query string parameter `booleanOperator=OR`.
+    /// * Each field on the table can be used as a query criteria.  Each query criteria field can be specified on the query string any number of times.
+    /// * By default, all criteria use the equals operator (e.g., `myField=value` means records will be returned where myField equals value).  Alternative operators can be used as follows:
+    ///   * Equals: `myField=value`
+    ///   * Not Equals: `myField=!value`
+    ///   * Less Than: `myField=&lt;value`
+    ///   * Greater Than: `myField=&gt;value`
+    ///   * Less Than or Equals: `myField=&lt;=value`
+    ///   * Greater Than or Equals: `myField=&gt;=value`
+    ///   * Empty (or null): `myField=EMPTY`
+    ///   * Not Empty: `myField=!EMPTY`
+    ///   * Between: `myField=BETWEEN value1,value2` (two values must be given, separated by commas)
+    ///   * Not Between: `myField=!BETWEEN value1,value2` (two values must be given, separated by commas)
+    ///   * In: `myField=IN value1,value2,...,valueN` (one or more values must be given, separated by commas)
+    ///   * Not In: `myField=!IN value1,value2,...,valueN` (one or more values must be given, separated by commas)
+    ///   * Like: `myField=LIKE value` (using standard SQL % and _ wildcards)
+    ///   * Not Like: `myField=!LIKE value` (using standard SQL % and _ wildcards)
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/tag/query`.
+    /// - Remark: Generated from `#/paths//v1/tag/query/get(queryTag)`.
+    func queryTag(_ input: Operations.QueryTag.Input) async throws -> Operations.QueryTag.Output
+    /// Get one Tags by Id
+    ///
+    /// Get one record from this table, by specifying its primary key as a path parameter.
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/tag/{id}`.
+    /// - Remark: Generated from `#/paths//v1/tag/{id}/get(getTag)`.
+    func getTag(_ input: Operations.GetTag.Input) async throws -> Operations.GetTag.Output
     /// List API versions
     ///
     /// Supported path versions and the full semantic version of each.
@@ -86,6 +197,165 @@ public protocol APIProtocol: Sendable {
 
 /// Convenience overloads for operation inputs.
 extension APIProtocol {
+    /// Search for Blog Post records by query string
+    ///
+    /// Execute a query on this table, using query criteria as specified in query string parameters.
+    ///
+    /// * Pagination is managed via the `pageNo` & `pageSize` query string parameters.  pageNo starts at 1.  pageSize defaults to 50.
+    /// * By default, the response includes the total count of records that match the query criteria.  The count can be omitted by specifying `includeCount=false`
+    /// * By default, results are sorted by the table's primary key, descending.  This can be changed by specifying the `orderBy` query string parameter, following SQL ORDER BY syntax (e.g., `fieldName1 ASC, fieldName2 DESC`)
+    /// * By default, all given query criteria are combined using logical AND.  This can be changed by specifying the query string parameter `booleanOperator=OR`.
+    /// * Each field on the table can be used as a query criteria.  Each query criteria field can be specified on the query string any number of times.
+    /// * By default, all criteria use the equals operator (e.g., `myField=value` means records will be returned where myField equals value).  Alternative operators can be used as follows:
+    ///   * Equals: `myField=value`
+    ///   * Not Equals: `myField=!value`
+    ///   * Less Than: `myField=&lt;value`
+    ///   * Greater Than: `myField=&gt;value`
+    ///   * Less Than or Equals: `myField=&lt;=value`
+    ///   * Greater Than or Equals: `myField=&gt;=value`
+    ///   * Empty (or null): `myField=EMPTY`
+    ///   * Not Empty: `myField=!EMPTY`
+    ///   * Between: `myField=BETWEEN value1,value2` (two values must be given, separated by commas)
+    ///   * Not Between: `myField=!BETWEEN value1,value2` (two values must be given, separated by commas)
+    ///   * In: `myField=IN value1,value2,...,valueN` (one or more values must be given, separated by commas)
+    ///   * Not In: `myField=!IN value1,value2,...,valueN` (one or more values must be given, separated by commas)
+    ///   * Like: `myField=LIKE value` (using standard SQL % and _ wildcards)
+    ///   * Not Like: `myField=!LIKE value` (using standard SQL % and _ wildcards)
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/post/query`.
+    /// - Remark: Generated from `#/paths//v1/post/query/get(queryPost)`.
+    public func queryPost(
+        query: Operations.QueryPost.Input.Query = .init(),
+        headers: Operations.QueryPost.Input.Headers = .init()
+    ) async throws -> Operations.QueryPost.Output {
+        try await queryPost(Operations.QueryPost.Input(
+            query: query,
+            headers: headers
+        ))
+    }
+    /// Get one Blog Post by Id
+    ///
+    /// Get one record from this table, by specifying its primary key as a path parameter.
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/post/{id}`.
+    /// - Remark: Generated from `#/paths//v1/post/{id}/get(getPost)`.
+    public func getPost(
+        path: Operations.GetPost.Input.Path,
+        headers: Operations.GetPost.Input.Headers = .init()
+    ) async throws -> Operations.GetPost.Output {
+        try await getPost(Operations.GetPost.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// Search for Blogs records by query string
+    ///
+    /// Execute a query on this table, using query criteria as specified in query string parameters.
+    ///
+    /// * Pagination is managed via the `pageNo` & `pageSize` query string parameters.  pageNo starts at 1.  pageSize defaults to 50.
+    /// * By default, the response includes the total count of records that match the query criteria.  The count can be omitted by specifying `includeCount=false`
+    /// * By default, results are sorted by the table's primary key, descending.  This can be changed by specifying the `orderBy` query string parameter, following SQL ORDER BY syntax (e.g., `fieldName1 ASC, fieldName2 DESC`)
+    /// * By default, all given query criteria are combined using logical AND.  This can be changed by specifying the query string parameter `booleanOperator=OR`.
+    /// * Each field on the table can be used as a query criteria.  Each query criteria field can be specified on the query string any number of times.
+    /// * By default, all criteria use the equals operator (e.g., `myField=value` means records will be returned where myField equals value).  Alternative operators can be used as follows:
+    ///   * Equals: `myField=value`
+    ///   * Not Equals: `myField=!value`
+    ///   * Less Than: `myField=&lt;value`
+    ///   * Greater Than: `myField=&gt;value`
+    ///   * Less Than or Equals: `myField=&lt;=value`
+    ///   * Greater Than or Equals: `myField=&gt;=value`
+    ///   * Empty (or null): `myField=EMPTY`
+    ///   * Not Empty: `myField=!EMPTY`
+    ///   * Between: `myField=BETWEEN value1,value2` (two values must be given, separated by commas)
+    ///   * Not Between: `myField=!BETWEEN value1,value2` (two values must be given, separated by commas)
+    ///   * In: `myField=IN value1,value2,...,valueN` (one or more values must be given, separated by commas)
+    ///   * Not In: `myField=!IN value1,value2,...,valueN` (one or more values must be given, separated by commas)
+    ///   * Like: `myField=LIKE value` (using standard SQL % and _ wildcards)
+    ///   * Not Like: `myField=!LIKE value` (using standard SQL % and _ wildcards)
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/blog/query`.
+    /// - Remark: Generated from `#/paths//v1/blog/query/get(queryBlog)`.
+    public func queryBlog(
+        query: Operations.QueryBlog.Input.Query = .init(),
+        headers: Operations.QueryBlog.Input.Headers = .init()
+    ) async throws -> Operations.QueryBlog.Output {
+        try await queryBlog(Operations.QueryBlog.Input(
+            query: query,
+            headers: headers
+        ))
+    }
+    /// Get one Blogs by Id
+    ///
+    /// Get one record from this table, by specifying its primary key as a path parameter.
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/blog/{id}`.
+    /// - Remark: Generated from `#/paths//v1/blog/{id}/get(getBlog)`.
+    public func getBlog(
+        path: Operations.GetBlog.Input.Path,
+        headers: Operations.GetBlog.Input.Headers = .init()
+    ) async throws -> Operations.GetBlog.Output {
+        try await getBlog(Operations.GetBlog.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// Search for Tags records by query string
+    ///
+    /// Execute a query on this table, using query criteria as specified in query string parameters.
+    ///
+    /// * Pagination is managed via the `pageNo` & `pageSize` query string parameters.  pageNo starts at 1.  pageSize defaults to 50.
+    /// * By default, the response includes the total count of records that match the query criteria.  The count can be omitted by specifying `includeCount=false`
+    /// * By default, results are sorted by the table's primary key, descending.  This can be changed by specifying the `orderBy` query string parameter, following SQL ORDER BY syntax (e.g., `fieldName1 ASC, fieldName2 DESC`)
+    /// * By default, all given query criteria are combined using logical AND.  This can be changed by specifying the query string parameter `booleanOperator=OR`.
+    /// * Each field on the table can be used as a query criteria.  Each query criteria field can be specified on the query string any number of times.
+    /// * By default, all criteria use the equals operator (e.g., `myField=value` means records will be returned where myField equals value).  Alternative operators can be used as follows:
+    ///   * Equals: `myField=value`
+    ///   * Not Equals: `myField=!value`
+    ///   * Less Than: `myField=&lt;value`
+    ///   * Greater Than: `myField=&gt;value`
+    ///   * Less Than or Equals: `myField=&lt;=value`
+    ///   * Greater Than or Equals: `myField=&gt;=value`
+    ///   * Empty (or null): `myField=EMPTY`
+    ///   * Not Empty: `myField=!EMPTY`
+    ///   * Between: `myField=BETWEEN value1,value2` (two values must be given, separated by commas)
+    ///   * Not Between: `myField=!BETWEEN value1,value2` (two values must be given, separated by commas)
+    ///   * In: `myField=IN value1,value2,...,valueN` (one or more values must be given, separated by commas)
+    ///   * Not In: `myField=!IN value1,value2,...,valueN` (one or more values must be given, separated by commas)
+    ///   * Like: `myField=LIKE value` (using standard SQL % and _ wildcards)
+    ///   * Not Like: `myField=!LIKE value` (using standard SQL % and _ wildcards)
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/tag/query`.
+    /// - Remark: Generated from `#/paths//v1/tag/query/get(queryTag)`.
+    public func queryTag(
+        query: Operations.QueryTag.Input.Query = .init(),
+        headers: Operations.QueryTag.Input.Headers = .init()
+    ) async throws -> Operations.QueryTag.Output {
+        try await queryTag(Operations.QueryTag.Input(
+            query: query,
+            headers: headers
+        ))
+    }
+    /// Get one Tags by Id
+    ///
+    /// Get one record from this table, by specifying its primary key as a path parameter.
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/tag/{id}`.
+    /// - Remark: Generated from `#/paths//v1/tag/{id}/get(getTag)`.
+    public func getTag(
+        path: Operations.GetTag.Input.Path,
+        headers: Operations.GetTag.Input.Headers = .init()
+    ) async throws -> Operations.GetTag.Output {
+        try await getTag(Operations.GetTag.Input(
+            path: path,
+            headers: headers
+        ))
+    }
     /// List API versions
     ///
     /// Supported path versions and the full semantic version of each.
