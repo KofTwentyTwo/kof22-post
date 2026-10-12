@@ -65,14 +65,29 @@ struct KoF22PostApp: App {
 
    /// Keeps sending for the time iOS grants after the app leaves the screen.
    private func finishOutboxInBackground() {
-      var taskID = UIBackgroundTaskIdentifier.invalid
-      taskID = UIApplication.shared.beginBackgroundTask(withName: "outbox") {
-         UIApplication.shared.endBackgroundTask(taskID)
+      let token = BackgroundTaskToken()
+      token.identifier = UIApplication.shared.beginBackgroundTask(withName: "outbox") {
+         token.end()
       }
       Task {
          await app.processor.drain()
-         UIApplication.shared.endBackgroundTask(taskID)
+         token.end()
       }
+   }
+}
+
+/// Holds a background-task identifier so the expiration handler and the drain task can
+/// both end it, whichever comes first, without ending it twice.
+@MainActor
+final class BackgroundTaskToken {
+   /// The identifier returned by `beginBackgroundTask`, or `.invalid` once ended.
+   var identifier = UIBackgroundTaskIdentifier.invalid
+
+   /// Ends the background task once; later calls do nothing.
+   func end() {
+      guard identifier != .invalid else { return }
+      UIApplication.shared.endBackgroundTask(identifier)
+      identifier = .invalid
    }
 }
 
@@ -100,7 +115,7 @@ enum OutboxRefresh {
          let request = BGAppRefreshTaskRequest(identifier: SharedIDs.backgroundTask)
          request.earliestBeginDate = Date.now.addingTimeInterval(Self.retryMinutes * Self.secondsPerMinute)
          do {
-            try BGTaskScheduler.shared.submit(request)
+            try await BGTaskScheduler.shared.submitTaskRequest(request)
          }
          catch {
             Log.outbox.warning(

@@ -166,16 +166,24 @@ enum ShareInput {
       }
    }
 
-   /// Loads an attachment as the given type, logging a failure instead of dropping it silently.
+   /// Loads an attachment as the given type through `Transferable` (the replacement for the
+   /// deprecated `loadItem(forTypeIdentifier:)`), logging a failure instead of dropping it
+   /// silently.
    @MainActor
-   private static func loadItem<Value>(_ provider: NSItemProvider, type: UTType, as _: Value.Type) async -> Value? {
-      do {
-         return try await provider.loadItem(forTypeIdentifier: type.identifier) as? Value
-      }
-      catch {
-         Log.ui.warning(
-            "Could not load shared \(type.identifier, privacy: .public): \(error.localizedDescription, privacy: .public)")
-         return nil
+   private static func loadItem<Value: Transferable & Sendable>(
+      _ provider: NSItemProvider, type: UTType, as valueType: Value.Type
+   ) async -> Value? {
+      await withCheckedContinuation { continuation in
+         _ = provider.loadTransferable(type: valueType) { result in
+            switch result {
+            case .success(let value):
+               continuation.resume(returning: value)
+            case .failure(let error):
+               Log.ui.warning(
+                  "Could not load shared \(type.identifier, privacy: .public): \(error.localizedDescription, privacy: .public)")
+               continuation.resume(returning: nil)
+            }
+         }
       }
    }
 
