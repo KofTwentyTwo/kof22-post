@@ -36,6 +36,7 @@ Last reviewed: 2026-10-11, by James Maes with Claude Opus 5.5. Checked with
 | --- | --- | --- | --- |
 | K22-AI-10, K22-SDLC-10, -12, -16 | Work is committed directly to `main` (locally) instead of topic branches and pull requests; `no-commit-to-branch` is not in the pre-commit hooks | James Maes, 2026-10-11 | At the first published version; then GitHub Flow with pull requests |
 | K22-REPO-20, K22-CI-01 (ruleset) | `protect-main` is not enabled yet because it would block the agreed direct work on `main`; `protect-release-tags` is active | Follows from the row above | Same |
+| K22-CI-22 (Swift) | CodeQL analyzes the workflows only; Swift analysis is paused because CodeQL's tracer cannot load compiler macro plugins on the Xcode 27 runner image (issue #1). Compensating controls: SwiftLint `--strict`, warnings as errors, 100% line coverage on KoF22Kit, gitleaks, Trivy and OSV | James Maes, 2026-10-12 | When CodeQL or the GA Xcode 27 image supports it |
 | K22-REPO-32 (SHOULD) | Actions policy allows all actions: the shared standards security workflow uses `docker://` container steps that a selected-actions policy rejects (startup failure). Compensating control: GitHub's "require actions to be pinned to a full-length commit SHA" is on, and zizmor/actionlint gate every workflow change | James Maes, 2026-10-12 (same setting as the standards repository itself) | When the shared workflow can run under a selected-actions policy |
 
 These rows are not in the standards' exception register yet. A Product-tier move or an
