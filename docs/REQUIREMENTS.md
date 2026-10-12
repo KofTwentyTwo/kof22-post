@@ -58,6 +58,47 @@ Status: draft for owner review (2026-10-11). Supersedes `BRIEF.md` where they di
 - C2. iPad layout.
 - C3. Draft sync back from the server into the composer for drafts written on the web.
 
+## Post metadata and publishing controls (v1.1, draft 2026-10-12)
+
+Status: draft for owner review. Waits on the new Site API that exposes every post field
+for writing (owner, 2026-10-12). The 1.2.0 contract accepts only `blog, title, body,
+status, publishAt, tags, locationLabel, linkUrl, media` on `/v1/me/posts` and silently
+ignores other fields, so nothing below is sent until the new contract is live.
+
+**Must**
+
+- M16. Every post gets a good name, short name, title and description, suggested on the
+  device and editable before posting. Lengths follow the contract; SEO targets are
+  title at most 60 characters and description at most 160.
+- M17. The slug is generated in code from the title: ASCII, lower case, words joined by
+  hyphens, no leading or trailing hyphen, at most 80 characters (the backend's
+  `slugify` rule). It is editable; the server keeps it unique.
+- M18. SEO fields (meta title, meta description, meta keywords) are filled and editable.
+- M19. All photos are attached to the post in order, the featured image is set (first
+  photo unless I choose another), and alt text is suggested for each photo.
+- M20. Blog, author and media agree: the composer shows the blog and "Posting as" the
+  author, and the post detail shows what the server stored.
+- M21. Publishing is explicit: Draft, Publish now (as soon as uploaded) or Schedule with
+  a date and time for the publish-at field. An "is featured" toggle is visible.
+- M22. Location is better populated (scope to confirm, see open questions).
+- M23. Suggestions come from the on-device model (Apple Foundation Models); no post
+  content leaves the phone for them. Without Apple Intelligence the fields fall back
+  to rules (first sentence, trimmed body, tags as keywords).
+
+**Decided**
+
+- Read time stays a word count (server-side, shown live in the composer), not a model
+  output: counting is exact in code and unreliable in a language model. Owner may
+  revisit.
+
+**Open questions**
+
+1. Location: richer label ("Place, City, State"), stored coordinates, or a place
+   suggested from photo GPS?
+2. Author: display only, or a choice among authors the account may post as?
+3. "Site": a separate field, or the blog the post appears under on kof22.com?
+4. Phone model: Apple Intelligence needs iPhone 15 Pro or newer.
+
 ## Non-goals (v1)
 
 Video, threads and replies, place picker, Apple Watch, Mac/iPad apps, cross-posting, comment moderation, analytics of any kind, multiple accounts.
