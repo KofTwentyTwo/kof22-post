@@ -115,6 +115,16 @@ import Testing
       #expect(isDirectory.boolValue)
    }
 
+   /// A non-empty override wins over the App Group and Application Support.
+   @Test func dataDirectoryOverrideWins() {
+      let fallback = URL(filePath: "/tmp/support", directoryHint: .isDirectory)
+      let group = URL(filePath: "/tmp/group", directoryHint: .isDirectory)
+      #expect(
+         SharedContainer.resolveRoot(override: "/tmp/override", groupContainer: group, applicationSupport: fallback)
+            .path(percentEncoded: false).hasPrefix("/tmp/override"))
+      #expect(SharedContainer.resolveRoot(override: "", groupContainer: group, applicationSupport: fallback) == group)
+   }
+
    @Test func directoryThatCannotBeCreatedIsStillReturned() throws {
       let root = TestImages.temporaryDirectory()
       defer { try? FileManager.default.removeItem(at: root) }
@@ -125,8 +135,14 @@ import Testing
       #expect(!FileManager.default.fileExists(atPath: folder.path(percentEncoded: false)))
    }
 
-   @Test func wellKnownLocationsLiveUnderTheRoot() {
+   /// Only runs with the data-directory override set (`make test-kit`, `make coverage`),
+   /// because resolving these folders creates them (K22-TEST-24).
+   @Test(.enabled(if: ProcessInfo.processInfo.environment[SharedContainer.dataDirectoryVariable] != nil))
+   func wellKnownLocationsLiveUnderTheRoot() {
       let root = SharedContainer.rootURL
+      #expect(
+         root.path(percentEncoded: false).hasPrefix(
+            ProcessInfo.processInfo.environment[SharedContainer.dataDirectoryVariable] ?? "-"))
       #expect(SharedContainer.photosDirectory.deletingLastPathComponent().standardizedFileURL == root.standardizedFileURL)
       #expect(SharedContainer.mockDirectory.lastPathComponent == "Mock Backend")
       #expect(SharedContainer.storeURL.lastPathComponent == "KoF22Post.store")

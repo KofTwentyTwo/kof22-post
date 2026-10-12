@@ -8,6 +8,10 @@ root="$(cd "$(dirname "$0")/.." && pwd)"
 minimum="${COVERAGE_MINIMUM:-100}"
 cd "$root/Packages/KoF22Kit"
 
+# Tests write shared data to a throwaway folder, never the real container (K22-TEST-24).
+KOF22_DATA_DIR="$(mktemp -d)"
+export KOF22_DATA_DIR
+
 swift test --enable-code-coverage
 codecov="$(dirname "$(swift test --show-codecov-path)")"
 profile="$codecov/default.profdata"

@@ -9,18 +9,28 @@ import Foundation
 /// mock backend state). Falls back to Application Support when the App Group is not
 /// available (unsigned simulator builds, `swift test`).
 public enum SharedContainer {
-   /// The App Group container, or the Application Support fallback.
+   /// Environment variable that redirects all shared data to another folder. Tests set
+   /// it so they never write to the real container (K22-TEST-24).
+   public static let dataDirectoryVariable = "KOF22_DATA_DIR"
+
+   /// The data-directory override, then the App Group container, then the Application
+   /// Support fallback.
    public static var rootURL: URL {
       resolveRoot(
+         override: ProcessInfo.processInfo.environment[dataDirectoryVariable],
          groupContainer: FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: SharedIDs.appGroup),
          applicationSupport: .applicationSupportDirectory
       )
    }
 
-   /// Picks the App Group container when there is one, otherwise a folder in
-   /// Application Support, so the app still works without the entitlement.
-   static func resolveRoot(groupContainer: URL?, applicationSupport: URL) -> URL {
-      groupContainer ?? applicationSupport.appending(path: "KoF22Post", directoryHint: .isDirectory)
+   /// Uses a non-empty override first; otherwise picks the App Group container when there
+   /// is one, or a folder in Application Support so the app still works without the
+   /// entitlement.
+   static func resolveRoot(override: String? = nil, groupContainer: URL?, applicationSupport: URL) -> URL {
+      if let override, !override.isEmpty {
+         return URL(filePath: override, directoryHint: .isDirectory)
+      }
+      return groupContainer ?? applicationSupport.appending(path: "KoF22Post", directoryHint: .isDirectory)
    }
 
    /// A named folder under `root`, created on first use. A folder that cannot be created

@@ -22,8 +22,8 @@ build-ci:           ## Build for the simulator without signing (CI, CodeQL)
 
 test: test-kit test-ui
 
-test-kit:           ## Core unit tests (fast, macOS, no simulator)
-	cd Packages/KoF22Kit && swift test
+test-kit:           ## Core unit tests (fast, macOS, no simulator); data goes to a temp folder
+	cd Packages/KoF22Kit && KOF22_DATA_DIR="$$(mktemp -d)" swift test
 
 coverage:           ## Unit tests with the 100% line-coverage gate on KoF22Kit (K22-TEST-10)
 	scripts/check-coverage.sh
