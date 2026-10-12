@@ -62,6 +62,9 @@ let package = Package(
             .product(name: "OpenAPIRuntime", package: "swift-openapi-runtime"),
             .product(name: "HTTPTypes", package: "swift-http-types"),
          ],
+         // Responses recorded once from the live API and examples built from the spec;
+         // the contract tests decode them through the generated client, offline.
+         resources: [.copy("Fixtures")],
          swiftSettings: strictSettings
       ),
    ]

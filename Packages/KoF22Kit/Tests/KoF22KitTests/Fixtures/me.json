@@ -1,0 +1,21 @@
+{
+  "email": "author@example.com",
+  "name": "Example Author",
+  "groups": ["kof22-publishers"],
+  "author": {"id": 2, "name": "Example Author", "slug": "example-author"},
+  "canPost": true,
+  "blogs": [
+    {"id": 1, "slug": "quick-bits", "name": "Field Notes", "isDefault": true},
+    {"id": 2, "slug": "ideas-into-systems", "name": "Ideas Into Systems", "isDefault": false}
+  ],
+  "defaultBlog": "quick-bits",
+  "limits": {
+    "maxBodyLength": 10000,
+    "maxTitleLength": 100,
+    "maxTags": 10,
+    "maxPhotosPerPost": 20,
+    "maxPhotoBytes": 26214400,
+    "photoContentTypes": ["image/jpeg", "image/png"]
+  },
+  "futureField": {"addedIn": "1.2.0", "ignoredByOlderClients": true}
+}

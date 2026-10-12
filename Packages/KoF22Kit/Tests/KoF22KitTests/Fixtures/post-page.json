@@ -1,0 +1,37 @@
+{
+  "items": [
+    {
+      "id": 42,
+      "blogId": 1,
+      "blog": "quick-bits",
+      "status": "published",
+      "title": "Coffee and a soldering iron",
+      "body": "Fixed the hallway sensor this morning.",
+      "slug": "coffee-and-a-soldering-iron",
+      "url": "https://www.kof22.com/blogs/quick-bits/coffee-and-a-soldering-iron",
+      "publishedAt": "2026-10-11T12:16:04.144433Z",
+      "tags": ["hardware"],
+      "media": [],
+      "createdAt": "2026-10-11T12:15:00Z",
+      "updatedAt": "2026-10-11T12:16:04.147361Z",
+      "version": "a1b2c3d4"
+    },
+    {
+      "id": 41,
+      "blogId": 1,
+      "blog": "quick-bits",
+      "status": "scheduled",
+      "title": "Weekend plans",
+      "body": "Printer enclosure, round two.",
+      "slug": "weekend-plans",
+      "url": null,
+      "publishAt": "2026-10-13T09:00:00Z",
+      "tags": [],
+      "media": [],
+      "createdAt": "2026-10-11T08:00:00.120Z",
+      "updatedAt": "2026-10-11T08:00:00.120Z",
+      "version": "v41"
+    }
+  ],
+  "nextCursor": "MjA="
+}

@@ -1,0 +1,21 @@
+{
+  "id": 42,
+  "blogId": 1,
+  "blog": "quick-bits",
+  "status": "published",
+  "title": "Coffee and a soldering iron",
+  "body": "Fixed the hallway sensor this morning.",
+  "slug": "coffee-and-a-soldering-iron",
+  "url": "https://www.kof22.com/blogs/quick-bits/coffee-and-a-soldering-iron",
+  "publishAt": null,
+  "publishedAt": "2026-10-11T12:16:04.144433Z",
+  "tags": ["hardware", "home"],
+  "locationLabel": "Workshop",
+  "link": {"url": "https://example.com/sensor", "title": "Sensor notes", "description": null, "imageUrl": null},
+  "media": [
+    {"mediaId": 7, "url": "https://cdn.example.com/m/7.jpg", "thumbnailUrl": "https://cdn.example.com/m/7-thumb.jpg", "width": 1600, "height": 1200, "altText": "Sensor board", "caption": null}
+  ],
+  "createdAt": "2026-10-11T12:15:00Z",
+  "updatedAt": "2026-10-11T12:16:04.147361Z",
+  "version": "a1b2c3d4"
+}
