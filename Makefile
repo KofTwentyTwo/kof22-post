@@ -9,7 +9,7 @@ SWIFT_SOURCES = App Shared ShareExtension Widgets UITests scripts \
 	Packages/KoF22Kit/Package.swift Packages/KoF22Kit/Sources/KoF22Kit \
 	Packages/KoF22Kit/Sources/KoF22UI Packages/KoF22Kit/Tests Tools/OpenAPIGen/Package.swift
 
-.PHONY: project build build-ci test test-kit test-ui coverage format format-check lint generate update-spec
+.PHONY: project build build-ci build-codeql test test-kit test-ui coverage format format-check lint generate update-spec
 
 project:            ## Regenerate KoF22Post.xcodeproj from project.yml
 	xcodegen generate
@@ -18,7 +18,12 @@ build:              ## Build the app for the simulator
 	$(XCODEBUILD) -destination '$(DESTINATION)' build
 
 build-ci:           ## Build for the simulator without signing (CI, CodeQL)
-	$(XCODEBUILD) -destination 'generic/platform=iOS Simulator' CODE_SIGNING_ALLOWED=NO build
+	$(XCODEBUILD) -destination 'generic/platform=iOS Simulator' CODE_SIGNING_ALLOWED=NO $(BUILD_FLAGS) build
+
+# CodeQL traces the build; SwiftPM's manifest sandbox (sandbox-exec) cannot be spawned
+# under the tracer ("Bad CPU type in executable"), so the CodeQL build turns it off.
+build-codeql:       ## build-ci without the SwiftPM manifest sandbox, for CodeQL tracing
+	$(MAKE) build-ci BUILD_FLAGS="-IDEPackageSupportDisableManifestSandbox=YES -IDEPackageSupportDisablePluginExecutionSandbox=YES"
 
 test: test-kit test-ui
 
