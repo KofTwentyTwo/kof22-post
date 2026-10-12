@@ -448,7 +448,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.kof22.post.uitests;
 				SDKROOT = iphoneos;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 				TEST_TARGET_NAME = KoF22Post;
 			};
 			name = Debug;
@@ -465,7 +465,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.kof22.post.widgets;
 				SDKROOT = iphoneos;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
@@ -484,7 +484,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.kof22.post;
 				SDKROOT = iphoneos;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
 		};
@@ -500,7 +500,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.kof22.post.share;
 				SDKROOT = iphoneos;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
@@ -516,7 +516,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.kof22.post.share;
 				SDKROOT = iphoneos;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
 		};
@@ -532,7 +532,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.kof22.post.uitests;
 				SDKROOT = iphoneos;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 				TEST_TARGET_NAME = KoF22Post;
 			};
 			name = Release;
@@ -624,7 +624,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.kof22.post;
 				SDKROOT = iphoneos;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
@@ -640,7 +640,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.kof22.post.widgets;
 				SDKROOT = iphoneos;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
 		};
