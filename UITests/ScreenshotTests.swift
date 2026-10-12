@@ -27,24 +27,42 @@ final class ScreenshotTests: XCTestCase {
       app.buttons["signIn.button"].tap()
       let body = app.textViews["compose.body"]
       XCTAssertTrue(body.waitForExistence(timeout: Self.composerTimeout))
-      body.typeText("Trying the **new** app.\n\n- fast\n- terminal look")
+      body.typeText(
+         "Shipped **offline posting** today.\n\n- write anywhere, it sends when you're back online\n- photos with alt text\n- schedule for later")
       app.textFields["compose.tags"].tap()
       app.textFields["compose.tags"].typeText("Sw")
+      let suggestion = app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "#Swift")).firstMatch
+      if suggestion.waitForExistence(timeout: Self.composerTimeout) { suggestion.tap() }
+      ///////////////////////////////////////////////////////////////
+      // Preview drops focus, so the keyboard is gone for both the //
+      // preview shot and the write shot that follows.             //
+      ///////////////////////////////////////////////////////////////
+      app.buttons["Preview"].tap()
+      sleep(Self.shortSettle)
+      snap(app, "3-preview")
+      app.buttons["Write"].tap()
       sleep(Self.shortSettle)
       snap(app, "2-compose")
-      app.buttons["Preview"].tap()
-      snap(app, "3-preview")
       app.buttons["compose.post"].tap()
       XCTAssertTrue(app.staticTexts["Sent"].waitForExistence(timeout: Self.sendTimeout))
       snap(app, "4-outbox")
       app.tabBars.buttons["Posts"].tap()
       sleep(Self.listSettle)
       snap(app, "5-posts")
-      app.staticTexts["Trying the new app."].firstMatch.tap()
+      app.staticTexts["Shipped offline posting today."].firstMatch.tap()
       sleep(Self.shortSettle)
       snap(app, "6-detail")
+      app.navigationBars.buttons.firstMatch.tap()
+      let site = app.buttons["posts.site"]
+      XCTAssertTrue(site.waitForExistence(timeout: Self.composerTimeout))
+      site.tap()
+      let blog = app.staticTexts["Quick Bits"]
+      XCTAssertTrue(blog.waitForExistence(timeout: Self.composerTimeout))
+      blog.tap()
+      sleep(Self.listSettle)
+      snap(app, "7-site")
       app.tabBars.buttons["Settings"].tap()
-      snap(app, "7-settings")
+      snap(app, "8-settings")
    }
 
    /// Attaches a screenshot of the current screen under `name`, kept even on success.

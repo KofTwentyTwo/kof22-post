@@ -5,7 +5,8 @@
 
 /////////////////////////////////////////////////////////////////////
 // Renders the app icon: kof22.com terminal prompt on zinc-950.    //
-// Usage: swift scripts/make-icon.swift <output.png>               //
+// Usage: swift scripts/make-icon.swift <output.png> [variant]     //
+// variant: light (default, opaque), dark or tinted (iOS 18+).     //
 /////////////////////////////////////////////////////////////////////
 import AppKit
 
@@ -46,25 +47,43 @@ func fail(_ message: String) -> Never {
 /// Bits per colour component of the icon bitmap.
 let bitsPerComponent = 8
 
+/// The home-screen appearances iOS 18+ asks for. The App Store (light) icon must be
+/// opaque; dark and tinted variants have a transparent background that the system
+/// fills, and tinted is grayscale so the system can colour it.
+enum IconVariant: String {
+   /// The default icon: zinc-950 background, colour dots and prompt. No alpha.
+   case light
+   /// Dark mode: transparent background, colour dots and prompt.
+   case dark
+   /// Tinted mode: transparent background, white glyphs the system tints.
+   case tinted
+
+   /// Whether the bitmap has an alpha channel.
+   var hasAlpha: Bool { self != .light }
+}
+
 /// Draws the icon into an opaque 1024 x 1024 bitmap and returns it as PNG data. App Store
 /// Connect rejects an app icon that has an alpha channel, so the bitmap has none
 /// (`noneSkipLast`), and it is sized in pixels so no Retina scaling or resize is needed.
-func renderIcon() -> Data {
+func renderIcon(_ variant: IconVariant) -> Data {
    let size = IconSpec.size
    let pixels = Int(size)
+   let alphaInfo: CGImageAlphaInfo = variant.hasAlpha ? .premultipliedLast : .noneSkipLast
    guard
       let space = CGColorSpace(name: CGColorSpace.sRGB),
       let bitmap = CGContext(
          data: nil, width: pixels, height: pixels, bitsPerComponent: bitsPerComponent, bytesPerRow: 0,
-         space: space, bitmapInfo: CGImageAlphaInfo.noneSkipLast.rawValue)
+         space: space, bitmapInfo: alphaInfo.rawValue)
    else {
       fail("could not create the icon bitmap")
    }
    NSGraphicsContext.saveGraphicsState()
    NSGraphicsContext.current = NSGraphicsContext(cgContext: bitmap, flipped: false)
-   IconSpec.background.setFill()
-   NSRect(x: 0, y: 0, width: size, height: size).fill()
-   let dots: [NSColor] = [.systemRed, .systemYellow, .systemGreen]
+   if variant == .light {
+      IconSpec.background.setFill()
+      NSRect(x: 0, y: 0, width: size, height: size).fill()
+   }
+   let dots: [NSColor] = variant == .tinted ? [.white, .white, .white] : [.systemRed, .systemYellow, .systemGreen]
    for (index, color) in dots.enumerated() {
       color.withAlphaComponent(IconSpec.dotAlpha).setFill()
       let originX = IconSpec.dotOriginX + Double(index) * IconSpec.dotPitch
@@ -76,7 +95,8 @@ func renderIcon() -> Data {
       .fill()
    }
    let font = NSFont.monospacedSystemFont(ofSize: IconSpec.promptFontSize, weight: .bold)
-   let text = NSMutableAttributedString(string: "$_", attributes: [.font: font, .foregroundColor: IconSpec.prompt])
+   let promptColor = variant == .tinted ? NSColor.white : IconSpec.prompt
+   let text = NSMutableAttributedString(string: "$_", attributes: [.font: font, .foregroundColor: promptColor])
    let bounds = text.size()
    let half = 2.0
    text.draw(at: NSPoint(x: (size - bounds.width) / half, y: (size - bounds.height) / half - IconSpec.promptDrop))
@@ -88,10 +108,13 @@ func renderIcon() -> Data {
    return png
 }
 
-guard CommandLine.arguments.count > 1 else { fail("usage: swift scripts/make-icon.swift <output.png>") }
+guard CommandLine.arguments.count > 1 else { fail("usage: swift scripts/make-icon.swift <output.png> [light|dark|tinted]") }
 let outputPath = CommandLine.arguments[1]
+let variantArgumentIndex = 2
+let variantName = CommandLine.arguments.count > variantArgumentIndex ? CommandLine.arguments[variantArgumentIndex] : "light"
+guard let variant = IconVariant(rawValue: variantName) else { fail("unknown variant \(variantName)") }
 do {
-   try renderIcon().write(to: URL(fileURLWithPath: outputPath))
+   try renderIcon(variant).write(to: URL(fileURLWithPath: outputPath))
 }
 catch {
    fail("could not write \(outputPath): \(error.localizedDescription)")

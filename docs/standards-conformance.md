@@ -46,10 +46,10 @@ audit needs them recorded there (`K22-AGENT-04`).
 
 | Requirement | Item | Who |
 | --- | --- | --- |
-| K22-REPO-42 | List `kof22-post` in `MAINTAINERS.md` of KofTwentyTwo/standards | Owner, via a pull request to the standards repository |
+| K22-REPO-42 | Not applicable while Internal (the inventory lists Product repositories); add the repository to `MAINTAINERS.md` when it moves to Product. The checker's FAIL here is reported upstream (standards#38) | At the Product move |
 | K22-SEC-60 | Off-GitHub backup: confirm the weekly backup includes this repository now that it is on GitHub | Owner |
 | K22-CI-01 (runner) | `ci.yml` and `codeql.yml` run on the `xcode-27` runner image (a GitHub preview image); move to the GA label when it ships | First CI run |
-| Upstream | Two fixes to the standards' Swift configuration: SwiftLint `unused_declaration`/`unused_import` belong in `analyzer_rules`, and `statement_position` needs `uncuddled_else` to agree with swift-format | Owner, issue or PR to KofTwentyTwo/standards |
+| Upstream | Swift configuration and checker fixes reported in KofTwentyTwo/standards#38 | Standards maintainers |
 
 ## Narrow suppressions
 

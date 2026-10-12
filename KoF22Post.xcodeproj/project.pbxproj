@@ -10,10 +10,13 @@
 		08131CA1338AEB6B118AC1B6 /* ShareViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32B789C278ED82328DE1E758 /* ShareViewController.swift */; };
 		3856433A59151474DB1F9A35 /* PostIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2EFB31D74BD6163C4CAACEE /* PostIntents.swift */; };
 		3EE4FF7C6E1E56143D41E5A6 /* KoF22PostApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16F80E918228C7C40CABA50E /* KoF22PostApp.swift */; };
+		3F918273004870E0C49BFB30 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 59D7B2FB7EAD49D6C61E9367 /* PrivacyInfo.xcprivacy */; };
 		491A1C5AFFE7A9B88B151B0B /* KoF22UI in Frameworks */ = {isa = PBXBuildFile; productRef = 9EC66D2ABDFBBE22DA75F380 /* KoF22UI */; };
 		55784843EA62B3847BCA1373 /* ScreenshotTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4350994DB5CC8DF4BE3754D /* ScreenshotTests.swift */; };
+		74F9171DAD5C1024E00EF237 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 91712ADB755F9D8AAAC1BDDA /* PrivacyInfo.xcprivacy */; };
 		808DA6651D14B948174D7176 /* AppIntents.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C9252F46A0BDB199FA924A7D /* AppIntents.framework */; };
 		93DAD4D8FF407D7B9FEFE110 /* KoF22UI in Frameworks */ = {isa = PBXBuildFile; productRef = 0DCB2309583D89A84A4E1949 /* KoF22UI */; };
+		9EE8C43750F660EED4A3E717 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = B2EA6732D28834F759D136CB /* PrivacyInfo.xcprivacy */; };
 		A20D3D6C6C6AF00B2FAF7FEF /* OpenComposeIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 945C65084A9C21521A33A3CD /* OpenComposeIntent.swift */; };
 		AC8884A44E6BF2689C8F0913 /* KoF22Widgets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 268923C54911E60BB53CA45C /* KoF22Widgets.swift */; };
 		C7C22D1D32A68C98AD643700 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DFE2FA9665C6186ABCA16120 /* Assets.xcassets */; };
@@ -69,12 +72,15 @@
 		2FAAD08196AACA911B447BD7 /* KoF22Post.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = KoF22Post.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		32B789C278ED82328DE1E758 /* ShareViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareViewController.swift; sourceTree = "<group>"; };
 		54237BE767C742BA94263A54 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		59D7B2FB7EAD49D6C61E9367 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		829660B6CA99A77026782DB0 /* KoF22PostWidgets.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = KoF22PostWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		8539F25C77C57264C66A0BA8 /* KoF22Post.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = KoF22Post.entitlements; sourceTree = "<group>"; };
 		8DDE628ACC92B813CB0D7595 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		91712ADB755F9D8AAAC1BDDA /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		945C65084A9C21521A33A3CD /* OpenComposeIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenComposeIntent.swift; sourceTree = "<group>"; };
 		A2EFB31D74BD6163C4CAACEE /* PostIntents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostIntents.swift; sourceTree = "<group>"; };
 		B27217B9C8F1CA4F1CCEA6C9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		B2EA6732D28834F759D136CB /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		B4350994DB5CC8DF4BE3754D /* ScreenshotTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenshotTests.swift; sourceTree = "<group>"; };
 		C9252F46A0BDB199FA924A7D /* AppIntents.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppIntents.framework; path = System/Library/Frameworks/AppIntents.framework; sourceTree = SDKROOT; };
 		CDCEB8F78433182D3FE77FD4 /* KoF22PostUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = KoF22PostUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -112,6 +118,7 @@
 			children = (
 				8DDE628ACC92B813CB0D7595 /* Info.plist */,
 				F4332FAF6BE12BCA7C62DCB0 /* KoF22PostShare.entitlements */,
+				91712ADB755F9D8AAAC1BDDA /* PrivacyInfo.xcprivacy */,
 				32B789C278ED82328DE1E758 /* ShareViewController.swift */,
 			);
 			path = ShareExtension;
@@ -123,6 +130,7 @@
 				B27217B9C8F1CA4F1CCEA6C9 /* Info.plist */,
 				DAD65B6393FA4C16C9C87824 /* KoF22PostWidgets.entitlements */,
 				268923C54911E60BB53CA45C /* KoF22Widgets.swift */,
+				59D7B2FB7EAD49D6C61E9367 /* PrivacyInfo.xcprivacy */,
 			);
 			path = Widgets;
 			sourceTree = "<group>";
@@ -135,6 +143,7 @@
 				8539F25C77C57264C66A0BA8 /* KoF22Post.entitlements */,
 				16F80E918228C7C40CABA50E /* KoF22PostApp.swift */,
 				A2EFB31D74BD6163C4CAACEE /* PostIntents.swift */,
+				B2EA6732D28834F759D136CB /* PrivacyInfo.xcprivacy */,
 			);
 			path = App;
 			sourceTree = "<group>";
@@ -214,6 +223,7 @@
 			buildConfigurationList = 56EAEBA8055F0AD96556A433 /* Build configuration list for PBXNativeTarget "KoF22PostWidgets" */;
 			buildPhases = (
 				3465578275C1E52FE0088D4D /* Sources */,
+				F203E39D217A137D6C88E93C /* Resources */,
 			);
 			buildRules = (
 			);
@@ -254,6 +264,7 @@
 			buildConfigurationList = 533535E8D0C5391E84E177AF /* Build configuration list for PBXNativeTarget "KoF22PostShare" */;
 			buildPhases = (
 				91197F0351654C84B068EA03 /* Sources */,
+				68DADED8CD3C6AF1B9B68335 /* Resources */,
 				8C758AB6F208F137D9591281 /* Frameworks */,
 			);
 			buildRules = (
@@ -345,6 +356,23 @@
 			buildActionMask = 2147483647;
 			files = (
 				C7C22D1D32A68C98AD643700 /* Assets.xcassets in Resources */,
+				9EE8C43750F660EED4A3E717 /* PrivacyInfo.xcprivacy in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		68DADED8CD3C6AF1B9B68335 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				74F9171DAD5C1024E00EF237 /* PrivacyInfo.xcprivacy in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F203E39D217A137D6C88E93C /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3F918273004870E0C49BFB30 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -565,7 +593,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 27.0;
-				MARKETING_VERSION = 0.1.0;
+				MARKETING_VERSION = 1.0.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -666,7 +694,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 27.0;
-				MARKETING_VERSION = 0.1.0;
+				MARKETING_VERSION = 1.0.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";

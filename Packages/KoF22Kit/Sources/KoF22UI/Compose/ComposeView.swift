@@ -106,6 +106,13 @@
             }
          }
          .onAppear { if model.composition.body.isEmpty { focus = .body } }
+         .onChange(of: preview) { _, isPreview in
+            ///////////////////////////////////////////////////////////////
+            // Reading the preview needs the whole screen: drop focus so //
+            // the keyboard goes away from whichever field had it.       //
+            ///////////////////////////////////////////////////////////////
+            if isPreview { focus = nil }
+         }
          .onChange(of: pickerItems) { _, items in
             guard !items.isEmpty else { return }
             Task {

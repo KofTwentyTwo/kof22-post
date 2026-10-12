@@ -18,7 +18,7 @@ settings:
     SWIFT_STRICT_CONCURRENCY: complete
     SWIFT_TREAT_WARNINGS_AS_ERRORS: YES
     GCC_TREAT_WARNINGS_AS_ERRORS: YES
-    MARKETING_VERSION: "0.1.0"
+    MARKETING_VERSION: "1.0.0"
     CURRENT_PROJECT_VERSION: "1"
     ENABLE_USER_SCRIPT_SANDBOXING: YES
     SWIFT_EMIT_LOC_STRINGS: YES
@@ -47,6 +47,8 @@ targets:
       path: App/Info.plist
       properties:
         CFBundleDisplayName: KoF22 Postr
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         UILaunchScreen:
           UIColorName: ""
         # App Store Connect rejects builds that do not list all four orientations
@@ -97,6 +99,8 @@ targets:
       path: ShareExtension/Info.plist
       properties:
         CFBundleDisplayName: KoF22 Postr
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         KoF22KeychainGroup: "$(AppIdentifierPrefix)com.kof22.post.shared"
         NSPhotoLibraryUsageDescription: Choose photos for your posts.
         NSLocationWhenInUseUsageDescription: Tag a post with where you are.
@@ -128,6 +132,8 @@ targets:
       path: Widgets/Info.plist
       properties:
         CFBundleDisplayName: KoF22 Postr
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         NSExtension:
           NSExtensionPointIdentifier: com.apple.widgetkit-extension
     settings:

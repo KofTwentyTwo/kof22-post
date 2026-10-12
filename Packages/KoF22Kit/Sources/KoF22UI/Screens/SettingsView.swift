@@ -12,6 +12,10 @@
       private static let siteURL = URL(literal: "https://www.kof22.com")
       /// The API documentation, linked from the About section.
       private static let apiDocsURL = URL(literal: "https://api.kof22.com/v1/")
+      /// The privacy policy, also linked from App Store Connect.
+      static let privacyPolicyURL = URL(literal: "https://github.com/KofTwentyTwo/kof22-post/blob/main/docs/privacy-policy.md")
+      /// Help and contact, also the App Store support URL.
+      static let supportURL = URL(literal: "https://github.com/KofTwentyTwo/kof22-post/blob/main/docs/support.md")
       /// Shown for values that are not known.
       private static let unknownValue = "—"
 
@@ -151,6 +155,8 @@
             LabeledContent("Version", value: Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? Self.unknownValue)
             Link("kof22.com", destination: Self.siteURL)
             Link("API docs", destination: Self.apiDocsURL)
+            Link("Privacy policy", destination: Self.privacyPolicyURL)
+            Link("Support", destination: Self.supportURL)
          } footer: {
             Text("No analytics or tracking. Tokens are stored in the Keychain only.")
          }

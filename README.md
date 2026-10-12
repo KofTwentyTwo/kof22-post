@@ -26,6 +26,11 @@ with cloud signing and uploads to App Store Connect (app "KoF22 Postr"), and the
 TestFlight app installs it. `ci_scripts/ci_post_clone.sh` prepares the Xcode Cloud
 build. You can also build from source onto a connected iPhone (below).
 
+App Store submission: metadata, screenshots, privacy answers and review notes are in
+[docs/app-store/metadata.md](docs/app-store/metadata.md); the
+[privacy policy](docs/privacy-policy.md) and [support page](docs/support.md) are the
+URLs App Store Connect links to.
+
 ## Usage
 
 1. Open **KoF22 Post** and sign in (**Sign in (mock)** in mock mode, or **Sign in with
