@@ -77,6 +77,8 @@ public enum SharedIDs {
    public static let urlScheme = "com.kof22.post"
    /// The background task that drains the outbox.
    public static let backgroundTask = "com.kof22.post.outbox"
+   /// The background `URLSession` that PUTs photos to presigned URLs.
+   public static let backgroundUploadSession = "com.kof22.post.uploads"
 }
 
 /// Small settings shared through the App Group defaults so the extensions see them.
@@ -101,6 +103,12 @@ public struct SharedSettings: @unchecked Sendable {
    public var backendMode: BackendMode {
       get { defaults.string(forKey: "backendMode").flatMap(BackendMode.init) ?? .mock }
       nonmutating set { defaults.set(newValue.rawValue, forKey: "backendMode") }
+   }
+
+   /// How large uploaded photos are; originals unless the owner picks `.large`.
+   public var uploadSize: UploadSizePreference {
+      get { defaults.string(forKey: "uploadSize").flatMap(UploadSizePreference.init) ?? .original }
+      nonmutating set { defaults.set(newValue.rawValue, forKey: "uploadSize") }
    }
 
    /// The blog chosen for the last post, preselected in the composer.

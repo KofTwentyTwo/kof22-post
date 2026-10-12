@@ -25,7 +25,9 @@ public struct SilentNotifier: OutboxNotifier {
 
 /// Sends queued items: uploads photos (create ticket, PUT, complete), then creates,
 /// updates or deletes the post. Every step is retry-safe:
-///   - creates and upload tickets carry idempotency keys derived from the item;
+///   - creates and upload tickets carry idempotency keys derived from the item, and a
+///     retry reuses the same key so a lost response replays instead of duplicating;
+///   - an expired presigned URL restarts that photo's upload with a new key;
 ///   - uploaded `mediaId`s are written back before the post call, so a retry
 ///     never uploads a photo twice;
 ///   - updates send `If-Match`, and a 412 stops for the user instead of overwriting.
@@ -34,17 +36,22 @@ public actor OutboxProcessor {
    public typealias ServiceProvider = @Sendable () async -> SiteService?
 
    /// The outbox store; every state change goes through it.
-   private let store: OutboxStore
+   let store: OutboxStore
    /// Supplies the API service at the start of each pass.
    private let service: ServiceProvider
    /// Reports successes and stops to the user.
    private let notifier: any OutboxNotifier
    /// Where queued photos are kept.
-   private let photosDirectory: URL
-   /// Scratch space for photos prepared for upload.
-   private let workDirectory: URL
+   let photosDirectory: URL
+   /// Photos prepared for upload. They stay until the photo's media id is recorded,
+   /// because a background upload can outlive the process that started it.
+   let workDirectory: URL
+   /// The upload size preference, read at each upload so a change applies at once.
+   let uploadSize: @Sendable () -> UploadSizePreference
+   /// A random number in 0...1 for backoff jitter, injected so tests are deterministic.
+   private let random: @Sendable () -> Double
    /// The clock, injected so tests control backoff deadlines.
-   private let now: @Sendable () -> Date
+   let now: @Sendable () -> Date
    /// The pass in progress, if any.
    private var current: Task<Void, Never>?
    /// Set when a drain arrives during a pass, asking for one more.
@@ -60,8 +67,13 @@ public actor OutboxProcessor {
    static let backoffGrowth: Double = 2
    /// Longest delay between automatic retries (15 minutes).
    static let maximumBackoff: TimeInterval = 900
-   /// Characters of the photo id used in its upload idempotency key.
-   static let photoKeyLength = 8
+   /// The smallest jitter factor: a delay is spread over 75%...125% of the base.
+   static let minimumJitterFactor = 0.75
+   /// The width of the jitter range around the base delay (±25%).
+   static let jitterSpan = 0.5
+   /// Prepared files left behind by deleted or abandoned items are removed after this
+   /// long (7 days).
+   static let workFileRetention: TimeInterval = 604_800
    /// Status used for an item that cannot be sent as stored (missing id or version).
    static let badRequestStatus = 400
    /// Status of a delete whose post is already gone.
@@ -69,23 +81,41 @@ public actor OutboxProcessor {
    /// Status used when a queued photo's file has disappeared from the device.
    static let goneStatus = 410
 
-   /// Creates a processor. `photosDirectory` and `now` are injectable for tests.
+   /// The shared folder for prepared photos, in the App Group so the app and the Share
+   /// Extension see the same files.
+   public static var defaultWorkDirectory: URL { SharedContainer.directory("Upload Work") }
+
+   /// Creates a processor. `uploadSize` is read at each upload (the app passes the
+   /// `SharedSettings` value); folders, the random source and the clock are injectable
+   /// for tests.
    public init(
       store: OutboxStore, service: @escaping ServiceProvider, notifier: any OutboxNotifier = SilentNotifier(),
       photosDirectory: URL = SharedContainer.photosDirectory,
+      workDirectory: URL = OutboxProcessor.defaultWorkDirectory,
+      uploadSize: @escaping @Sendable () -> UploadSizePreference = { .original },
+      random: @escaping @Sendable () -> Double = { Double.random(in: 0...1) },
       now: @escaping @Sendable () -> Date = { .now }
    ) {
       self.store = store
       self.service = service
       self.notifier = notifier
       self.photosDirectory = photosDirectory
-      self.workDirectory = FileManager.default.temporaryDirectory.appending(path: "kof22-upload", directoryHint: .isDirectory)
+      self.workDirectory = workDirectory
+      self.uploadSize = uploadSize
+      self.random = random
       self.now = now
    }
 
-   /// The automatic retry delay after `attempt` failures: 5 s, doubling, capped.
+   /// The base retry delay after `attempt` failures: 5 s, doubling, capped at 15 minutes.
    static func backoff(attempt: Int) -> TimeInterval {
       min(pow(backoffGrowth, Double(max(attempt - 1, 0))) * initialBackoff, maximumBackoff)
+   }
+
+   /// The base delay spread by ±25% with `random` (0...1, clamped), still capped at 15
+   /// minutes, so many failed items do not all retry at the same instant.
+   static func backoff(attempt: Int, random: Double) -> TimeInterval {
+      let factor = minimumJitterFactor + jitterSpan * min(max(random, 0), 1)
+      return min(backoff(attempt: attempt) * factor, maximumBackoff)
    }
 
    /// Sends everything that is due and returns when the outbox is idle. A call
@@ -112,6 +142,7 @@ public actor OutboxProcessor {
             await process(item, service: service)
          }
          await bestEffort("prune sent items", systemic: true) { [store] in try await store.pruneSent() }
+         sweepWorkDirectory()
       } while rerun
       //////////////////////////////////////////////////////////////////
       // No suspension between the last `rerun` check and this reset. //
@@ -195,54 +226,8 @@ public actor OutboxProcessor {
       await notifier.posted(summary: composition.summary, status: post.status, url: post.url)
    }
 
-   /// Uploads the photos that have no media id yet, saving each media id as soon as
-   /// it is known so a retry continues where this attempt stopped.
-   private func uploadPhotos(_ item: OutboxSnapshot, service: SiteService) async throws -> PostComposition {
-      var composition = item.composition
-      let pending = composition.photos.indices.filter { !composition.photos[$0].isUploaded }
-      guard !pending.isEmpty else { return composition }
-      let limits = try await currentLimits(service)
-      for (done, index) in pending.enumerated() {
-         let photo = composition.photos[index]
-         try await store.update(item.id) {
-            $0.phase = "Uploading photo \(done + 1) of \(pending.count)"
-            $0.progress = Double(done) / Double(pending.count + 1)
-         }
-         guard let source = photo.localURL(in: photosDirectory), FileManager.default.fileExists(atPath: source.path(percentEncoded: false)) else {
-            throw APIError(status: Self.goneStatus, code: "photo_missing", message: "A photo for this post is no longer on the device")
-         }
-         let prepared = try MediaProcessor.prepare(
-            source: source, keepLocation: composition.keepLocation,
-            acceptedTypes: limits.photoContentTypes, maxBytes: limits.maxPhotoBytes, workDirectory: workDirectory
-         )
-         defer {
-            ////////////////////////////////////////////////////////////////
-            // A temporary copy; a leftover is cleared with the temp dir. //
-            ////////////////////////////////////////////////////////////////
-            try? FileManager.default.removeItem(at: prepared.fileURL)
-         }
-         /////////////////////////////////////////////////////////////////////////////////
-         // The attempt number keeps a retry after an expired ticket from replaying it. //
-         /////////////////////////////////////////////////////////////////////////////////
-         let key = "\(item.idempotencyKey)-p-\(photo.id.uuidString.prefix(Self.photoKeyLength))-a\(item.attempts)"
-         let ticket = try await service.createUpload(
-            UploadCreate(fileName: prepared.fileURL.lastPathComponent, contentType: prepared.contentType, byteSize: prepared.byteSize),
-            idempotencyKey: key
-         )
-         try await service.putUpload(fileURL: prepared.fileURL, ticket: ticket)
-         let media = try await service.completeUpload(
-            id: ticket.uploadId,
-            UploadComplete(altText: photo.altText.nilIfBlank, caption: photo.caption.nilIfBlank, keepLocation: composition.keepLocation)
-         )
-         composition.photos[index].attach(media)
-         let saved = composition
-         try await store.update(item.id) { $0.composition = saved }
-      }
-      return composition
-   }
-
    /// The server's limits, fetched on first use and then reused.
-   private func currentLimits(_ service: SiteService) async throws -> AuthoringLimits {
+   func currentLimits(_ service: SiteService) async throws -> AuthoringLimits {
       if let limits { return limits }
       let fetched = try await service.me().limits
       limits = fetched
@@ -259,7 +244,7 @@ public actor OutboxProcessor {
       let instant = now()
       var retryDelay: TimeInterval?
       if case .retryLater(let after) = disposition, attempts < Self.maxAutomaticAttempts {
-         retryDelay = after ?? Self.backoff(attempt: attempts)
+         retryDelay = after ?? Self.backoff(attempt: attempts, random: random())
       }
       Log.outbox.warning("Send of \(item.id, privacy: .public) failed (attempt \(attempts, privacy: .public)): \(message, privacy: .private)")
       let delay = retryDelay

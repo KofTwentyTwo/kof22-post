@@ -20,11 +20,17 @@ public struct ComposedPhoto: Codable, Sendable, Identifiable, Equatable, Hashabl
    public var altText: String
    /// Caption shown with the photo; blank sends none.
    public var caption: String
+   /// Whether this photo keeps its GPS metadata (published publicly). Off by default:
+   /// location is removed on device before upload.
+   public var keepLocation: Bool
+   /// Counts upload restarts after an expired presigned URL; part of the upload's
+   /// idempotency key so a restart gets a fresh ticket while plain retries reuse it.
+   var uploadGeneration: Int
 
    /// Creates a photo reference; a new photo has only a `fileName`.
    public init(
       id: UUID = UUID(), fileName: String? = nil, mediaId: Int64? = nil, remoteURL: String? = nil,
-      altText: String = "", caption: String = ""
+      altText: String = "", caption: String = "", keepLocation: Bool = false
    ) {
       self.id = id
       self.fileName = fileName
@@ -32,6 +38,23 @@ public struct ComposedPhoto: Codable, Sendable, Identifiable, Equatable, Hashabl
       self.remoteURL = remoteURL
       self.altText = altText
       self.caption = caption
+      self.keepLocation = keepLocation
+      self.uploadGeneration = 0
+   }
+
+   /// Decodes a stored photo. Payloads saved before location became a per-photo choice
+   /// have no `keepLocation` (or `uploadGeneration`); both default to off and zero, and
+   /// `PostComposition` applies a stored post-level opt-in on top.
+   public init(from decoder: any Decoder) throws {
+      let container = try decoder.container(keyedBy: CodingKeys.self)
+      id = try container.decode(UUID.self, forKey: .id)
+      fileName = try container.decodeIfPresent(String.self, forKey: .fileName)
+      mediaId = try container.decodeIfPresent(Int64.self, forKey: .mediaId)
+      remoteURL = try container.decodeIfPresent(String.self, forKey: .remoteURL)
+      altText = try container.decode(String.self, forKey: .altText)
+      caption = try container.decode(String.self, forKey: .caption)
+      keepLocation = try container.decodeIfPresent(Bool.self, forKey: .keepLocation) ?? false
+      uploadGeneration = try container.decodeIfPresent(Int.self, forKey: .uploadGeneration) ?? 0
    }
 
    /// Whether the photo already has a server media id and needs no upload.
@@ -58,6 +81,18 @@ public struct PostComposition: Codable, Sendable, Equatable {
    /// A composition may be scheduled no sooner than this, leaving time to send it
    /// before the server's own 30-second minimum applies.
    public static let minimumScheduleLead: TimeInterval = 60
+   /// The server refuses a schedule more than 366 days ahead.
+   public static let maximumScheduleHorizon: TimeInterval = 31_622_400
+   /// Longest tag name the server accepts (`PostCreate.tags.items.maxLength`).
+   public static let maxTagLength = 50
+   /// Longest place name the server accepts (`PostCreate.locationLabel.maxLength`).
+   public static let maxLocationLabelLength = 200
+   /// Longest link the server accepts (`PostCreate.linkUrl.maxLength`).
+   public static let maxLinkLength = 2_000
+   /// Longest photo alt text the server accepts (`MediaAttachment.altText.maxLength`).
+   public static let maxAltTextLength = 1_000
+   /// Longest photo caption the server accepts (`MediaAttachment.caption.maxLength`).
+   public static let maxCaptionLength = 2_000
 
    /// The blog slug to post to.
    public var blog: String
@@ -71,8 +106,6 @@ public struct PostComposition: Codable, Sendable, Equatable {
    public var linkURL: String
    /// Optional place name; blank for none.
    public var locationLabel: String
-   /// Whether photos keep their GPS metadata.
-   public var keepLocation: Bool
    /// Draft, published now, or scheduled.
    public var status: PostStatus
    /// When a scheduled post goes live.
@@ -86,7 +119,7 @@ public struct PostComposition: Codable, Sendable, Equatable {
    /// published on send.
    public init(
       blog: String = "quick-bits", title: String = "", body: String = "", tags: [String] = [],
-      linkURL: String = "", locationLabel: String = "", keepLocation: Bool = false,
+      linkURL: String = "", locationLabel: String = "",
       status: PostStatus = .published, publishAt: Date? = nil, photos: [ComposedPhoto] = [],
       originalHadLink: Bool = false
    ) {
@@ -96,11 +129,37 @@ public struct PostComposition: Codable, Sendable, Equatable {
       self.tags = tags
       self.linkURL = linkURL
       self.locationLabel = locationLabel
-      self.keepLocation = keepLocation
       self.status = status
       self.publishAt = publishAt
       self.photos = photos
       self.originalHadLink = originalHadLink
+   }
+
+   /// The post-level location switch of payloads saved before location became a
+   /// per-photo choice; read when decoding, never written.
+   private enum LegacyKeys: String, CodingKey {
+      /// Whether every photo of the post kept its GPS metadata.
+      case keepLocation
+   }
+
+   /// Decodes a stored composition. An older payload's post-level `keepLocation: true`
+   /// opts every one of its photos in, so a queued post keeps the choice it was made with.
+   public init(from decoder: any Decoder) throws {
+      let container = try decoder.container(keyedBy: CodingKeys.self)
+      blog = try container.decode(String.self, forKey: .blog)
+      title = try container.decode(String.self, forKey: .title)
+      body = try container.decode(String.self, forKey: .body)
+      tags = try container.decode([String].self, forKey: .tags)
+      linkURL = try container.decode(String.self, forKey: .linkURL)
+      locationLabel = try container.decode(String.self, forKey: .locationLabel)
+      status = try container.decode(PostStatus.self, forKey: .status)
+      publishAt = try container.decodeIfPresent(Date.self, forKey: .publishAt)
+      photos = try container.decode([ComposedPhoto].self, forKey: .photos)
+      originalHadLink = try container.decode(Bool.self, forKey: .originalHadLink)
+      let legacy = try decoder.container(keyedBy: LegacyKeys.self)
+      if try legacy.decodeIfPresent(Bool.self, forKey: .keepLocation) == true {
+         for index in photos.indices { photos[index].keepLocation = true }
+      }
    }
 
    /// Starts an edit from a server post.
@@ -146,24 +205,6 @@ public struct PostComposition: Codable, Sendable, Equatable {
             MediaAttachment(mediaId: $0, altText: photo.altText.nilIfBlank, caption: photo.caption.nilIfBlank)
          }
       }
-   }
-
-   /// The first problem that would make the server refuse this post, worded for the
-   /// user, or nil when it can be sent. `now` is injectable for tests.
-   public func validationMessage(limits: AuthoringLimits, now: Date = .now) -> String? {
-      if isEmpty { return "Write something, add a photo or a link." }
-      if body.count > limits.maxBodyLength { return "Posts are limited to \(limits.maxBodyLength) characters." }
-      if title.count > limits.maxTitleLength { return "Titles are limited to \(limits.maxTitleLength) characters." }
-      if tags.count > limits.maxTags { return "At most \(limits.maxTags) tags." }
-      if photos.count > limits.maxPhotosPerPost { return "At most \(limits.maxPhotosPerPost) photos per post." }
-      if status == .scheduled {
-         guard let publishAt else { return "Pick a time to schedule." }
-         if publishAt.timeIntervalSince(now) < Self.minimumScheduleLead { return "Schedule at least a minute ahead." }
-      }
-      if !linkURL.isEmpty, URL(string: linkURL)?.scheme?.hasPrefix("http") != true {
-         return "Links must start with http:// or https://"
-      }
-      return nil
    }
 
    /// The create request: blank optional fields are omitted.

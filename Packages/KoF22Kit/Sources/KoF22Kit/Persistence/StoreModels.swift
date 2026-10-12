@@ -18,6 +18,18 @@ public enum OutboxState: String, Codable, Sendable, CaseIterable {
    case failed
    /// Accepted by the server.
    case sent
+
+   /// The label shown to the user. The raw values stay the persisted names; only the
+   /// wording changes here.
+   public var displayName: String {
+      switch self {
+      case .localDraft: "Draft"
+      case .queued: "Queued"
+      case .sending: "Uploading"
+      case .failed: "Failed"
+      case .sent: "Done"
+      }
+   }
 }
 
 /// What an outbox item asks the server to do.

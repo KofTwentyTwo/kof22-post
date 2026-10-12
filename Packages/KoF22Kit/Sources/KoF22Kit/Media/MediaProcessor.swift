@@ -36,10 +36,12 @@ public enum MediaError: Error, LocalizedError, Equatable {
    }
 }
 
-/// Prepares a photo for upload. Originals are kept at full resolution (owner's
-/// choice); the only changes are:
-///   - GPS metadata is removed unless the post opts in (lossless for JPEG/PNG);
+/// Prepares a photo for upload. Originals are kept at full resolution by default
+/// (owner's choice, ADR-0005); the only changes are:
+///   - GPS metadata is removed unless the photo opts in (lossless for JPEG/PNG);
 ///   - formats the server does not accept (HEIC today) are converted to JPEG;
+///   - a photo over the server's pixel limits, or over the `.large` size preference,
+///     is scaled down and re-encoded as JPEG;
 ///   - a photo over the server's byte limit is re-encoded smaller until it fits.
 public enum MediaProcessor {
    /// JPEG quality for format conversion; visually lossless for photos.
@@ -60,13 +62,16 @@ public enum MediaProcessor {
    static let shrinkDenominator = 4
 
    /// Copies or converts `source` into `workDirectory`. JPEG and PNG files the server
-   /// accepts pass through with only GPS removed; anything else becomes JPEG. A result
-   /// over `maxBytes` is re-encoded at smaller sizes until it fits.
+   /// accepts pass through with only GPS removed; anything else becomes JPEG. A photo
+   /// larger than `pixelLimits` or the `size` preference is scaled down to JPEG, and a
+   /// result over `maxBytes` is re-encoded at smaller sizes until it fits.
    public static func prepare(
       source: URL,
       keepLocation: Bool,
       acceptedTypes: [String],
       maxBytes: Int64,
+      size: UploadSizePreference = .original,
+      pixelLimits: PixelLimits = .server,
       workDirectory: URL
    ) throws -> PreparedPhoto {
       guard let image = CGImageSourceCreateWithURL(source as CFURL, nil),
@@ -77,11 +82,18 @@ public enum MediaProcessor {
       let accepted = Set(acceptedTypes)
       let serverAccepts = type.preferredMIMEType.map { accepted.contains($0) } == true
       let passThrough = serverAccepts && (type.conforms(to: .jpeg) || type.conforms(to: .png))
+      let targetEdge = scaledLongEdge(image, size: size, pixelLimits: pixelLimits)
       try FileManager.default.createDirectory(at: workDirectory, withIntermediateDirectories: true)
 
       var output: URL
       var contentType: UploadCreate.ContentTypePayload
-      if passThrough {
+      if let targetEdge {
+         contentType = .imageJpeg
+         output = workDirectory.appending(path: UUID().uuidString + ".jpg")
+         let quality = size == .large ? UploadSizePreference.largeJPEGQuality : jpegQuality
+         try encodeJPEG(image, keepLocation: keepLocation, maxPixelSize: targetEdge, quality: quality, to: output)
+      }
+      else if passThrough {
          contentType = type.conforms(to: .png) ? .imagePng : .imageJpeg
          output = workDirectory.appending(path: UUID().uuidString + (contentType == .imagePng ? ".png" : ".jpg"))
          if keepLocation {
@@ -97,18 +109,29 @@ public enum MediaProcessor {
          try encodeJPEG(image, keepLocation: keepLocation, maxPixelSize: nil, quality: jpegQuality, to: output)
       }
 
-      var size = try fileSize(output)
-      var maxPixel = firstShrinkPixelSize
-      while size > maxBytes {
+      var byteSize = try fileSize(output)
+      var maxPixel = min(firstShrinkPixelSize, targetEdge ?? firstShrinkPixelSize)
+      while byteSize > maxBytes {
          guard maxPixel >= minimumShrinkPixelSize else { throw MediaError.tooLarge }
          removeLeftover(output)
          contentType = .imageJpeg
          output = workDirectory.appending(path: UUID().uuidString + ".jpg")
          try encodeJPEG(image, keepLocation: keepLocation, maxPixelSize: maxPixel, quality: shrinkQuality, to: output)
-         size = try fileSize(output)
+         byteSize = try fileSize(output)
          maxPixel = maxPixel * shrinkNumerator / shrinkDenominator
       }
-      return PreparedPhoto(fileURL: output, contentType: contentType, byteSize: size)
+      return PreparedPhoto(fileURL: output, contentType: contentType, byteSize: byteSize)
+   }
+
+   /// The long edge the photo must be scaled to so it fits both the server's pixel limits
+   /// and the size preference, or nil when it keeps its resolution. A source without
+   /// readable dimensions reads as zero by zero and is left alone.
+   static func scaledLongEdge(_ image: CGImageSource, size: UploadSizePreference, pixelLimits: PixelLimits) -> Int? {
+      let properties = (CGImageSourceCopyPropertiesAtIndex(image, 0, nil) as? [CFString: Any]) ?? [:]
+      let width = properties[kCGImagePropertyPixelWidth] as? Int ?? 0
+      let height = properties[kCGImagePropertyPixelHeight] as? Int ?? 0
+      let preferred = size.maxLongEdge.flatMap { $0 < max(width, height) ? $0 : nil }
+      return [pixelLimits.requiredLongEdge(width: width, height: height), preferred].compactMap(\.self).min()
    }
 
    /// Deletes an earlier attempt that was too large. Failure only leaves a stray file in
