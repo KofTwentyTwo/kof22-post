@@ -19,6 +19,7 @@ make project        # generate KoF22Post.xcodeproj from project.yml
 make build          # build the app for the iPhone 18 Pro simulator
 make test-kit       # unit tests (swift test, macOS, no simulator)
 make coverage       # unit tests plus the 100% line-coverage gate on KoF22Kit
+make sim-boot       # boot the iPhone 18 Pro simulator and wait (CI does this first)
 make test-ui        # XCUITests against the in-process mock API
 make format         # rewrite Swift files with swift-format
 make format-check   # fail on unformatted Swift files

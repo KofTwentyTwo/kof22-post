@@ -9,7 +9,7 @@ SWIFT_SOURCES = App Shared ShareExtension Widgets UITests scripts \
 	Packages/KoF22Kit/Package.swift Packages/KoF22Kit/Sources/KoF22Kit \
 	Packages/KoF22Kit/Sources/KoF22UI Packages/KoF22Kit/Tests Tools/OpenAPIGen/Package.swift
 
-.PHONY: project build build-ci build-codeql test test-kit test-ui coverage format format-check lint generate update-spec
+.PHONY: project build build-ci build-codeql sim-boot test test-kit test-ui coverage format format-check lint generate update-spec
 
 project:            ## Regenerate KoF22Post.xcodeproj from project.yml
 	xcodegen generate
@@ -32,6 +32,9 @@ test-kit:           ## Core unit tests (fast, macOS, no simulator); data goes to
 
 coverage:           ## Unit tests with the 100% line-coverage gate on KoF22Kit (K22-TEST-10)
 	scripts/check-coverage.sh
+
+sim-boot:           ## Boot the test simulator and wait until it is ready (CI runs this first)
+	xcrun simctl bootstatus "$(SIM)" -b
 
 test-ui:            ## XCUITests against the in-process mock API
 	$(XCODEBUILD) -destination '$(DESTINATION)' -only-testing:KoF22PostUITests test

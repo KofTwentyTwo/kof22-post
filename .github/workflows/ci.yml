@@ -56,5 +56,9 @@ jobs:
       - name: Build app (warnings are errors)
         run: make build-ci
 
+      - name: Boot the simulator
+        # A cold simulator makes the UI test runner stall while bootstrapping.
+        run: make sim-boot
+
       - name: UI tests
         run: make test-ui
