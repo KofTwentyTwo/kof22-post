@@ -24,11 +24,15 @@ Blocked on the Authentik `kof22-post-ios` provider (discovery URL 404).
 - Sign in with the real account, post to Field Notes, verify on www.kof22.com.
 - Contract test: run the mock-backed suite against recorded live responses (fixtures only).
 
-## Phase 3: Distribution and CI
+## Phase 3: Distribution and CI (in progress 2026-10-12)
 
-- New Apple ID / team, App Group and keychain group registered, TestFlight build.
-- Xcode Cloud workflow running `make test-kit` + UI tests on PRs; archive to TestFlight on `main`.
-- Backend: `SITE_API_IOS_APP_IDS` for the AASA universal-link callback.
+- Done: Apple team UC9R3P8ZUU; App Store Connect app "KoF22 Postr" (com.kof22.post);
+  Xcode Cloud workflow "Default": on changes to `main`, Archive (iOS) with TestFlight
+  (Internal Testing) and the TestFlight Internal Testing post-action to the "Owner"
+  group (automatic distribution). GitHub Actions runs the full gates on every push/PR.
+- Open: backend `SITE_API_IOS_APP_IDS=UC9R3P8ZUU.com.kof22.post` for the AASA
+  universal-link callback; remove the redundant "Build - iOS" action from the
+  Xcode Cloud workflow.
 
 ## Phase 4: Upload robustness
 
