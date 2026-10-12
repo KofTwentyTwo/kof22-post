@@ -35,7 +35,8 @@ Last reviewed: 2026-10-11, by James Maes with Claude Opus 5.5. Checked with
 | Requirement | Deviation | Decision | Ends |
 | --- | --- | --- | --- |
 | K22-AI-10, K22-SDLC-10, -12, -16 | Work is committed directly to `main` (locally) instead of topic branches and pull requests; `no-commit-to-branch` is not in the pre-commit hooks | James Maes, 2026-10-11 | At the first published version; then GitHub Flow with pull requests |
-| K22-REPO-20, -21 (rulesets) | `protect-main` is not enabled yet because it would block the agreed direct work on `main` | Follows from the row above | Same |
+| K22-REPO-20, K22-CI-01 (ruleset) | `protect-main` is not enabled yet because it would block the agreed direct work on `main`; `protect-release-tags` is active | Follows from the row above | Same |
+| K22-REPO-32 (SHOULD) | Actions policy allows all actions: the shared standards security workflow uses `docker://` container steps that a selected-actions policy rejects (startup failure). Compensating control: GitHub's "require actions to be pinned to a full-length commit SHA" is on, and zizmor/actionlint gate every workflow change | James Maes, 2026-10-12 (same setting as the standards repository itself) | When the shared workflow can run under a selected-actions policy |
 
 These rows are not in the standards' exception register yet. A Product-tier move or an
 audit needs them recorded there (`K22-AGENT-04`).
@@ -44,7 +45,6 @@ audit needs them recorded there (`K22-AGENT-04`).
 
 | Requirement | Item | Who |
 | --- | --- | --- |
-| K22-REPO-22, -30, -31, -32, -40, -41 | GitHub settings: squash-only merging with PR title/body, delete head branches, Dependabot alerts and security updates, secret scanning with push protection, private vulnerability reporting, immutable releases, read-only `GITHUB_TOKEN`, Actions cannot approve PRs, allowed actions restricted, wiki off, description/topics | Owner (repository settings are reserved to a person, K22-AI-10) |
 | K22-REPO-42 | List `kof22-post` in `MAINTAINERS.md` of KofTwentyTwo/standards | Owner, via a pull request to the standards repository |
 | K22-SEC-60 | Off-GitHub backup: confirm the weekly backup includes this repository now that it is on GitHub | Owner |
 | K22-CI-01 (runner) | `ci.yml` and `codeql.yml` run on the `xcode-27` runner image (a GitHub preview image); move to the GA label when it ships | First CI run |

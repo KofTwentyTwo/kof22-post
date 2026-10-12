@@ -4,6 +4,8 @@ Native iPhone app for posting to [kof22.com](https://kof22.com). Built for one
 user, mainly for fast short-form posts to the Field Notes blog (`quick-bits`:
 text, photos, links), with longer posts to the other blogs as a secondary use.
 
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/KofTwentyTwo/kof22-post/badge)](https://scorecard.dev/viewer/?uri=github.com/KofTwentyTwo/kof22-post)
+
 **Tier:** Internal ([scope](https://github.com/KofTwentyTwo/standards/blob/main/policies/README.md#scope)).
 **Standards:** adopting [KofTwentyTwo standards](https://github.com/KofTwentyTwo/standards)
 v1.0.0. Conformance status, open items and owner-approved deviations are in
