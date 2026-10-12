@@ -5,7 +5,8 @@
 
 import Foundation
 
-/// An in-process stand-in for the Site API v1 authoring endpoints, following the
+/// An in-process stand-in for the Site API v1 authoring endpoints and the anonymous
+/// content reads the app uses, following the
 /// behaviour documented in Website-Backend (`AuthoringService`, `MediaUploadService`,
 /// `IdempotencyStore`): validation limits, idempotent replays, ETag/If-Match,
 /// scheduled publishing, presigned uploads and the error envelope.
@@ -189,6 +190,7 @@ public actor MockBackend {
       case "createUpload":
          return try idempotent("createUpload", headers: headers, body: body) { try createUpload(body) }
       case "completeUpload": return try completeUpload(segments.dropLast().last ?? "", body: body)
+      case "queryBlog", "queryTag", "queryPost", "getPost": return try handleRead(operation, segments: segments, query: query)
       default: return try handlePostOperation(operation, segments: segments, query: query, headers: headers, body: body)
       }
    }

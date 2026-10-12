@@ -123,13 +123,76 @@ public enum ErrorClassifier {
       }
    }
 
-   /// A short message for the outbox row and notifications.
+   /// A short message for the outbox row, notifications and error banners.
    public static func message(for error: any Error) -> String {
       switch error {
-      case let error as APIError: error.summary
+      case let error as APIError: userMessage(for: error)
       case AuthError.sessionExpired, AuthError.signedOut: "Signed out. Sign in again to send."
       case let error as URLError: error.code == .notConnectedToInternet ? "Offline" : error.localizedDescription
       default: error.localizedDescription
       }
+   }
+
+   /// True when the server refused because this account may not publish (403
+   /// `forbidden` or `insufficient_scope`), so the UI can say "this account can't
+   /// publish" instead of offering a retry. A 403 from photo storage is not one.
+   public static func isForbidden(_ error: any Error) -> Bool {
+      guard let error = error as? APIError else { return false }
+      return forbiddenCodes.contains(error.code)
+   }
+
+   /// The error codes that mean the account lacks permission to publish; `http_403` is a
+   /// 403 whose body was not the error envelope.
+   static let forbiddenCodes: Set<String> = ["forbidden", "insufficient_scope", "http_403"]
+
+   /// Clear wording for each error code the Site API and its storage use. Codes not
+   /// listed here fall back to the server's own message.
+   static let codeMessages: [String: String] = [
+      "unauthorized": "Your session has ended. Sign in again.",
+      "forbidden": "This account can't publish to kof22.com.",
+      "http_403": "This account can't publish to kof22.com.",
+      "insufficient_scope": "This sign-in doesn't include permission to publish. Sign out and sign in again.",
+      "not_found": "Not found. It may have been deleted.",
+      "conflict": "The server reported a conflict. Try again.",
+      "slug_conflict": "Another post already uses this address. Change the title and try again.",
+      "idempotency_in_progress": "The server is still working on this request. It will be retried.",
+      "idempotency_key_reused": "This request was already sent with different content.",
+      "delete_blocked": "This post can't be deleted right now.",
+      "precondition_failed": "The post changed on the server since it was loaded.",
+      "precondition_required": "The update was sent without the post's version. Reload the post and try again.",
+      "payload_too_large": "This is too large to send.",
+      "image_too_large": "The photo is too large.",
+      "unsupported_media_type": "This file type isn't supported. Use JPEG, PNG or HEIC.",
+      "heic_conversion_unavailable": "The server can't convert HEIC photos right now. Try again later.",
+      "heic_conversion_failed": "The server couldn't convert this HEIC photo.",
+      "rate_limited": "Too many requests right now. Try again shortly.",
+      "link_not_allowed": "Only public http or https links can be used.",
+      "upload_expired": "The photo upload expired before it finished. Send again to upload it again.",
+      "upload_not_received": "The photo didn't reach the server. Send again.",
+      "unavailable": "kof22.com is temporarily unavailable. Try again later.",
+      "internal_error": "The server ran into a problem. Try again later.",
+      "bad_request": "The server couldn't understand the request.",
+   ]
+
+   /// A clear, user-facing message for an API error: validation failures list each field
+   /// problem, a bad request keeps its specific message, rate limiting says how long to
+   /// wait when the server said, known codes use fixed wording and anything else shows the
+   /// server's message.
+   public static func userMessage(for error: APIError) -> String {
+      if error.code == "validation_failed" {
+         guard !error.details.isEmpty else { return "The post wasn't accepted: \(error.message)" }
+         return "Please fix: " + error.details.map { "\($0.field) \($0.issue)" }.joined(separator: "; ")
+      }
+      if error.code == "bad_request", !error.message.isEmpty {
+         //////////////////////////////////////////////////////////////
+         // a 400's own message names what was wrong with the       //
+         // request (local checks raise it too), so it is kept.      //
+         //////////////////////////////////////////////////////////////
+         return error.summary
+      }
+      if error.code == "rate_limited", let seconds = error.retryAfter {
+         return "Too many requests right now. Try again in \(Int(seconds.rounded(.up))) seconds."
+      }
+      return codeMessages[error.code] ?? error.summary
    }
 }

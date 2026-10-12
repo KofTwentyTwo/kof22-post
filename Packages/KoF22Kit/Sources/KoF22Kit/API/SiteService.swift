@@ -61,34 +61,46 @@ public struct SiteService: Sendable {
    let client: Client
    /// Sends photo bytes to presigned URLs.
    let uploader: any UploadPerformer
+   /// Anonymous reads of published content over the same transport, sent without
+   /// credentials and cached briefly.
+   public let reads: PublicReadService
 
    /// Builds the service on any transport. The middleware order matters: errors are
-   /// mapped last so the auth middleware still sees the raw 401.
-   public init(serverURL: URL, transport: any ClientTransport, auth: AuthSession, uploader: any UploadPerformer) {
+   /// mapped last so the auth middleware still sees the raw 401. Only `/v1/me` requests
+   /// carry the bearer token.
+   public init(serverURL: URL, transport: any ClientTransport, auth: any SessionAuthenticating, uploader: any UploadPerformer) {
       self.client = Client(
          serverURL: serverURL,
+         configuration: Self.configuration,
          transport: transport,
          middlewares: [ErrorEnvelopeMiddleware(), RawHeaderMiddleware(), ExplicitNullMiddleware(), AuthMiddleware(auth: auth)]
       )
       self.uploader = uploader
+      self.reads = PublicReadService(serverURL: serverURL, transport: transport)
    }
 
-   /// The service for the real Site API over `URLSession`.
-   public static func live(config: AppConfig = .production, auth: AuthSession) -> Self {
+   /// Client settings shared by every generated client in the app: dates with or
+   /// without fractional seconds.
+   static let configuration = Configuration(dateTranscoder: SiteDateTranscoder())
+
+   /// A `URLSession` transport that fails fast instead of waiting for connectivity.
+   static func liveTransport() -> URLSessionTransport {
       let configuration = URLSessionConfiguration.default
       configuration.waitsForConnectivity = false
       configuration.timeoutIntervalForRequest = Self.requestTimeout
-      let session = URLSession(configuration: configuration)
-      return Self(
-         serverURL: config.apiBaseURL,
-         transport: URLSessionTransport(configuration: .init(session: session)),
-         auth: auth,
-         uploader: URLSessionUploadPerformer()
-      )
+      return URLSessionTransport(configuration: .init(session: URLSession(configuration: configuration)))
+   }
+
+   /// The service for the real Site API over `URLSession`. `uploader` sends photo bytes;
+   /// the app passes a background-session uploader so uploads survive suspension.
+   public static func live(
+      config: AppConfig = .production, auth: any SessionAuthenticating, uploader: any UploadPerformer = URLSessionUploadPerformer()
+   ) -> Self {
+      Self(serverURL: config.apiBaseURL, transport: liveTransport(), auth: auth, uploader: uploader)
    }
 
    /// The service backed by the in-process mock of the Site API contract.
-   public static func mock(backend: MockBackend, auth: AuthSession) -> Self {
+   public static func mock(backend: MockBackend, auth: any SessionAuthenticating) -> Self {
       Self(
          serverURL: AppConfig.mockAPIBaseURL,
          transport: MockTransport(backend: backend),
@@ -99,15 +111,10 @@ public struct SiteService: Sendable {
 
    /// Unwraps errors thrown by middlewares out of the generator's `ClientError`.
    private func call<T>(_ body: () async throws -> T) async throws -> T {
-      do {
-         return try await body()
-      }
-      catch let error as ClientError {
-         throw error.underlyingError
-      }
+      try await unwrappingClientErrors(body)
    }
 
-   /// The API versions the server supports; needs no sign-in.
+   /// The API versions the server supports; sent without credentials.
    public func versions() async throws -> APIVersions {
       try await call { try await client.getApiVersions().ok.body.json }
    }

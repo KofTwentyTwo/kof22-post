@@ -6,6 +6,7 @@
 import Foundation
 import HTTPTypes
 import OpenAPIRuntime
+import Synchronization
 
 /// Turns any non-2xx response into an `APIError` built from the error envelope, so
 /// callers only ever see success outputs or a typed error.
@@ -40,21 +41,33 @@ struct ErrorEnvelopeMiddleware: ClientMiddleware {
    }
 }
 
-/// Adds the bearer token and, on a 401, refreshes once and replays the request.
+/// Adds the bearer token to the authoring endpoints and, on a 401, refreshes once and
+/// replays the request. The spec allows bearer tokens on `/v1/me` and `/v1/me/...`
+/// only; every other request (versions, content reads) goes out without credentials and
+/// never triggers a refresh.
 struct AuthMiddleware: ClientMiddleware {
    /// Upper bound for a request body buffered for a possible replay.
    static let maximumReplayBodyBytes = 4 << 20
 
-   /// The session that supplies and refreshes tokens.
-   let auth: AuthSession
+   /// The only path that carries a bearer token, with its sub-paths.
+   static let authoringPath = "/v1/me"
 
-   /// Sends the request with the current token and replays it once with a fresh token
-   /// when the server rejects the first one. The versions endpoint is public and skipped.
+   /// The session that supplies and refreshes tokens.
+   let auth: any SessionAuthenticating
+
+   /// True when `path` (with or without a query string) is `/v1/me` or below it.
+   static func needsBearer(_ path: String?) -> Bool {
+      let bare = String((path ?? "").prefix { $0 != "?" })
+      return bare == authoringPath || bare.hasPrefix(authoringPath + "/")
+   }
+
+   /// Sends authoring requests with the current token and replays them once with a fresh
+   /// token when the server rejects the first one. Other requests pass through untouched.
    func intercept(
       _ request: HTTPRequest, body: HTTPBody?, baseURL: URL, operationID: String,
       next: (HTTPRequest, HTTPBody?, URL) async throws -> (HTTPResponse, HTTPBody?)
    ) async throws -> (HTTPResponse, HTTPBody?) {
-      guard operationID != "getApiVersions" else { return try await next(request, body, baseURL) }
+      guard Self.needsBearer(request.path) else { return try await next(request, body, baseURL) }
       //////////////////////////////////////////////////
       // buffer the body so it can be sent twice.     //
       //////////////////////////////////////////////////
@@ -131,6 +144,52 @@ struct RawHeaderMiddleware: ClientMiddleware {
          request.headerFields[.ifMatch] = decoded
       }
       return try await next(request, body, baseURL)
+   }
+}
+
+/// Holds the raw body of one response so code can read fields the generated types drop.
+/// A read sets it as the task-local `current` around one call.
+final class ResponseCapture: Sendable {
+   /// The capture for the calls made in the current task, if any.
+   @TaskLocal static var current: ResponseCapture?
+
+   /// The captured body; empty until a response arrives.
+   private let storage = Mutex(Data())
+
+   /// The body captured last, or empty when none was.
+   var data: Data { storage.withLock { $0 } }
+
+   /// Keeps `data` as the captured body.
+   func keep(_ data: Data) { storage.withLock { $0 = data } }
+}
+
+/// Copies the response body into `ResponseCapture.current` when a caller asked for it,
+/// and hands the generated client an identical body to decode.
+struct ResponseCaptureMiddleware: ClientMiddleware {
+   /// Upper bound for a captured body; a page of posts with full content is far smaller.
+   static let maximumBodyBytes = 16 << 20
+
+   /// Captures the body of the response when a capture is set for this task.
+   func intercept(
+      _ request: HTTPRequest, body: HTTPBody?, baseURL: URL, operationID: String,
+      next: (HTTPRequest, HTTPBody?, URL) async throws -> (HTTPResponse, HTTPBody?)
+   ) async throws -> (HTTPResponse, HTTPBody?) {
+      let (response, responseBody) = try await next(request, body, baseURL)
+      guard let capture = ResponseCapture.current, let responseBody else { return (response, responseBody) }
+      let data = try await Data(collecting: responseBody, upTo: Self.maximumBodyBytes)
+      capture.keep(data)
+      return (response, HTTPBody(data))
+   }
+}
+
+/// Runs a generated-client call and rethrows errors raised by middlewares (`APIError`,
+/// `AuthError`, `URLError`) without the generator's `ClientError` wrapper.
+func unwrappingClientErrors<T>(_ body: () async throws -> T) async throws -> T {
+   do {
+      return try await body()
+   }
+   catch let error as ClientError {
+      throw error.underlyingError
    }
 }
 

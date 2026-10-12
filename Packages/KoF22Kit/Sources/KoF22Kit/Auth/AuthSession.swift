@@ -40,6 +40,9 @@ public actor AuthSession {
    private var refreshTask: Task<TokenSet, any Error>?
    /// Bumped on sign-out so a refresh that finishes afterwards is discarded.
    private var generation = 0
+   /// True while sign-out is revoking tokens that are still in the Keychain, so they
+   /// are not read back in the meantime.
+   private var signingOut = false
 
    /// Creates a session; nothing is read from the store until tokens are first needed.
    public init(
@@ -138,6 +141,7 @@ public actor AuthSession {
    /// Re-reads the Keychain: the app and the Share Extension share tokens, and
    /// the other process may have refreshed (and rotated) them.
    private func reloadFromStore() -> TokenSet? {
+      if signingOut { return nil }
       loaded = false
       return current()
    }
@@ -199,16 +203,24 @@ public actor AuthSession {
       }
    }
 
-   /// Forgets the tokens and, for the live backend, revokes them at the provider.
+   /// Ends the session. For the live backend the tokens are revoked at the provider
+   /// first (best effort, short timeout) and only then removed from the Keychain, so a
+   /// sign-out that is interrupted leaves no live refresh token behind without a copy
+   /// that can still be revoked. The in-memory copy is dropped at once, and a refresh
+   /// that finishes after this point is discarded.
    public func signOut() async {
       generation += 1
       refreshTask = nil
       let tokens = current()
-      persist(nil)
-      guard mode == .live, let tokens else { return }
-      if let refresh = tokens.refreshToken {
-         await oauth.revoke(refresh, hint: "refresh_token")
+      signingOut = true
+      self.tokens = nil
+      defer { signingOut = false }
+      if mode == .live, let tokens {
+         if let refresh = tokens.refreshToken {
+            await oauth.revoke(refresh, hint: "refresh_token")
+         }
+         await oauth.revoke(tokens.accessToken, hint: "access_token")
       }
-      await oauth.revoke(tokens.accessToken, hint: "access_token")
+      persist(nil)
    }
 }

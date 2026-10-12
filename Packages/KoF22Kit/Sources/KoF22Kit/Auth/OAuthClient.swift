@@ -67,7 +67,7 @@ public enum AuthError: Error, Equatable, Sendable {
 /// Authorization Code + PKCE against Authentik. Stateless; `AuthSession` owns tokens.
 public struct OAuthClient: Sendable {
    /// Revocation is best effort and must not hold up sign-out.
-   static let revokeTimeout: TimeInterval = 10
+   static let revokeTimeout: TimeInterval = 5
 
    /// Lifetime assumed when the token response leaves out `expires_in`.
    static let defaultTokenLifetime: TimeInterval = 300
