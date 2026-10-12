@@ -1,48 +1,100 @@
+/*
+ * Copyright (c) 2026 James Maes (KofTwentyTwo)
+ * SPDX-License-Identifier: MIT
+ */
+
 #if os(iOS)
    import PhotosUI
    import SwiftUI
-   import Textual
 
-   /// The composer: opens with the keyboard up on the body field.
+   /// The composer: opens with the keyboard up on the body field. The sections live in
+   /// their own views; this view owns the focus, the sheets and the alerts.
    public struct ComposeView: View {
+      /// The app's composition root.
       @Environment(AppModel.self) private var app
+      /// The post being written.
       @Bindable var model: ComposeModel
+      /// Called after a successful submit or discard when the composer is presented
+      /// modally (drafts, edits, Share Extension); nil for the Compose tab.
       let onDone: (() -> Void)?
 
+      /// The field with keyboard focus.
       @FocusState private var focus: Field?
+      /// Whether the editor shows the rendered preview instead of the text.
       @State private var preview = false
+      /// Items chosen in the photo picker, consumed as soon as they arrive.
       @State private var pickerItems: [PhotosPickerItem] = []
+      /// Whether the camera is presented.
       @State private var showCamera = false
+      /// Whether the schedule sheet is presented.
       @State private var showSchedule = false
-      @State private var scheduleDate = Date.now.addingTimeInterval(3600)
+      /// Date chosen in the schedule sheet; one hour ahead by default.
+      @State private var scheduleDate = Date.now.addingTimeInterval(ComposeScheduleSheet.defaultLead)
+      /// Photo whose alt-text sheet is open.
       @State private var editingPhoto: ComposedPhoto?
+      /// Whether the arrange-photos sheet is presented.
       @State private var arranging = false
+      /// Whether the link and location section is expanded.
       @State private var showDetails = false
+      /// Whether the discard confirmation is shown.
       @State private var confirmDiscard = false
+      /// Whether the photo picker is presented.
       @State private var showPhotoPicker = false
+      /// Whether the "allow full photo access" alert is shown.
       @State private var photoAccessPrompt = false
-      private let permissions = Permissions.shared
 
-      enum Field { case body, title, tags, link, location }
+      /// Fields that can hold keyboard focus.
+      enum Field {
+         /// The Markdown body.
+         case body
+         /// The optional title.
+         case title
+         /// The tag input.
+         case tags
+         /// The link URL.
+         case link
+         /// The location label.
+         case location
+      }
 
+      /// Creates a composer for `model`; `onDone` makes it behave as a modal.
       public init(model: ComposeModel, onDone: (() -> Void)? = nil) {
          self.model = model
          self.onDone = onDone
       }
 
+      /// The composer with its sheets, alerts and the discard confirmation attached.
       public var body: some View {
-         ScrollView {
-            VStack(alignment: .leading, spacing: 14) {
-               header
-               if model.showTitle { titleField }
-               editor
-               photoStrip
-               tagsSection
-               if showDetails || !model.composition.linkURL.isEmpty || !model.composition.locationLabel.isEmpty {
-                  detailsSection
+         composer
+            .sheet(item: $editingPhoto) { photo in
+               PhotoDetailSheet(photo: photo, onSave: model.update, onRemove: model.removePhoto)
+            }
+            .sheet(isPresented: $arranging) { ArrangePhotosSheet(model: model) }
+            .sheet(isPresented: $showSchedule) {
+               ComposeScheduleSheet(date: $scheduleDate, isPresented: $showSchedule) { date in submit(.scheduled, at: date) }
+            }
+            .fullScreenCover(isPresented: $showCamera) {
+               CameraPicker { data in model.addPhoto(data: data, ext: CameraPicker.fileExtension) }.ignoresSafeArea()
+            }
+            .alert("Heads up", isPresented: messageIsPresented) {
+               Button("OK", role: .cancel) {}
+            } message: {
+               Text(model.message ?? "")
+            }
+            .confirmationDialog("Discard this post?", isPresented: $confirmDiscard, titleVisibility: .visible) {
+               Button("Discard", role: .destructive) {
+                  Task {
+                     await model.discard()
+                     onDone?()
+                  }
                }
             }
-            .padding()
+      }
+
+      /// The scrolling form, the action bar, the keyboard toolbar and the photo picker.
+      private var composer: some View {
+         ScrollView {
+            sections.padding()
          }
          .scrollDismissesKeyboard(.interactively)
          .background(Theme.background)
@@ -67,76 +119,31 @@
             matching: .images, photoLibrary: .shared()
          )
          .alert("Allow full photo access", isPresented: $photoAccessPrompt) {
-            Button("Open Settings") { permissions.openSettings() }
+            Button("Open Settings") { Permissions.shared.openSettings() }
             Button("Pick anyway") { showPhotoPicker = true }
             Button("Cancel", role: .cancel) {}
          } message: {
-            Text("KoF22 Post works best with access to all photos, so it can upload originals and keep their location when you ask. Choose \"Full Access\" in Settings › Privacy › Photos.")
+            Text(
+               "KoF22 Post works best with access to all photos, so it can upload originals and keep their location when you ask. Choose \"Full Access\" in Settings › Privacy › Photos."
+            )
          }
-         .sheet(item: $editingPhoto) { photo in
-            PhotoDetailSheet(photo: photo, onSave: model.update, onRemove: model.removePhoto)
-         }
-         .sheet(isPresented: $arranging) { ArrangePhotosSheet(model: model) }
-         .sheet(isPresented: $showSchedule) { scheduleSheet }
-         .fullScreenCover(isPresented: $showCamera) {
-            CameraPicker { data in model.addPhoto(data: data, ext: "jpg") }.ignoresSafeArea()
-         }
-         .alert("Heads up", isPresented: Binding(get: { model.message != nil }, set: { if !$0 { model.message = nil } })) {
-            Button("OK", role: .cancel) {}
-         } message: {
-            Text(model.message ?? "")
-         }
-         .confirmationDialog("Discard this post?", isPresented: $confirmDiscard, titleVisibility: .visible) {
-            Button("Discard", role: .destructive) {
-               Task {
-                  await model.discard()
-                  onDone?()
-               }
+      }
+
+      /// Header, optional title, editor, photos, tags and, when used, link and location.
+      private var sections: some View {
+         VStack(alignment: .leading, spacing: Theme.Spacing.xLarge) {
+            ComposeHeader(model: model, showsCursor: focus == nil && model.composition.isEmpty)
+            if model.showTitle { titleField }
+            ComposeEditor(model: model, preview: $preview, focus: $focus)
+            ComposePhotoStrip(model: model, editingPhoto: $editingPhoto, arranging: $arranging)
+            ComposeTagsSection(model: model, focus: $focus)
+            if showDetails || !model.composition.linkURL.isEmpty || !model.composition.locationLabel.isEmpty {
+               ComposeDetailsSection(model: model, focus: $focus)
             }
          }
       }
 
-      // MARK: Sections
-
-      private var header: some View {
-         VStack(alignment: .leading, spacing: 8) {
-            PromptLabel("~/blogs/\(model.composition.blog)", cursor: focus == nil && model.composition.isEmpty)
-            blogPicker
-         }
-      }
-
-      /// Which blog this post goes to; changeable for new posts and edits.
-      private var blogPicker: some View {
-         HStack(spacing: 8) {
-            Text("Post to").font(Theme.mono(.caption)).foregroundStyle(Theme.muted)
-            Menu {
-               Picker("Blog", selection: $model.composition.blog) {
-                  ForEach(app.blogs) { blog in
-                     Text(blog.name).tag(blog.slug)
-                  }
-               }
-            } label: {
-               HStack(spacing: 4) {
-                  Text(app.blogs.first { $0.slug == model.composition.blog }?.name ?? model.composition.blog)
-                  Image(systemName: "chevron.up.chevron.down").font(.caption2)
-               }
-               .font(Theme.mono(.callout, weight: .semibold))
-               .foregroundStyle(Theme.accent)
-               .padding(.horizontal, 10)
-               .padding(.vertical, 5)
-               .overlay(Capsule().stroke(Theme.accent.opacity(0.4)))
-            }
-            .onChange(of: model.composition.blog) { _, _ in
-               model.changed()
-               model.tagInputChanged()
-            }
-            .accessibilityLabel("Blog: \(app.blogs.first { $0.slug == model.composition.blog }?.name ?? model.composition.blog)")
-            .accessibilityHint("Choose which blog to post to")
-            .accessibilityIdentifier("compose.blogMenu")
-            Spacer()
-         }
-      }
-
+      /// The optional title; Return moves on to the body.
       private var titleField: some View {
          TextField("Title (optional)", text: $model.composition.title)
             .font(.title3.weight(.semibold))
@@ -147,282 +154,24 @@
             .accessibilityIdentifier("compose.title")
       }
 
-      private var editor: some View {
-         VStack(alignment: .leading, spacing: 6) {
-            Picker("Mode", selection: $preview) {
-               Text("Write").tag(false)
-               Text("Preview").tag(true)
-            }
-            .pickerStyle(.segmented)
-            .frame(maxWidth: 220)
-            .accessibilityIdentifier("compose.previewToggle")
-
-            if preview {
-               VStack(alignment: .leading, spacing: 10) {
-                  if model.composition.body.isEmpty && model.composition.photos.isEmpty {
-                     Text("Nothing to preview").foregroundStyle(Theme.muted)
-                  }
-                  else {
-                     StructuredText(markdown: model.composition.body)
-                     ForEach(model.composition.photos) { photo in
-                        PhotoPreview(photo: photo)
-                     }
-                  }
-               }
-               .frame(maxWidth: .infinity, minHeight: 160, alignment: .topLeading)
-               .padding(10)
-               .background(Theme.surface, in: RoundedRectangle(cornerRadius: 8))
-            }
-            else {
-               ZStack(alignment: .topLeading) {
-                  if model.composition.body.isEmpty {
-                     Text("What's happening? Markdown works.")
-                        .foregroundStyle(Theme.muted)
-                        .padding(.top, 8)
-                        .padding(.leading, 5)
-                        .allowsHitTesting(false)
-                  }
-                  TextEditor(text: $model.composition.body)
-                     .focused($focus, equals: .body)
-                     .frame(minHeight: 160)
-                     .scrollContentBackground(.hidden)
-                     .onChange(of: model.composition.body) { model.changed() }
-                     .accessibilityLabel("Post text")
-                     .accessibilityIdentifier("compose.body")
-               }
-               .padding(6)
-               .background(Theme.surface, in: RoundedRectangle(cornerRadius: 8))
-               .overlay(RoundedRectangle(cornerRadius: 8).stroke(focus == .body ? Theme.accent.opacity(0.6) : Theme.border))
-            }
-         }
-      }
-
-      @ViewBuilder
-      private var photoStrip: some View {
-         if !model.composition.photos.isEmpty || model.isLoadingPhotos {
-            VStack(alignment: .leading, spacing: 6) {
-               ScrollView(.horizontal, showsIndicators: false) {
-                  HStack(spacing: 8) {
-                     ForEach(model.composition.photos) { photo in
-                        Button {
-                           editingPhoto = photo
-                        } label: {
-                           PhotoThumbnail(photo: photo, size: 84)
-                              .overlay(alignment: .bottomLeading) {
-                                 if photo.altText.isEmpty {
-                                    Text("ALT").font(Theme.mono(.caption2, weight: .bold))
-                                       .padding(3).background(Theme.warning, in: RoundedRectangle(cornerRadius: 3))
-                                       .foregroundStyle(.black).padding(4)
-                                 }
-                              }
-                        }
-                        .accessibilityLabel(photo.altText.isEmpty ? "Photo without alt text" : "Photo: \(photo.altText)")
-                        .accessibilityHint("Edit alt text or remove")
-                     }
-                     if model.isLoadingPhotos { ProgressView().frame(width: 84, height: 84) }
-                  }
-               }
-               HStack {
-                  if model.photosMissingAltText > 0 {
-                     Label("\(model.photosMissingAltText) without alt text", systemImage: "text.below.photo")
-                        .font(.caption).foregroundStyle(Theme.warning)
-                  }
-                  Spacer()
-                  if model.composition.photos.count > 1 {
-                     Button("Arrange") { arranging = true }.font(.caption)
-                  }
-               }
-            }
-         }
-      }
-
-      private var tagsSection: some View {
-         VStack(alignment: .leading, spacing: 6) {
-            if !model.composition.tags.isEmpty {
-               FlowLayout(spacing: 6) {
-                  ForEach(model.composition.tags, id: \.self) { tag in
-                     TagChip(tag) { model.removeTag(tag) }
-                  }
-               }
-            }
-            HStack {
-               Text("#").font(Theme.mono()).foregroundStyle(Theme.accent)
-               TextField("Add tags", text: $model.tagInput)
-                  .font(Theme.mono(.callout))
-                  .textInputAutocapitalization(.never)
-                  .autocorrectionDisabled()
-                  .focused($focus, equals: .tags)
-                  .submitLabel(.done)
-                  .onSubmit { model.addTag(model.tagInput) }
-                  .onChange(of: model.tagInput) { model.tagInputChanged() }
-                  .onChange(of: focus) { _, field in if field == .tags { model.tagInputChanged() } }
-                  .accessibilityIdentifier("compose.tags")
-            }
-            if focus == .tags && !model.tagSuggestions.isEmpty {
-               ScrollView(.horizontal, showsIndicators: false) {
-                  HStack {
-                     ForEach(model.tagSuggestions) { tag in
-                        Button {
-                           model.addTag(tag.name)
-                        } label: {
-                           TagChip(tag.name)
-                        }
-                        .buttonStyle(.plain)
-                     }
-                  }
-               }
-            }
-         }
-      }
-
-      private var detailsSection: some View {
-         VStack(alignment: .leading, spacing: 10) {
-            HStack {
-               Image(systemName: "link").foregroundStyle(Theme.muted)
-               TextField("https://", text: $model.composition.linkURL)
-                  .keyboardType(.URL)
-                  .textInputAutocapitalization(.never)
-                  .autocorrectionDisabled()
-                  .focused($focus, equals: .link)
-                  .onChange(of: model.composition.linkURL) { model.linkChanged() }
-                  .accessibilityIdentifier("compose.link")
-            }
-            if let preview = model.linkPreview {
-               LinkPreviewCard(preview: preview)
-            }
-            else if let error = model.linkPreviewError {
-               Text(error).font(.caption).foregroundStyle(Theme.muted)
-            }
-            HStack {
-               Image(systemName: "mappin.and.ellipse").foregroundStyle(Theme.muted)
-               TextField("Location label (optional)", text: $model.composition.locationLabel)
-                  .focused($focus, equals: .location)
-                  .onChange(of: model.composition.locationLabel) { model.changed() }
-               if model.isLocating {
-                  ProgressView().controlSize(.small)
-               }
-               else {
-                  Button {
-                     Task { await model.useCurrentLocation() }
-                  } label: {
-                     Image(systemName: "location.fill")
-                  }
-                  .accessibilityLabel("Use current location")
-               }
-            }
-            if !model.composition.photos.isEmpty {
-               Toggle(isOn: $model.composition.keepLocation) {
-                  VStack(alignment: .leading) {
-                     Text("Keep photo location")
-                     Text("GPS data in photos is removed unless you turn this on. It will be public.")
-                        .font(.caption).foregroundStyle(Theme.muted)
-                  }
-               }
-               .tint(Theme.accent)
-            }
-         }
-         .padding(12)
-         .background(Theme.surface, in: RoundedRectangle(cornerRadius: 8))
-      }
-
+      /// The bottom bar with the attachment buttons, the options menu and Post.
       private var actionBar: some View {
-         HStack(spacing: 14) {
-            Button {
-               Task {
-                  let status = await permissions.requestPhotos()
-                  if status == .authorized {
-                     showPhotoPicker = true
-                  }
-                  else {
-                     photoAccessPrompt = true
-                  }
-               }
-            } label: {
-               Image(systemName: "photo.on.rectangle.angled")
-            }
-            .accessibilityLabel("Add photos")
-            .accessibilityIdentifier("compose.addPhotos")
-            if UIImagePickerController.isSourceTypeAvailable(.camera) {
-               Button {
-                  showCamera = true
-               } label: {
-                  Image(systemName: "camera")
-               }
-               .accessibilityLabel("Take photo")
-            }
-            Button {
-               showDetails.toggle(); if showDetails { focus = .link }
-            } label: {
-               Image(systemName: "link")
-            }
-            .accessibilityLabel("Add link")
-            Button {
-               showDetails = true
-               Task { await model.useCurrentLocation() }
-            } label: {
-               Image(systemName: "location")
-            }
-            .accessibilityLabel("Add current location")
-            Spacer()
-            if !model.composition.isEmpty || onDone != nil {
-               Menu {
-                  Toggle("Title", isOn: $model.showTitle)
-                  if !model.isEditing || model.composition.status != .published {
-                     Button("Save as draft", systemImage: "doc") { submit(.draft) }
-                  }
-                  Button("Schedule…", systemImage: "calendar.badge.clock") { showSchedule = true }
-                  if !model.isEditing {
-                     Button("Discard", systemImage: "trash", role: .destructive) { confirmDiscard = true }
-                  }
-               } label: {
-                  Image(systemName: "ellipsis.circle")
-               }
-               .accessibilityLabel("More options")
-               .accessibilityIdentifier("compose.more")
-            }
-            Button {
-               submit(model.isEditing && model.composition.status != .published ? model.composition.status : .published)
-            } label: {
-               Text(model.isEditing ? "Save" : "Post")
-                  .font(Theme.mono(.body, weight: .bold))
-                  .padding(.horizontal, 18)
-                  .padding(.vertical, 8)
-                  .background(Theme.accent, in: Capsule())
-                  .foregroundStyle(Color.black)
-            }
-            .disabled(model.composition.isEmpty || model.isSubmitting)
-            .opacity(model.composition.isEmpty ? 0.5 : 1)
-            .accessibilityIdentifier("compose.post")
+         ComposeActionBar(
+            model: model, isModal: onDone != nil, focus: $focus, showPhotoPicker: $showPhotoPicker,
+            photoAccessPrompt: $photoAccessPrompt, showCamera: $showCamera, showDetails: $showDetails,
+            showSchedule: $showSchedule, confirmDiscard: $confirmDiscard
+         ) { status in
+            submit(status)
          }
-         .font(.title3)
-         .foregroundStyle(Theme.accent)
-         .padding(.horizontal)
-         .padding(.vertical, 10)
-         .background(.bar)
       }
 
-      private var scheduleSheet: some View {
-         NavigationStack {
-            Form {
-               DatePicker("Publish at", selection: $scheduleDate, in: Date.now.addingTimeInterval(120)...Date.now.addingTimeInterval(365 * 86400))
-                  .datePickerStyle(.graphical)
-                  .tint(Theme.accent)
-            }
-            .navigationTitle("Schedule")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-               ToolbarItem(placement: .cancellationAction) { Button("Cancel") { showSchedule = false } }
-               ToolbarItem(placement: .confirmationAction) {
-                  Button("Schedule") {
-                     showSchedule = false
-                     submit(.scheduled, at: scheduleDate)
-                  }
-               }
-            }
-         }
-         .presentationDetents([.large])
+      /// Presents the model's message as an alert and clears it when dismissed.
+      private var messageIsPresented: Binding<Bool> {
+         Binding(get: { model.message != nil }, set: { if !$0 { model.message = nil } })
       }
 
+      /// Queues the post. A modal composer then closes; the Compose tab clears itself and
+      /// switches to the Outbox so the post can be followed.
       private func submit(_ status: PostStatus, at date: Date? = nil) {
          Task {
             if await model.submit(as: status, publishAt: date) {
@@ -436,22 +185,6 @@
                }
             }
          }
-      }
-   }
-
-   struct LinkPreviewCard: View {
-      let preview: LinkPreview
-
-      var body: some View {
-         VStack(alignment: .leading, spacing: 4) {
-            Text(preview.title ?? preview.url).font(.subheadline.weight(.semibold)).foregroundStyle(Theme.heading)
-            if let description = preview.description { Text(description).font(.caption).foregroundStyle(Theme.body).lineLimit(3) }
-            Text(URL(string: preview.url)?.host() ?? preview.url).font(Theme.mono(.caption2)).foregroundStyle(Theme.link)
-         }
-         .frame(maxWidth: .infinity, alignment: .leading)
-         .padding(10)
-         .overlay(RoundedRectangle(cornerRadius: 8).stroke(Theme.border))
-         .accessibilityElement(children: .combine)
       }
    }
 #endif
