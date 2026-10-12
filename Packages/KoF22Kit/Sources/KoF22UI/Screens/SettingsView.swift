@@ -112,6 +112,14 @@
                Text("api.kof22.com").tag(BackendMode.live)
             }
             LabeledContent("API version", value: app.apiVersion ?? Self.unknownValue)
+            NavigationLink("Diagnostics") { DiagnosticsView() }
+               .accessibilityIdentifier("settings.diagnostics")
+            Picker(
+               "Photo upload size",
+               selection: Binding(get: { app.settings.uploadSize }, set: { app.settings.uploadSize = $0 })
+            ) {
+               ForEach(UploadSizePreference.allCases, id: \.self) { size in Text(size.displayName).tag(size) }
+            }
          } header: {
             Text("Backend")
          } footer: {

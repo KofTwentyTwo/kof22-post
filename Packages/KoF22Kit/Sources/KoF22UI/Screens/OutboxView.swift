@@ -212,6 +212,7 @@
       /// Operation, photo count and what is happening now (phase, retry time, Open link).
       private var statusLine: some View {
          HStack(spacing: Theme.Spacing.medium) {
+            Text(item.state.displayName).font(Theme.mono(.caption2, weight: .medium)).foregroundStyle(Theme.heading)
             Text(operationLabel).font(Theme.mono(.caption2)).foregroundStyle(Theme.accent)
             if !item.composition.photos.isEmpty {
                Label("\(item.composition.photos.count)", systemImage: "photo").font(.caption2).foregroundStyle(Theme.muted)

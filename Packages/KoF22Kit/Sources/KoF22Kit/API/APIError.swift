@@ -141,6 +141,9 @@ public enum ErrorClassifier {
       return forbiddenCodes.contains(error.code)
    }
 
+   /// The status storage returns for a presigned upload URL that has expired.
+   static let storageExpiredStatus = 403
+
    /// The error codes that mean the account lacks permission to publish; `http_403` is a
    /// 403 whose body was not the error envelope.
    static let forbiddenCodes: Set<String> = ["forbidden", "insufficient_scope", "http_403"]
@@ -189,6 +192,15 @@ public enum ErrorClassifier {
          // request (local checks raise it too), so it is kept.      //
          //////////////////////////////////////////////////////////////
          return error.summary
+      }
+      if error.code == "upload_put_failed" {
+         //////////////////////////////////////////////////////////////
+         // storage answers a presigned PUT with 403 once the link  //
+         // has expired; that is not an account permission problem. //
+         //////////////////////////////////////////////////////////////
+         return error.status == storageExpiredStatus
+            ? "The photo upload link expired. Send again to start a new upload."
+            : "The photo upload to storage failed. It will be retried."
       }
       if error.code == "rate_limited", let seconds = error.retryAfter {
          return "Too many requests right now. Try again in \(Int(seconds.rounded(.up))) seconds."

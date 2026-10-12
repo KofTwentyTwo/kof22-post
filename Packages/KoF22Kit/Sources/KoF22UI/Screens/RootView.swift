@@ -65,7 +65,10 @@
       /// Switches on `AppModel.isSignedIn`.
       public var body: some View {
          Group {
-            if app.isSignedIn {
+            if app.isSignedIn, let reason = app.cannotPublishReason {
+               CannotPublishView(reason: reason)
+            }
+            else if app.isSignedIn {
                MainView()
             }
             else {

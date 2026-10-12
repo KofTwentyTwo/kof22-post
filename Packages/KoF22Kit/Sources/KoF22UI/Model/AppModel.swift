@@ -45,6 +45,9 @@ public final class AppModel {
 
    /// Blog used when neither settings nor the account name a default.
    static let fallbackBlogSlug = "quick-bits"
+   /// Shown when `/v1/me` reports an account that is not allowed to post.
+   static let cannotPostMessage =
+      "This KoF22 account can't publish. It needs the kof22:publish scope and a publisher group, and its email must belong to an author."
    /// Simulated network latency of the mock backend, in milliseconds.
    private static let mockLatencyMilliseconds = 350
    /// Shown when the on-disk store cannot be opened.
@@ -78,6 +81,9 @@ public final class AppModel {
    public private(set) var me: Me?  // swiftlint:disable:this identifier_name
    /// Semantic version reported by the API, shown in Settings.
    public private(set) var apiVersion: String?
+   /// Why the signed-in account cannot publish (a 403 from `/v1/me`, or `canPost` false),
+   /// or nil when it can. The root view shows a dedicated screen while this is set.
+   public private(set) var cannotPublishReason: String?
    /// The latest error to show the user, or nil.
    public var lastError: String?
    /// The selected tab of the signed-in shell.
@@ -127,17 +133,39 @@ public final class AppModel {
       mockBackend = backend
       let auth = AuthSession(mode: mode, store: secureStore)
       self.auth = auth
-      service = mode == .mock ? .mock(backend: backend, auth: auth) : .live(auth: auth)
+      service = Self.makeService(mode: mode, backend: backend, auth: auth, context: context)
       let box = box
+      let sharedSettings = settings
       processor = OutboxProcessor(
          store: store,
          service: { await box.service },
-         notifier: context == .shareExtension || context == .uiTest ? SilentNotifier() : LocalNotifier()
+         notifier: context == .shareExtension || context == .uiTest ? SilentNotifier() : LocalNotifier(),
+         uploadSize: { sharedSettings.uploadSize }
       )
       if opened.isFallback {
          lastError = Self.storageFallbackMessage
       }
    }
+
+   /// Session identifier for the Share Extension's background uploads; an extension
+   /// must not reuse the app's session identifier.
+   static let shareExtensionUploadSession = "com.kof22.post.uploads.share"
+
+   /// Builds the service for `mode`. Live photo uploads use a background URLSession so
+   /// they survive suspension (ADR-0007); UI tests never reach the network.
+   static func makeService(mode: BackendMode, backend: MockBackend, auth: AuthSession, context: Context) -> SiteService {
+      switch (mode, context) {
+      case (.mock, _), (_, .uiTest):
+         return .mock(backend: backend, auth: auth)
+      case (.live, .shareExtension):
+         return .live(auth: auth, uploader: BackgroundUploadPerformer.performer(for: shareExtensionUploadSession))
+      case (.live, .app):
+         return .live(auth: auth, uploader: BackgroundUploadPerformer.shared)
+      }
+   }
+
+   /// Anonymous reads of published content (blogs, posts, tags), cached briefly.
+   public var reads: PublicReadService { service.reads }
 
    /// Opens the SwiftData container. When the requested store fails, it falls back to an
    /// in-memory store and reports `isFallback` so the caller can tell the user.
@@ -204,18 +232,24 @@ public final class AppModel {
       await box.set(nil)
       isSignedIn = false
       me = nil
+      cannotPublishReason = nil
    }
 
    /// Reloads the account and API version. An expired session signs out; other failures
    /// keep the last loaded account and only report when there is none.
    public func refreshMe() async {
       do {
-         me = try await service.me()
+         let account = try await service.me()
+         me = account
+         cannotPublishReason = account.canPost ? nil : Self.cannotPostMessage
          lastError = nil
       }
       catch {
          Log.api.warning("Account could not be loaded: \(error.localizedDescription, privacy: .public)")
-         if ErrorClassifier.disposition(for: error) == .needsSignIn {
+         if ErrorClassifier.isForbidden(error) {
+            cannotPublishReason = ErrorClassifier.message(for: error)
+         }
+         else if ErrorClassifier.disposition(for: error) == .needsSignIn {
             await signOut()
             lastError = "Your session expired. Sign in again."
          }
@@ -246,7 +280,7 @@ public final class AppModel {
       settings.backendMode = newMode
       mode = newMode
       auth = AuthSession(mode: newMode, store: secureStore)
-      service = newMode == .mock ? .mock(backend: mockBackend, auth: auth) : .live(auth: auth)
+      service = Self.makeService(mode: newMode, backend: mockBackend, auth: auth, context: context)
       await bootstrap()
    }
 
@@ -280,6 +314,11 @@ public final class AppModel {
          composition, operation: operation, serverPostID: serverPostID,
          ifMatch: ifMatch, replacing: draftID)
       kickOutbox()
+      ///////////////////////////////////////////////////////////////
+      // cached site reads would hide the new post until the cache //
+      // expired, so they are dropped as soon as a post is queued. //
+      ///////////////////////////////////////////////////////////////
+      await service.reads.cache.removeAll()
       return id
    }
 

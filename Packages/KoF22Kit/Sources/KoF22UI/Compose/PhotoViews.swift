@@ -100,6 +100,13 @@
                } footer: {
                   Text("Shown to people using VoiceOver and when images do not load.")
                }
+               Section {
+                  Toggle("Keep this photo's location", isOn: $photo.keepLocation)
+                     .tint(Theme.accent)
+                     .accessibilityIdentifier("photo.keepLocation")
+               } footer: {
+                  Text("Off by default: GPS data is removed before upload. When on, the location in this photo is published.")
+               }
                Section("Caption") {
                   TextField("Optional caption", text: $photo.caption, axis: .vertical).lineLimit(Theme.LineLimit.captionField)
                }

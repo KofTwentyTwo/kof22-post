@@ -113,6 +113,14 @@
                }
             }
             .navigationTitle("Posts")
+            .toolbar {
+               NavigationLink {
+                  SiteBlogsView()
+               } label: {
+                  Label("On kof22.com", systemImage: "globe")
+               }
+               .accessibilityIdentifier("posts.site")
+            }
             .navigationDestination(for: Post.self) { post in
                PostDetailView(post: post) { model.remove($0) }
             }

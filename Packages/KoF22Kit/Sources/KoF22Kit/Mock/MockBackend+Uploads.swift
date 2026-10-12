@@ -46,8 +46,8 @@ extension MockBackend {
    /// refused with 403, as S3 does.
    public func receiveUpload(id: String, from fileURL: URL) throws {
       reload()
-      guard var upload = state.uploads[id] else { throw APIError(status: Status.forbidden, code: "forbidden", message: "Unknown upload URL") }
-      guard upload.expiresAt > now() else { throw APIError(status: Status.forbidden, code: "forbidden", message: "Upload URL expired") }
+      guard var upload = state.uploads[id] else { throw APIError(status: Status.forbidden, code: "upload_put_failed", message: "Unknown upload URL") }
+      guard upload.expiresAt > now() else { throw APIError(status: Status.forbidden, code: "upload_put_failed", message: "Upload URL expired") }
       let name = "upload-\(id)"
       let target = try mediaDirectory().appending(path: name)
       ////////////////////////////////////////////////////////////////

@@ -157,6 +157,16 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
       return true
    }
 
+   /// iOS relaunches the app when background photo uploads finish (ADR-0007); the
+   /// uploader delivers the results and calls `completionHandler` when it is done.
+   func application(
+      _ application: UIApplication,
+      handleEventsForBackgroundURLSession identifier: String,
+      completionHandler: @escaping @Sendable () -> Void
+   ) {
+      BackgroundUploadPerformer.handleEvents(forBackgroundURLSession: identifier, completionHandler: completionHandler)
+   }
+
    /// Shows notifications as banners even while the app is in the foreground.
    nonisolated func userNotificationCenter(
       _ center: UNUserNotificationCenter, willPresent notification: UNNotification

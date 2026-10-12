@@ -93,3 +93,19 @@ import Testing
       #expect(limits.photoContentTypes == ["image/jpeg", "image/png"])
    }
 }
+
+/// Storage errors on the presigned PUT get their own wording.
+@Suite struct StorageErrorMessageTests {
+   /// An expired upload link is explained as such, not as a permission problem.
+   @Test func expiredUploadLinkIsNotReportedAsForbidden() {
+      let expired = APIError(status: 403, code: "upload_put_failed", message: "Request has expired")
+      #expect(ErrorClassifier.userMessage(for: expired).contains("expired"))
+      #expect(!ErrorClassifier.isForbidden(expired))
+   }
+
+   /// Other storage failures say the upload will be retried.
+   @Test func otherStorageFailuresAreRetried() {
+      let failed = APIError(status: 500, code: "upload_put_failed", message: "Internal")
+      #expect(ErrorClassifier.userMessage(for: failed).contains("retried"))
+   }
+}

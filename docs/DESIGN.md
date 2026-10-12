@@ -111,7 +111,7 @@ localDraft ──(Post / Save draft / Schedule)──► queued ──► sendin
   - when connectivity returns (`NWPathMonitor`);
   - in the background-task time iOS grants when the app is backgrounded;
   - via `BGAppRefreshTask` (`com.kof22.post.outbox`) while items are pending.
-- **Deferred:** a background `URLSession` for the presigned PUT, so uploads survive suspension.
+- **Background uploads:** the presigned PUT runs on a background `URLSession` (ADR-0007), so uploads survive suspension; an expired URL restarts from the ticket step.
   Presigned URLs need no auth header, which makes this a clean fit. It is phase 4 in `PLAN.md`.
 - **Cache:** the last fetched copy of my posts is cached in SwiftData (`CachedPost`) for offline
   viewing.

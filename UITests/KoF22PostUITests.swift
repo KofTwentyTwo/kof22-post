@@ -110,6 +110,22 @@ final class KoF22PostUITests: XCTestCase {
       XCTAssertTrue(app.staticTexts["Sent"].waitForExistence(timeout: Self.sendTimeout))
    }
 
+   /// The Posts tab opens the published blogs (anonymous reads, served by the mock here)
+   /// and a blog's published posts.
+   func testSiteBlogsListPublishedPosts() {
+      signIn()
+      tab("Posts")
+      let site = app.buttons["posts.site"]
+      XCTAssertTrue(site.waitForExistence(timeout: Self.standardTimeout))
+      site.tap()
+      let quickBits = app.staticTexts["Quick Bits"]
+      XCTAssertTrue(quickBits.waitForExistence(timeout: Self.standardTimeout))
+      quickBits.tap()
+      XCTAssertTrue(
+         app.staticTexts["Welcome to the mock Site API. Posts you write here stay on this device."]
+            .waitForExistence(timeout: Self.standardTimeout))
+   }
+
    /// Signing out from Settings returns to the sign-in screen.
    func testSignOutReturnsToSignIn() {
       signIn()

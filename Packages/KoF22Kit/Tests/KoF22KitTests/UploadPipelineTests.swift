@@ -216,7 +216,7 @@ struct PipelineRig {
       await rig.processor.drain()
       let item = try await rig.item(id)
       #expect(item.state == .failed)
-      #expect(item.lastError == "Upload URL expired")
+      #expect(item.lastError?.localizedCaseInsensitiveContains("expired") == true)
       #expect(item.composition.photos.first?.uploadGeneration == 1)
       #expect(rig.transport.keys(for: "createUpload").count == 2)
       ////////////////////////////////////////////////////////////////

@@ -33,6 +33,6 @@ edits carry `If-Match` and a 412 becomes a user decision instead of an overwrite
 ## Consequences
 
 - The store lives in the App Group so the Share Extension and App Intents share it.
-- Background `URLSession` uploads are not used yet (planned, `docs/PLAN.md` phase 4).
+- Photo bytes upload on a background `URLSession` since 2026-10-12 (ADR-0007).
 - Security: queued photos stay in the App Group container until sent; GPS is removed
-  before upload unless the post opts in (ADR-0005).
+  before upload unless the photo opts in (ADR-0005).

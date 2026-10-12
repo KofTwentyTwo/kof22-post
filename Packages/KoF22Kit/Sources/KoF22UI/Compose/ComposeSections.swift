@@ -274,14 +274,8 @@
             }
             locationField
             if !model.composition.photos.isEmpty {
-               Toggle(isOn: $model.composition.keepLocation) {
-                  VStack(alignment: .leading) {
-                     Text("Keep photo location")
-                     Text("GPS data in photos is removed unless you turn this on. It will be public.")
-                        .font(.caption).foregroundStyle(Theme.muted)
-                  }
-               }
-               .tint(Theme.accent)
+               Text("Photo location (GPS) is removed unless you turn it on for a photo: tap the photo.")
+                  .font(.caption).foregroundStyle(Theme.muted)
             }
          }
          .padding(Theme.Spacing.large)
