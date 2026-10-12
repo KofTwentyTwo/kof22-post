@@ -46,3 +46,5 @@ excluded:
   - Tools/OpenAPIGen/.build
   - build
   - KoF22Post.xcodeproj
+  # Temporary agent checkouts (git worktrees) are not part of this tree.
+  - .claude

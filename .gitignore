@@ -48,3 +48,6 @@ fastlane/test_output
 .idea/
 .vscode/
 Config/Local.xcconfig
+
+# Agent worktrees
+.claude/worktrees/
