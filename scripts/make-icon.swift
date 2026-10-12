@@ -43,11 +43,25 @@ func fail(_ message: String) -> Never {
    exit(EXIT_FAILURE)
 }
 
-/// Draws the icon into a bitmap and returns it as PNG data.
+/// Bits per colour component of the icon bitmap.
+let bitsPerComponent = 8
+
+/// Draws the icon into an opaque 1024 x 1024 bitmap and returns it as PNG data. App Store
+/// Connect rejects an app icon that has an alpha channel, so the bitmap has none
+/// (`noneSkipLast`), and it is sized in pixels so no Retina scaling or resize is needed.
 func renderIcon() -> Data {
    let size = IconSpec.size
-   let image = NSImage(size: NSSize(width: size, height: size))
-   image.lockFocus()
+   let pixels = Int(size)
+   guard
+      let space = CGColorSpace(name: CGColorSpace.sRGB),
+      let bitmap = CGContext(
+         data: nil, width: pixels, height: pixels, bitsPerComponent: bitsPerComponent, bytesPerRow: 0,
+         space: space, bitmapInfo: CGImageAlphaInfo.noneSkipLast.rawValue)
+   else {
+      fail("could not create the icon bitmap")
+   }
+   NSGraphicsContext.saveGraphicsState()
+   NSGraphicsContext.current = NSGraphicsContext(cgContext: bitmap, flipped: false)
    IconSpec.background.setFill()
    NSRect(x: 0, y: 0, width: size, height: size).fill()
    let dots: [NSColor] = [.systemRed, .systemYellow, .systemGreen]
@@ -66,11 +80,9 @@ func renderIcon() -> Data {
    let bounds = text.size()
    let half = 2.0
    text.draw(at: NSPoint(x: (size - bounds.width) / half, y: (size - bounds.height) / half - IconSpec.promptDrop))
-   image.unlockFocus()
-   guard let tiff = image.tiffRepresentation, let rep = NSBitmapImageRep(data: tiff) else {
-      fail("could not rasterise the icon")
-   }
-   guard let png = rep.representation(using: .png, properties: [:]) else {
+   NSGraphicsContext.restoreGraphicsState()
+   guard let image = bitmap.makeImage() else { fail("could not rasterise the icon") }
+   guard let png = NSBitmapImageRep(cgImage: image).representation(using: .png, properties: [:]) else {
       fail("could not encode the icon as PNG")
    }
    return png
