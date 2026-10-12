@@ -1,5 +1,6 @@
 # Build, test, format, lint and code generation. CI runs these same targets
 # (K22-CI-03); CONTRIBUTING.md documents them.
+SHELL := /bin/bash
 SIM ?= iPhone 18 Pro
 DESTINATION ?= platform=iOS Simulator,name=$(SIM)
 XCODEBUILD = xcodebuild -project KoF22Post.xcodeproj -scheme KoF22Post -skipPackagePluginValidation
@@ -17,8 +18,11 @@ project:            ## Regenerate KoF22Post.xcodeproj from project.yml
 build:              ## Build the app for the simulator
 	$(XCODEBUILD) -destination '$(DESTINATION)' build
 
-build-ci:           ## Build for the simulator without signing (CI, CodeQL)
-	$(XCODEBUILD) -destination 'generic/platform=iOS Simulator' CODE_SIGNING_ALLOWED=NO $(BUILD_FLAGS) build
+build-ci:           ## Unsigned simulator build that fails on any warning, including tool warnings (CI)
+	@mkdir -p build
+	set -o pipefail; $(XCODEBUILD) -destination 'generic/platform=iOS Simulator' CODE_SIGNING_ALLOWED=NO \
+		$(BUILD_FLAGS) build 2>&1 | tee build/build-ci.log
+	@if grep -q 'warning:' build/build-ci.log; then grep 'warning:' build/build-ci.log; echo "build-ci: warnings are not allowed"; exit 1; fi
 
 # CodeQL traces the build; SwiftPM's manifest sandbox (sandbox-exec) cannot be spawned
 # under the tracer ("Bad CPU type in executable"), so the CodeQL build turns it off.
@@ -56,6 +60,7 @@ generate: $(GENERATOR)  ## Regenerate the API client from openapi/openapi.yaml
 	rm -f Packages/KoF22Kit/Sources/KoF22API/Generated/*.swift
 	$(GENERATOR) generate build/openapi-for-generator.yaml --config openapi/openapi-generator-config.yaml \
 		--output-directory Packages/KoF22Kit/Sources/KoF22API/Generated
+	scripts/merge-generated-types.sh Packages/KoF22Kit/Sources/KoF22API/Generated
 
 update-spec:        ## Show how the live spec differs; APPLY=1 replaces the copy and regenerates
 	APPLY=$(APPLY) scripts/update-spec.sh

@@ -12,6 +12,7 @@
 		3EE4FF7C6E1E56143D41E5A6 /* KoF22PostApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16F80E918228C7C40CABA50E /* KoF22PostApp.swift */; };
 		491A1C5AFFE7A9B88B151B0B /* KoF22UI in Frameworks */ = {isa = PBXBuildFile; productRef = 9EC66D2ABDFBBE22DA75F380 /* KoF22UI */; };
 		55784843EA62B3847BCA1373 /* ScreenshotTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4350994DB5CC8DF4BE3754D /* ScreenshotTests.swift */; };
+		808DA6651D14B948174D7176 /* AppIntents.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C9252F46A0BDB199FA924A7D /* AppIntents.framework */; };
 		93DAD4D8FF407D7B9FEFE110 /* KoF22UI in Frameworks */ = {isa = PBXBuildFile; productRef = 0DCB2309583D89A84A4E1949 /* KoF22UI */; };
 		A20D3D6C6C6AF00B2FAF7FEF /* OpenComposeIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 945C65084A9C21521A33A3CD /* OpenComposeIntent.swift */; };
 		AC8884A44E6BF2689C8F0913 /* KoF22Widgets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 268923C54911E60BB53CA45C /* KoF22Widgets.swift */; };
@@ -75,6 +76,7 @@
 		A2EFB31D74BD6163C4CAACEE /* PostIntents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostIntents.swift; sourceTree = "<group>"; };
 		B27217B9C8F1CA4F1CCEA6C9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		B4350994DB5CC8DF4BE3754D /* ScreenshotTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenshotTests.swift; sourceTree = "<group>"; };
+		C9252F46A0BDB199FA924A7D /* AppIntents.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppIntents.framework; path = System/Library/Frameworks/AppIntents.framework; sourceTree = SDKROOT; };
 		CDCEB8F78433182D3FE77FD4 /* KoF22PostUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = KoF22PostUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		D0DB1745C73CE4C81270B514 /* KoF22PostUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KoF22PostUITests.swift; sourceTree = "<group>"; };
 		DAD65B6393FA4C16C9C87824 /* KoF22PostWidgets.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = KoF22PostWidgets.entitlements; sourceTree = "<group>"; };
@@ -98,6 +100,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				93DAD4D8FF407D7B9FEFE110 /* KoF22UI in Frameworks */,
+				808DA6651D14B948174D7176 /* AppIntents.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -153,6 +156,14 @@
 			path = UITests;
 			sourceTree = "<group>";
 		};
+		617D9CE98BF0A74B02BC58CA /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				C9252F46A0BDB199FA924A7D /* AppIntents.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		B13B0FE4F35E587C6ADFC800 /* Packages */ = {
 			isa = PBXGroup;
 			children = (
@@ -182,6 +193,7 @@
 				0FC8DD3E33A6FCB4A49E737C /* ShareExtension */,
 				4EA5BE8FB91C843ED2BD6B7B /* UITests */,
 				2586E29D931176E4D189A66A /* Widgets */,
+				617D9CE98BF0A74B02BC58CA /* Frameworks */,
 				BA5C32B0719A7D670D955016 /* Products */,
 			);
 			sourceTree = "<group>";

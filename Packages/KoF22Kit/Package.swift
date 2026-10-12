@@ -6,9 +6,9 @@
 
 import PackageDescription
 
-/// Warnings are errors for hand-written code (K22-CODE-02, K22-CODE-SW-04). The
-/// generated client (KoF22API) is excluded by target (K22-CODE-25): the generator
-/// emits unused-import warnings that cannot be fixed without editing its output.
+/// Warnings are errors for every target (K22-CODE-02, K22-CODE-SW-04), including the
+/// generated client: `make generate` merges the generator's split type files so its
+/// imports are all used and it compiles without warnings.
 let strictSettings: [SwiftSetting] = [.treatAllWarnings(as: .error)]
 
 /// Shared code for the app, Share Extension and widgets:

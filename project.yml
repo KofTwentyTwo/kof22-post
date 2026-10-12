@@ -49,9 +49,13 @@ targets:
         CFBundleDisplayName: KoF22 Postr
         UILaunchScreen:
           UIColorName: ""
-        UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
-        # Portrait-only iPhone app: App Store packaging requires full screen in that case.
-        UIRequiresFullScreen: true
+        # App Store Connect rejects builds that do not list all four orientations
+        # (ITMS-90474, iPad multitasking); UIRequiresFullScreen is deprecated in iOS 26.
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationPortraitUpsideDown
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
         UIApplicationSceneManifest:
           UIApplicationSupportsMultipleScenes: false
         CFBundleURLTypes:
@@ -80,6 +84,10 @@ targets:
     dependencies:
       - package: KoF22Kit
         product: KoF22UI
+      # Xcode runs App Intents metadata extraction for every extension and warns
+      # when AppIntents.framework is not linked; linking the system framework keeps
+      # the build warning-free (and lets the extension host intents later).
+      - sdk: AppIntents.framework
     entitlements:
       path: ShareExtension/KoF22PostShare.entitlements
       properties:

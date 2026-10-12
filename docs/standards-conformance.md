@@ -19,7 +19,7 @@ Last reviewed: 2026-10-11, by James Maes with Claude Opus 5.5. Checked with
 | --- | --- | --- |
 | Formatting | K22-CODE-03, -07, K22-CODE-SW-01 | `.swift-format`, `.editorconfig`, `.gitattributes`; `make format-check` in CI and pre-commit |
 | Lint | K22-CODE-SW-03, -09, -12, -19 | `.swiftlint.yml` with `--strict`; `make lint` in CI and pre-commit |
-| Warnings as errors | K22-CODE-02, K22-CODE-SW-04 | `project.yml` and `Package.swift` (`strictSettings`); generated client excluded by target |
+| Warnings as errors | K22-CODE-02, K22-CODE-SW-04 | `project.yml` and `Package.swift` (`strictSettings` on every target, generated client included); `make build-ci` also fails on any tool warning in the build log |
 | Header comments, flower boxes, license headers | K22-CODE-09, -10, -24 | Every hand-written Swift file |
 | Errors and logging | K22-CODE-19, -20 | `Log` (os.Logger); remaining `try?` carry a comment saying why |
 | Tests and coverage | K22-TEST-01, -02, -10, -20, -22, -24 | `make test`, `make coverage` (100% lines of `Sources/KoF22Kit`), `KOF22_DATA_DIR` override for tests |
