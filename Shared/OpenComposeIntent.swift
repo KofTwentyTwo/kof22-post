@@ -14,7 +14,7 @@ struct OpenComposeIntent: AppIntent {
    /// Name shown in Shortcuts, Siri and the Control Center gallery.
    static let title: LocalizedStringResource = "New Field Note"
    /// Explanation shown under the action in Shortcuts.
-   static let description = IntentDescription("Open KoF22 Post ready to write.")
+   static let description = IntentDescription("Open KoF22 Postr ready to write.")
    /// The composer lives in the app, so running the intent brings the app forward.
    static let openAppWhenRun = true
 

@@ -27,7 +27,7 @@ struct ComposeControl: ControlWidget {
          }
       }
       .displayName("New Field Note")
-      .description("Open KoF22 Post ready to write.")
+      .description("Open KoF22 Postr ready to write.")
    }
 }
 

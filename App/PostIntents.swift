@@ -47,7 +47,7 @@ struct PostToFieldNotesIntent: AppIntent {
       let app = AppServices.shared
       if !app.isSignedIn { await app.bootstrap() }
       guard app.isSignedIn else {
-         throw IntentError.message("Open KoF22 Post and sign in first.")
+         throw IntentError.message("Open KoF22 Postr and sign in first.")
       }
       var composed: [ComposedPhoto] = []
       for file in photos ?? [] {

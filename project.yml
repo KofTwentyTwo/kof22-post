@@ -46,7 +46,7 @@ targets:
     info:
       path: App/Info.plist
       properties:
-        CFBundleDisplayName: KoF22 Post
+        CFBundleDisplayName: KoF22 Postr
         UILaunchScreen:
           UIColorName: ""
         UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
@@ -86,7 +86,7 @@ targets:
     info:
       path: ShareExtension/Info.plist
       properties:
-        CFBundleDisplayName: KoF22 Post
+        CFBundleDisplayName: KoF22 Postr
         KoF22KeychainGroup: "$(AppIdentifierPrefix)com.kof22.post.shared"
         NSPhotoLibraryUsageDescription: Choose photos for your posts.
         NSLocationWhenInUseUsageDescription: Tag a post with where you are.
@@ -117,7 +117,7 @@ targets:
     info:
       path: Widgets/Info.plist
       properties:
-        CFBundleDisplayName: KoF22 Post
+        CFBundleDisplayName: KoF22 Postr
         NSExtension:
           NSExtensionPointIdentifier: com.apple.widgetkit-extension
     settings:

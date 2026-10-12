@@ -87,7 +87,7 @@ struct ShareRootView: View {
             else {
                ContentUnavailableView(
                   "Not signed in", systemImage: "person.crop.circle.badge.exclamationmark",
-                  description: Text("Open KoF22 Post and sign in, then share again."))
+                  description: Text("Open KoF22 Postr and sign in, then share again."))
             }
          }
          .overlay {
@@ -96,7 +96,7 @@ struct ShareRootView: View {
                   .background(.regularMaterial, in: RoundedRectangle(cornerRadius: Self.overlayCornerRadius))
             }
          }
-         .navigationTitle("KoF22 Post")
+         .navigationTitle("KoF22 Postr")
          .navigationBarTitleDisplayMode(.inline)
          .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Cancel") { done(false) } } }
       }

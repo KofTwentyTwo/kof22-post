@@ -124,7 +124,7 @@
             Button("Cancel", role: .cancel) {}
          } message: {
             Text(
-               "KoF22 Post works best with access to all photos, so it can upload originals and keep their location when you ask. Choose \"Full Access\" in Settings › Privacy › Photos."
+               "KoF22 Postr works best with access to all photos, so it can upload originals and keep their location when you ask. Choose \"Full Access\" in Settings › Privacy › Photos."
             )
          }
       }

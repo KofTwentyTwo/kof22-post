@@ -1,6 +1,6 @@
-# KoF22 Post
+# KoF22 Postr
 
-Native iPhone app for posting to [kof22.com](https://kof22.com). Built for one
+KoF22 Postr is a native iPhone app for posting to [kof22.com](https://kof22.com). Built for one
 user, mainly for fast short-form posts to the Field Notes blog (`quick-bits`:
 text, photos, links), with longer posts to the other blogs as a secondary use.
 
