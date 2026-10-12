@@ -1,11 +1,9 @@
 // swift-tools-version: 6.2
-//
-// Shared code for the app, Share Extension and widgets.
-//   KoF22API  - client generated from openapi/openapi.yaml (`make generate`)
-//   KoF22Kit  - auth, API service, mock backend, outbox, media, persistence
-//   KoF22UI   - SwiftUI screens and theme shared by the app and extensions
-//
-// macOS is listed only so `swift test` can run the core tests without a simulator.
+/*
+ * Copyright (c) 2026 James Maes (KofTwentyTwo)
+ * SPDX-License-Identifier: MIT
+ */
+
 import PackageDescription
 
 /// Warnings are errors for hand-written code (K22-CODE-02, K22-CODE-SW-04). The
@@ -13,6 +11,12 @@ import PackageDescription
 /// emits unused-import warnings that cannot be fixed without editing its output.
 let strictSettings: [SwiftSetting] = [.treatAllWarnings(as: .error)]
 
+/// Shared code for the app, Share Extension and widgets:
+/// - `KoF22API`: client generated from openapi/openapi.yaml (`make generate`).
+/// - `KoF22Kit`: auth, API service, mock backend, outbox, media, persistence.
+/// - `KoF22UI`: SwiftUI screens and theme shared by the app and extensions.
+///
+/// macOS is listed only so `swift test` can run the core tests without a simulator.
 let package = Package(
    name: "KoF22Kit",
    platforms: [.iOS("27.0"), .macOS("26.0")],

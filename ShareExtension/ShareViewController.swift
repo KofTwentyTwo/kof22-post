@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2026 James Maes (KofTwentyTwo)
+ * SPDX-License-Identifier: MIT
+ */
+
 import KoF22UI
 import SwiftUI
 import UIKit
@@ -7,14 +12,18 @@ import UniformTypeIdentifiers
 /// the post in the shared outbox and tries to send it before closing. Anything not
 /// sent here is picked up by the app.
 final class ShareViewController: UIViewController {
+   /// The extension's own app model, configured for the Share Extension context.
    private let app = AppModel(context: .shareExtension)
 
+   /// Sets the background and starts loading the shared items.
    override func viewDidLoad() {
       super.viewDidLoad()
       view.backgroundColor = .systemBackground
       Task { await load() }
    }
 
+   /// Restores the session, builds a composition from the shared items and embeds the
+   /// SwiftUI composer in this controller.
    private func load() async {
       await app.bootstrap()
       let composition = await ShareInput.composition(
@@ -33,6 +42,8 @@ final class ShareViewController: UIViewController {
       host.didMove(toParent: self)
    }
 
+   /// Closes the share sheet: completes the request when the post was queued, cancels it
+   /// when the user backed out.
    private func finish(sent: Bool) {
       if sent {
          extensionContext?.completeRequest(returningItems: nil)
@@ -43,12 +54,24 @@ final class ShareViewController: UIViewController {
    }
 }
 
+/// SwiftUI root of the share sheet: the composer when signed in, otherwise a prompt to
+/// sign in from the app first.
 struct ShareRootView: View {
+   /// Seconds the extension waits for the first send before handing over to the app.
+   private static let sendHeadStartSeconds = 20
+   /// Corner radius of the "Posting…" overlay card.
+   private static let overlayCornerRadius: CGFloat = 12
+
+   /// The shared app model, used for the sign-in state and the outbox processor.
    @Environment(AppModel.self) private var app
+   /// The composer state seeded from the shared items.
    @Bindable var model: ComposeModel
+   /// Called with `true` once the post is queued, `false` when the user cancels.
    let done: (Bool) -> Void
+   /// Whether the post has been submitted and the overlay is showing.
    @State private var sending = false
 
+   /// The composer or the signed-out message, inside a navigation stack with Cancel.
    var body: some View {
       NavigationStack {
          Group {
@@ -56,13 +79,7 @@ struct ShareRootView: View {
                ComposeView(model: model) {
                   sending = true
                   Task {
-                     // Give the upload a short head start; the app finishes the rest.
-                     _ = await withTaskGroup(of: Void.self) { group in
-                        group.addTask { await app.processor.drain() }
-                        group.addTask { try? await Task.sleep(for: .seconds(20)) }
-                        await group.next()
-                        group.cancelAll()
-                     }
+                     await sendWithHeadStart()
                      done(true)
                   }
                }
@@ -73,15 +90,42 @@ struct ShareRootView: View {
                   description: Text("Open KoF22 Post and sign in, then share again."))
             }
          }
-         .overlay { if sending { ProgressView("Posting…").padding().background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12)) } }
+         .overlay {
+            if sending {
+               ProgressView("Posting…").padding()
+                  .background(.regularMaterial, in: RoundedRectangle(cornerRadius: Self.overlayCornerRadius))
+            }
+         }
          .navigationTitle("KoF22 Post")
          .navigationBarTitleDisplayMode(.inline)
          .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Cancel") { done(false) } } }
       }
    }
+
+   /// Drains the outbox, but gives up after a short head start; the app finishes the rest.
+   private func sendWithHeadStart() async {
+      let headStart = Duration.seconds(Self.sendHeadStartSeconds)
+      let processor = app.processor
+      _ = await withTaskGroup(of: Void.self) { group in
+         group.addTask { await processor.drain() }
+         group.addTask {
+            ////////////////////////////////////////////////////////////////
+            // The timer is cancelled as soon as the drain finishes, so a //
+            // CancellationError here is the expected outcome.            //
+            ////////////////////////////////////////////////////////////////
+            try? await Task.sleep(for: headStart)
+         }
+         await group.next()
+         group.cancelAll()
+      }
+   }
 }
 
+/// Converts the items handed to the Share Extension into a post composition.
 enum ShareInput {
+   /// File extension used when a shared image arrives without one.
+   private static let defaultImageExtension = "jpg"
+
    /// Copies shared images into the App Group and collects URLs and text.
    @MainActor
    static func composition(from items: [NSExtensionItem], blog: String) async -> PostComposition {
@@ -89,25 +133,7 @@ enum ShareInput {
       var texts: [String] = []
       for item in items {
          for provider in item.attachments ?? [] {
-            if provider.hasItemConformingToTypeIdentifier(UTType.image.identifier) {
-               if let name = await copyImage(provider) { composition.photos.append(ComposedPhoto(fileName: name)) }
-            }
-            else if provider.hasItemConformingToTypeIdentifier(UTType.url.identifier) {
-               if let url = try? await provider.loadItem(forTypeIdentifier: UTType.url.identifier) as? URL {
-                  if url.isFileURL { continue }
-                  if composition.linkURL.isEmpty {
-                     composition.linkURL = url.absoluteString
-                  }
-                  else {
-                     texts.append(url.absoluteString)
-                  }
-               }
-            }
-            else if provider.hasItemConformingToTypeIdentifier(UTType.plainText.identifier) {
-               if let text = try? await provider.loadItem(forTypeIdentifier: UTType.plainText.identifier) as? String {
-                  texts.append(text)
-               }
-            }
+            await collect(provider, into: &composition, texts: &texts)
          }
          if texts.isEmpty, let title = item.attributedContentText?.string, !title.isEmpty { texts.append(title) }
       }
@@ -115,18 +141,64 @@ enum ShareInput {
       return composition
    }
 
+   /// Adds one attachment to the composition: images become photos, the first web URL
+   /// becomes the link (later ones go into the text), and plain text is collected.
+   @MainActor
+   private static func collect(
+      _ provider: NSItemProvider, into composition: inout PostComposition, texts: inout [String]
+   ) async {
+      if provider.hasItemConformingToTypeIdentifier(UTType.image.identifier) {
+         if let name = await copyImage(provider) { composition.photos.append(ComposedPhoto(fileName: name)) }
+      }
+      else if provider.hasItemConformingToTypeIdentifier(UTType.url.identifier) {
+         guard let url = await loadItem(provider, type: .url, as: URL.self), !url.isFileURL else { return }
+         if composition.linkURL.isEmpty {
+            composition.linkURL = url.absoluteString
+         }
+         else {
+            texts.append(url.absoluteString)
+         }
+      }
+      else if provider.hasItemConformingToTypeIdentifier(UTType.plainText.identifier) {
+         if let text = await loadItem(provider, type: .plainText, as: String.self) {
+            texts.append(text)
+         }
+      }
+   }
+
+   /// Loads an attachment as the given type, logging a failure instead of dropping it silently.
+   @MainActor
+   private static func loadItem<Value>(_ provider: NSItemProvider, type: UTType, as _: Value.Type) async -> Value? {
+      do {
+         return try await provider.loadItem(forTypeIdentifier: type.identifier) as? Value
+      }
+      catch {
+         Log.ui.warning(
+            "Could not load shared \(type.identifier, privacy: .public): \(error.localizedDescription, privacy: .public)")
+         return nil
+      }
+   }
+
+   /// Copies a shared image into the App Group photos directory and returns its file name,
+   /// or nil when the image could not be read or copied.
    @MainActor
    private static func copyImage(_ provider: NSItemProvider) async -> String? {
       await withCheckedContinuation { continuation in
-         _ = provider.loadFileRepresentation(for: .image) { url, _, _ in
-            guard let url else { return continuation.resume(returning: nil) }
-            let name = "\(UUID().uuidString).\(url.pathExtension.isEmpty ? "jpg" : url.pathExtension)"
+         _ = provider.loadFileRepresentation(for: .image) { url, _, loadError in
+            guard let url else {
+               Log.media.warning(
+                  "Could not read shared image: \(loadError?.localizedDescription ?? "no file", privacy: .public)")
+               return continuation.resume(returning: nil)
+            }
+            let ext = url.pathExtension.isEmpty ? Self.defaultImageExtension : url.pathExtension
+            let name = "\(UUID().uuidString).\(ext)"
             let target = SharedContainer.photosDirectory.appending(path: name)
             do {
                try FileManager.default.copyItem(at: url, to: target)
                continuation.resume(returning: name)
             }
             catch {
+               Log.media.warning("Could not copy shared image: \(error.localizedDescription, privacy: .public)")
                continuation.resume(returning: nil)
             }
          }
