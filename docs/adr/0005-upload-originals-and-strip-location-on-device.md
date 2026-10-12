@@ -29,6 +29,14 @@ photo is personal data (K22-SEC-70).
 
 Option B, implemented in `MediaProcessor`.
 
+## Amendment (2026-10-12)
+
+The API integration brief asked for location opt-in per photo and on-device
+downscaling. Location is now opted in per photo (default off). Originals remain the
+default because the owner chose them; a Settings option uploads at a 4096 px long edge
+(JPEG 0.85) instead, and anything over the server's pixel limits (16,000 px per side,
+80 MP) or 25 MB is always reduced.
+
 ## Consequences
 
 - Full photo-library access is requested so originals and their metadata can be read

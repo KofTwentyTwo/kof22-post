@@ -47,7 +47,9 @@ flowchart LR
 | --- | --- | --- | --- | --- |
 | Authentik authorize/token/revoke | Out/In | PKCE code, tokens | Public client + PKCE; `state` checked | `OAuthClient` (state, error, missing code) |
 | Site API `/v1/me/*` | Out/In | Posts, tags, photos metadata | Bearer JWT (`kof22:publish`) | Generated client decodes typed JSON; `ErrorEnvelopeMiddleware` maps errors |
-| Presigned upload URL | Out | Photo bytes | Signature in URL (15 min) | Server sniffs and sanitizes the file |
+| Presigned upload URL | Out | Photo bytes (background `URLSession`, shared with the Share Extension) | Signature in URL (15 min); no bearer token | Server sniffs and sanitizes the file |
+| Anonymous reads (`/v1/post`, `/v1/blog`, `/v1/tag`, `/versions.json`) | Out/In | Published content | None by design; the bearer token is never attached outside `/v1/me` | Generated Codable types; unknown fields ignored |
+| Diagnostics checks | Out/In | OIDC discovery, versions, one anonymous read | None | Status and `issuer` comparison only |
 | Custom URL scheme `com.kof22.post://` | In | OAuth callback, `compose`/`outbox`/`posts`/`settings` routes | No | `AppModel.open(url:)` accepts only known hosts; compose text is placed in the editor, never sent automatically |
 | Share Extension input | In | Text, URLs, images | No | Images copied as files; URLs must be http(s) to be previewed; nothing is sent without the owner tapping Post |
 | App Intent "Post to Field Notes" | In | Text, link, photos, tags | Device unlock / Siri | `PostComposition.validationMessage` before queueing |
@@ -74,6 +76,8 @@ flowchart LR
 | T7 | Link preview | Information disclosure / SSRF | A link makes something fetch an internal URL | Low | Medium | The server fetches previews with its SSRF guard (public IPs only); the app never fetches arbitrary URLs itself | Mitigated (server) |
 | T8 | Network | Information disclosure | Traffic interception | Low | High | HTTPS only (ATS defaults, no exceptions) | Mitigated |
 | T9 | Lost device | Elevation of privilege | Someone with the unlocked phone posts | Low | Medium | Device passcode; sign-out revokes tokens; tokens can be revoked in Authentik | Accepted |
+| T11 | Token scope | Information disclosure | The bearer token is sent to endpoints that do not need it | Low | Medium | Path allow-list in `AuthMiddleware` (`/v1/me` only), tested (ADR-0008) | Mitigated |
+| T12 | Background uploads | Information disclosure | Prepared photos linger on disk after an upload | Low | Low | Files live in the App Group container and are removed once the media ID is recorded; GPS stripped unless the photo opts in | Mitigated |
 | T10 | Dependencies | Tampering | A compromised Swift package | Low | High | Exact pins and `Package.resolved`; Dependabot with cooldown; Trivy/OSV in CI | Mitigated |
 
 ## 7. Accepted risks
@@ -88,3 +92,4 @@ flowchart LR
 | Date | Version | Reviewer | Changes |
 | --- | --- | --- | --- |
 | 2026-10-11 | 0.1.0 | James Maes (with Claude Opus 5.5) | Initial model |
+| 2026-10-12 | 0.1.0 | James Maes (with Claude Opus 5.5) | Background uploads, anonymous reads, bearer allow-list, diagnostics, per-photo location |
