@@ -1,21 +1,39 @@
+/*
+ * Copyright (c) 2026 James Maes (KofTwentyTwo)
+ * SPDX-License-Identifier: MIT
+ */
+
 import Foundation
 import SwiftData
 
 /// A Sendable copy of an `OutboxItem` for work off the main actor.
 public struct OutboxSnapshot: Sendable, Equatable, Identifiable {
+   /// The item's id.
    public var id: UUID
+   /// What the item asks the server to do.
    public var operation: OutboxOperation
+   /// Where the item is in its life.
    public var state: OutboxState
+   /// The post content.
    public var composition: PostComposition
+   /// The server's post id, when known.
    public var serverPostID: Int64?
+   /// The version an update or delete is based on.
    public var ifMatch: String?
+   /// The create's idempotency key.
    public var idempotencyKey: String
+   /// Failed attempts since the last manual retry.
    public var attempts: Int
+   /// Not sent before this instant.
    public var nextAttemptAt: Date?
+   /// The last failure, worded for the user.
    public var lastError: String?
+   /// Whether the server copy changed under an edit.
    public var isConflict: Bool
+   /// The public URL once the post is live.
    public var resultURL: String?
 
+   /// Copies the item's current values.
    init(_ item: OutboxItem) {
       id = item.id
       operation = item.operation
@@ -36,17 +54,25 @@ public struct OutboxSnapshot: Sendable, Equatable, Identifiable {
 /// Share Extension never race on the same context.
 @ModelActor
 public actor OutboxStore {
+   /// How long sent items stay listed before `pruneSent` drops them (7 days).
+   public static let sentRetention: TimeInterval = 604_800
+
+   /// The item with `id`, or nil when it has been deleted.
    private func item(_ id: UUID) throws -> OutboxItem? {
       try modelContext.fetch(FetchDescriptor<OutboxItem>(predicate: #Predicate { $0.id == id })).first
    }
 
+   /// Queues a composition for sending and returns the item's id. When `draftID`
+   /// names the composer's local draft, that draft becomes the queued item.
    @discardableResult
    public func enqueue(
       _ composition: PostComposition, operation: OutboxOperation, serverPostID: Int64? = nil,
       ifMatch: String? = nil, replacing draftID: UUID? = nil
    ) throws -> UUID {
-      // Only a local draft can be turned into a queued item; anything else is
-      // already on its way and must not be overwritten.
+      ////////////////////////////////////////////////////////////////////////
+      // Only a local draft can be turned into a queued item; anything else //
+      // is already on its way and must not be overwritten.                 //
+      ////////////////////////////////////////////////////////////////////////
       if let draftID, let draft = try item(draftID), draft.state == .localDraft {
          draft.composition = composition
          draft.operationRaw = operation.rawValue
@@ -113,6 +139,7 @@ public actor OutboxStore {
       try modelContext.save()
    }
 
+   /// The item's current values, or nil when it has been deleted.
    public func snapshot(_ id: UUID) throws -> OutboxSnapshot? {
       try item(id).map(OutboxSnapshot.init)
    }
@@ -131,12 +158,16 @@ public actor OutboxStore {
          .map(OutboxSnapshot.init)
    }
 
+   /// The earliest backoff deadline of a queued item, for scheduling a background
+   /// wake-up; nil when nothing is waiting.
    public func nextWakeDate() throws -> Date? {
       let queued = OutboxState.queued.rawValue
       let descriptor = FetchDescriptor<OutboxItem>(predicate: #Predicate { $0.stateRaw == queued })
       return try modelContext.fetch(descriptor).compactMap(\.nextAttemptAt).min()
    }
 
+   /// Applies `change` to the item and stamps `updatedAt`; does nothing when the
+   /// item has been deleted.
    public func update(_ id: UUID, _ change: @Sendable (OutboxItem) -> Void) throws {
       guard let item = try item(id) else { return }
       change(item)
@@ -167,24 +198,32 @@ public actor OutboxStore {
       try modelContext.save()
    }
 
-   public func delete(_ id: UUID) throws {
+   /// Deletes the item and its local photo files (in `photosDirectory`, injectable for
+   /// tests), whatever its state.
+   public func delete(_ id: UUID, photosDirectory: URL = SharedContainer.photosDirectory) throws {
       guard let item = try item(id) else { return }
       for photo in item.composition.photos {
-         if let url = photo.localURL() { try? FileManager.default.removeItem(at: url) }
+         if let url = photo.localURL(in: photosDirectory) {
+            //////////////////////////////////////////////////////////////
+            // Uploaded or already cleaned up photos have no file left. //
+            //////////////////////////////////////////////////////////////
+            try? FileManager.default.removeItem(at: url)
+         }
       }
       modelContext.delete(item)
       try modelContext.save()
    }
 
    /// Drops sent items older than `age`, keeping the list short.
-   public func pruneSent(olderThan age: TimeInterval = 7 * 24 * 3600) throws {
+   public func pruneSent(olderThan age: TimeInterval = sentRetention, now: Date = .now) throws {
       let sent = OutboxState.sent.rawValue
-      let cutoff = Date.now.addingTimeInterval(-age)
+      let cutoff = now.addingTimeInterval(-age)
       let descriptor = FetchDescriptor<OutboxItem>(predicate: #Predicate { $0.stateRaw == sent && $0.updatedAt < cutoff })
       for item in try modelContext.fetch(descriptor) { modelContext.delete(item) }
       try modelContext.save()
    }
 
+   /// Saves server copies of posts for offline viewing, replacing older copies.
    public func cache(_ posts: [Post]) throws {
       for post in posts {
          let id = post.id
@@ -198,16 +237,19 @@ public actor OutboxStore {
       try modelContext.save()
    }
 
+   /// Forgets the cached copy of a deleted post.
    public func removeCached(_ postID: Int64) throws {
       try modelContext.delete(model: CachedPost.self, where: #Predicate { $0.postID == postID })
       try modelContext.save()
    }
 
+   /// Cached posts, most recently changed first; unreadable copies are skipped.
    public func cachedPosts() throws -> [Post] {
       try modelContext.fetch(FetchDescriptor<CachedPost>(sortBy: [SortDescriptor(\.updatedAt, order: .reverse)]))
          .compactMap(\.post)
    }
 
+   /// Items still to send or needing attention (not drafts, not sent), for the badge.
    public func pendingCount() throws -> Int {
       let sent = OutboxState.sent.rawValue
       let draft = OutboxState.localDraft.rawValue

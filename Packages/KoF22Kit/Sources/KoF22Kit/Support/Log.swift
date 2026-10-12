@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2026 James Maes (KofTwentyTwo)
+ * SPDX-License-Identifier: MIT
+ */
+
 import OSLog
 
 /// Structured logging for the app and its extensions (K22-CODE-19). Every message goes
@@ -26,6 +31,7 @@ public enum Log {
    /// SwiftData and other local storage.
    public static let storage = Logger(subsystem: subsystem, category: "storage")
 
-   /// Screens, permissions and other user-interface work.
-   public static let ui = Logger(subsystem: subsystem, category: "ui")
+   /// Screens, permissions and other user-interface work. The short name mirrors the
+   /// `ui` log category it writes to.
+   public static let ui = Logger(subsystem: subsystem, category: "ui")  // swiftlint:disable:this identifier_name
 }
