@@ -5,6 +5,11 @@ KoF22 Post adopts the [KofTwentyTwo standards](https://github.com/KofTwentyTwo/s
 plus `K22-REPO-01`–`05` is mandatory, the rest is SHOULD. The owner asked for the full
 standards, so SHOULD items are implemented too unless listed below.
 
+The repository is public since 2026-10-12 (owner decision, so CI gets GitHub-hosted
+macOS runners without the private-repository minute multiplier). It has no releases
+yet; it moves to the Product tier before its first public release, which brings the
+OpenSSF Best Practices badge (K22-REPO-12) and Scorecard (K22-CI-24, K22-REPO-11).
+
 Last reviewed: 2026-10-11, by James Maes with Claude Opus 5.5. Checked with
 `tools/Test-RepoConformance.ps1` from the standards repository and the local gates.
 
@@ -41,7 +46,7 @@ audit needs them recorded there (`K22-AGENT-04`).
 | --- | --- | --- |
 | K22-REPO-22, -30, -31, -32, -40, -41 | GitHub settings: squash-only merging with PR title/body, delete head branches, Dependabot alerts and security updates, secret scanning with push protection, private vulnerability reporting, immutable releases, read-only `GITHUB_TOKEN`, Actions cannot approve PRs, allowed actions restricted, wiki off, description/topics | Owner (repository settings are reserved to a person, K22-AI-10) |
 | K22-REPO-42 | List `kof22-post` in `MAINTAINERS.md` of KofTwentyTwo/standards | Owner, via a pull request to the standards repository |
-| K22-SEC-60 | Off-GitHub backup: the repository has only been committed locally; push it so the existing backups include it | Owner |
+| K22-SEC-60 | Off-GitHub backup: confirm the weekly backup includes this repository now that it is on GitHub | Owner |
 | K22-CI-01 (runner) | `ci.yml` pins Xcode 27.0 on `macos-26` runners; verify the image provides it on the first run | First CI run |
 | Upstream | Two fixes to the standards' Swift configuration: SwiftLint `unused_declaration`/`unused_import` belong in `analyzer_rules`, and `statement_position` needs `uncuddled_else` to agree with swift-format | Owner, issue or PR to KofTwentyTwo/standards |
 
