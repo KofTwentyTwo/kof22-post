@@ -61,7 +61,7 @@ func pixelSize(of url: URL) -> (width: Int, height: Int) {
       let prepared = try MediaProcessor.prepare(
          source: source, keepLocation: false, acceptedTypes: ["image/jpeg", "image/png"], maxBytes: Self.generousBytes,
          pixelLimits: Self.smallLimits, workDirectory: directory.appending(path: "out"))
-      #expect(prepared.contentType == .imageJpeg)
+      #expect(prepared.contentType == "image/jpeg")
       #expect(pixelSize(of: prepared.fileURL).width == 100)
       #expect(!MediaProcessor.hasGPS(prepared.fileURL))
    }
@@ -93,7 +93,7 @@ func pixelSize(of url: URL) -> (width: Int, height: Int) {
       let prepared = try MediaProcessor.prepare(
          source: source, keepLocation: false, acceptedTypes: ["image/png"], maxBytes: Self.generousBytes, size: .large,
          workDirectory: directory)
-      #expect(prepared.contentType == .imagePng)
+      #expect(prepared.contentType == "image/png")
       #expect(pixelSize(of: prepared.fileURL).width == TestImages.defaultWidth)
    }
 

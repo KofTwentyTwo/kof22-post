@@ -1,9 +1,0 @@
-{
-  "uploadId": "8f14e45f-ceea-467f-a8f7-5d9f0e2b1c3a",
-  "uploadUrl": "https://storage.example.com/incoming/8f14e45f-ceea-467f-a8f7-5d9f0e2b1c3a",
-  "method": "PUT",
-  "headers": {"Content-Type": "image/jpeg"},
-  "expiresAt": "2026-10-11T12:30:00.5Z",
-  "maxBytes": 26214400,
-  "completeUrl": "https://api.kof22.com/v1/me/uploads/8f14e45f-ceea-467f-a8f7-5d9f0e2b1c3a/complete"
-}

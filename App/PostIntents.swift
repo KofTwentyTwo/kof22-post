@@ -56,9 +56,11 @@ struct PostToFieldNotesIntent: AppIntent {
          try file.data.write(to: SharedContainer.photosDirectory.appending(path: name))
          composed.append(ComposedPhoto(fileName: name))
       }
-      let composition = PostComposition(
-         blog: "quick-bits", body: text, tags: tags,
-         linkURL: link?.absoluteString ?? "", photos: composed)
+      let blog = app.blogs.first { $0.slug == Post.defaultBlogSlug }?.name ?? "Field Notes"
+      let composition = await PostComposition(
+         blog: Post.defaultBlogSlug, body: text, tags: tags,
+         linkURL: link?.absoluteString ?? "", photos: composed
+      ).fillingBlankDetails(using: OnDevicePostSuggester(), blog: blog)
       if let problem = composition.validationMessage(limits: app.limits) {
          throw IntentError.message(problem)
       }

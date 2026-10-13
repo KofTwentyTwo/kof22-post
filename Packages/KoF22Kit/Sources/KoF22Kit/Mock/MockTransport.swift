@@ -7,8 +7,8 @@ import Foundation
 import HTTPTypes
 import OpenAPIRuntime
 
-/// Routes generated-client requests to `MockBackend` without any networking, so the
-/// whole client stack (middlewares, error mapping) runs against the mock contract.
+/// Routes requests to `MockBackend` without any networking, so the whole client stack
+/// (middlewares, error mapping, process calls) runs against the fake.
 public struct MockTransport: ClientTransport {
    /// Largest request body the mock reads (8 MiB); post bodies are far smaller.
    static let maxRequestBytes = 8_388_608
@@ -19,22 +19,20 @@ public struct MockTransport: ClientTransport {
    /// Creates a transport answering from `backend`.
    public init(backend: MockBackend) { self.backend = backend }
 
-   /// Hands the request to the backend by operation id, with lower-cased header names
-   /// and the query as a dictionary, and converts the reply back to HTTP types.
+   /// Hands the request to the backend by operation id, with the query as a dictionary,
+   /// and converts the reply back to HTTP types.
    public func send(
       _ request: HTTPRequest, body: HTTPBody?, baseURL: URL, operationID: String
    ) async throws
       -> (HTTPResponse, HTTPBody?)
    {
-      let components = URLComponents(string: request.path ?? "/")
+      guard let components = URLComponents(string: request.path ?? "/") else { throw URLError(.badURL) }
       var query: [String: String] = [:]
-      for item in components?.queryItems ?? [] { query[item.name] = item.value ?? "" }
-      var headers: [String: String] = [:]
-      for field in request.headerFields { headers[field.name.canonicalName.lowercased()] = field.value }
+      for item in components.queryItems ?? [] { query[item.name] = item.value ?? "" }
       let data = try await collect(body, upTo: Self.maxRequestBytes)
 
       let response = try await backend.handle(
-         operation: operationID, path: components?.path ?? "/", query: query, headers: headers, body: data
+         operation: operationID, path: components.path, query: query, body: data
       )
       var fields = HTTPFields()
       for (name, value) in response.headers {

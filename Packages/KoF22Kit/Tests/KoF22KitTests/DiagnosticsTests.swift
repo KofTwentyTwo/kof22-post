@@ -62,13 +62,19 @@ final class RoutedLoader: @unchecked Sendable {
       let checks = await ServiceDiagnostics(load: routes.loader).run()
       #expect(checks.map(\.id) == ["oidc", "versions", "read", "token"])
       #expect(checks.allSatisfy { $0.passed })
-      #expect(checks[1].detail == "v1 1.1.0")
+      #expect(checks[1].detail.hasPrefix("v2 2."))
       #expect(checks[2].detail == "2 blogs")
       #expect(checks[3].detail == "HTTP 405 from https://auth.kof22.com/application/o/token/")
       #expect(routes.requests.allSatisfy { $0.value(forHTTPHeaderField: "Authorization") == nil && $0.httpMethod == "GET" })
       let read = try #require(routes.requests.first { $0.url?.path().hasSuffix("blog/query") == true })
       #expect(read.url?.query() == "pageSize=1")
       #expect(read.timeoutInterval == ServiceDiagnostics.checkTimeout)
+   }
+
+   @Test func aMatchingDiscoveryDocumentPasses() async throws {
+      let check = await ServiceDiagnostics(load: RoutedLoader(try healthy()).loader).checkDiscovery()
+      #expect(check.passed)
+      #expect(check.detail == "Issuer \(issuer)")
    }
 
    @Test func missingDiscoveryDocumentFails() async throws {
@@ -105,12 +111,20 @@ final class RoutedLoader: @unchecked Sendable {
       #expect(unreadable.detail == "The version list is not readable")
    }
 
-   @Test func versionWithoutACurrentEntryStillPasses() async throws {
+   @Test func versionWithoutASemanticVersionStillPasses() async throws {
       var routes = try healthy()
-      routes["versions.json"] = .http(200, #"{"currentVersion":"v2","supportedVersions":["v2"],"versions":[]}"#)
+      routes["versions.json"] = .http(200, #"{"currentVersion":"v2","supportedVersions":["v2"]}"#)
       let check = await ServiceDiagnostics(load: RoutedLoader(routes).loader).checkVersions()
       #expect(check.passed)
       #expect(check.detail == "v2 (no semver)")
+   }
+
+   @Test func aServerWithoutTheAppsMajorVersionFails() async throws {
+      var routes = try healthy()
+      routes["versions.json"] = .http(200, #"{"currentVersion":"v3","supportedVersions":["v3","v4"],"semanticVersions":{"v3":"3.0.0"}}"#)
+      let check = await ServiceDiagnostics(load: RoutedLoader(routes).loader).checkVersions()
+      #expect(!check.passed)
+      #expect(check.detail == "This app needs v2; the server supports v3, v4")
    }
 
    @Test func readFailuresAreReported() async throws {

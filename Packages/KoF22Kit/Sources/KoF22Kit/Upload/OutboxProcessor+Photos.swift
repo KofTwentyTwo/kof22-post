@@ -16,15 +16,13 @@ extension OutboxProcessor {
       case complete
    }
 
-   /// Characters of the photo id used in its upload idempotency key.
-   static let photoKeyLength = 8
    /// Storage answers 403 to a PUT on an expired (or otherwise invalid) presigned URL.
    static let forbiddenStatus = 403
    /// `completeUpload` answers 409 when the bytes never arrived.
    static let conflictStatus = 409
    /// The prepared file types the outbox keeps, by extension.
-   static let preparedTypes: [(fileExtension: String, contentType: UploadCreate.ContentTypePayload)] = [
-      ("jpg", .imageJpeg), ("png", .imagePng),
+   static let preparedTypes: [(fileExtension: String, contentType: String)] = [
+      ("jpg", "image/jpeg"), ("png", "image/png"),
    ]
 
    /// Uploads the photos that have no media id yet, saving each media id as soon as it is
@@ -43,7 +41,7 @@ extension OutboxProcessor {
          let current = composition
          let uploaded = try await upload(current.photos[index], prepared: prepared, item: item, service: service) { photo in
             ////////////////////////////////////////////////////////////////
-            // A restart is saved at once so later retries use its key.   //
+            // A restart is saved at once so later retries see it.        //
             ////////////////////////////////////////////////////////////////
             var restarted = current
             restarted.photos[index] = photo
@@ -60,15 +58,14 @@ extension OutboxProcessor {
 
    /// Runs ticket, PUT and complete for one photo and returns it with its media attached.
    /// An expired presigned URL restarts the upload once (`canRestart`) with a new
-   /// idempotency key, after `saveRestart` persists the new generation; any other failure
-   /// is thrown.
+   /// ticket, after `saveRestart` persists the new generation; any other failure is
+   /// thrown.
    func upload(
       _ photo: ComposedPhoto, prepared: PreparedPhoto, item: OutboxSnapshot, service: SiteService, canRestart: Bool = true,
       saveRestart: (ComposedPhoto) async throws -> Void
    ) async throws -> ComposedPhoto {
       let ticket = try await service.createUpload(
-         UploadCreate(fileName: prepared.fileURL.lastPathComponent, contentType: prepared.contentType, byteSize: prepared.byteSize),
-         idempotencyKey: Self.uploadKey(item: item, photo: photo, byteSize: prepared.byteSize)
+         UploadRequest(fileName: prepared.fileURL.lastPathComponent, contentType: prepared.contentType, byteSize: prepared.byteSize)
       )
       var stage = UploadStage.put
       do {
@@ -76,7 +73,7 @@ extension OutboxProcessor {
          stage = .complete
          let media = try await service.completeUpload(
             id: ticket.uploadId,
-            UploadComplete(altText: photo.altText.nilIfBlank, caption: photo.caption.nilIfBlank, keepLocation: photo.keepLocation)
+            UploadCompletion(altText: photo.altText.nilIfBlank, caption: photo.caption.nilIfBlank, keepLocation: photo.keepLocation)
          )
          var uploaded = photo
          uploaded.attach(media)
@@ -89,14 +86,6 @@ extension OutboxProcessor {
          try await saveRestart(restarted)
          return try await upload(restarted, prepared: prepared, item: item, service: service, canRestart: false, saveRestart: saveRestart)
       }
-   }
-
-   /// The idempotency key of one upload ticket. It is the same for every retry of the
-   /// same upload, so a lost response replays the ticket; a restart after expiry bumps
-   /// the generation, and a different prepared file (another size) gets its own key
-   /// because the server refuses a reused key with a different body.
-   static func uploadKey(item: OutboxSnapshot, photo: ComposedPhoto, byteSize: Int64) -> String {
-      "\(item.idempotencyKey)-p-\(photo.id.uuidString.prefix(photoKeyLength))-g\(photo.uploadGeneration)-s\(byteSize)"
    }
 
    /// Whether a failure means the presigned URL expired, so a fresh ticket can succeed:
@@ -117,7 +106,7 @@ extension OutboxProcessor {
    /// the bytes, size and idempotency key stay the same across retries and a background
    /// upload still in flight keeps its file; otherwise the original is prepared with the
    /// photo's location choice and the current size preference.
-   func preparedFile(for photo: ComposedPhoto, limits: AuthoringLimits) throws -> PreparedPhoto {
+   func preparedFile(for photo: ComposedPhoto, limits: PhotoLimits) throws -> PreparedPhoto {
       for type in Self.preparedTypes {
          let url = workDirectory.appending(path: "\(photo.id.uuidString).\(type.fileExtension)")
          if FileManager.default.fileExists(atPath: url.path(percentEncoded: false)) {
@@ -135,7 +124,7 @@ extension OutboxProcessor {
       // A stable name lets the next attempt find the file; the move //
       // is atomic, so a crash never leaves a half-written file.     //
       /////////////////////////////////////////////////////////////////
-      let fileExtension = prepared.contentType == .imagePng ? "png" : "jpg"
+      let fileExtension = prepared.contentType == "image/png" ? "png" : "jpg"
       let target = workDirectory.appending(path: "\(photo.id.uuidString).\(fileExtension)")
       try FileManager.default.moveItem(at: prepared.fileURL, to: target)
       return PreparedPhoto(fileURL: target, contentType: prepared.contentType, byteSize: prepared.byteSize)

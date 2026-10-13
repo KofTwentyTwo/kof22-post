@@ -61,22 +61,31 @@ import Testing
 
    @Test func validationCoversEveryServerLimit() {
       let now = Date(timeIntervalSince1970: 10_000)
-      let limits = AuthoringLimits.fallback
+      let limits = PhotoLimits.fallback
       let long = { (count: Int) in String(repeating: "x", count: count) }
       let cases: [(PostComposition, String?)] = [
-         (PostComposition(body: "x", tags: [long(PostComposition.maxTagLength + 1)]), "Tags are limited to 50 characters."),
-         (PostComposition(body: "x", tags: [long(PostComposition.maxTagLength)]), nil),
-         (PostComposition(body: "x", locationLabel: long(PostComposition.maxLocationLabelLength + 1)), "Places are limited to 200 characters."),
-         (PostComposition(body: "x", photos: [ComposedPhoto(altText: long(PostComposition.maxAltTextLength + 1))]), "Alt text is limited to 1000 characters."),
-         (PostComposition(body: "x", photos: [ComposedPhoto(caption: long(PostComposition.maxCaptionLength + 1))]), "Captions are limited to 2000 characters."),
+         (PostComposition(body: "x", tags: [long(PostFieldLimits.tag + 1)]), "Tags are limited to 40 characters."),
+         (PostComposition(body: "x", tags: [long(PostFieldLimits.tag)]), nil),
+         (PostComposition(title: long(PostFieldLimits.title + 1), body: "x"), "Titles are limited to 100 characters."),
+         (PostComposition(name: long(PostFieldLimits.name + 1), body: "x"), "Names are limited to 40 characters."),
+         (PostComposition(shortName: long(PostFieldLimits.shortName + 1), body: "x"), "Short names are limited to 20 characters."),
+         (PostComposition(slug: long(PostFieldLimits.slug + 1), body: "x"), "Slugs are limited to 100 characters."),
+         (PostComposition(description: long(PostFieldLimits.description + 1), body: "x"), "Descriptions are limited to 255 characters."),
+         (PostComposition(metaTitle: long(PostFieldLimits.metaTitle + 1), body: "x"), "SEO titles are limited to 255 characters."),
+         (PostComposition(metaDescription: long(PostFieldLimits.metaDescription + 1), body: "x"), "SEO descriptions are limited to 500 characters."),
+         (PostComposition(metaKeywords: long(PostFieldLimits.metaKeywords + 1), body: "x"), "SEO keywords are limited to 255 characters."),
+         (PostComposition(body: "x", locationLabel: long(PostFieldLimits.locationLabel + 1)), "Places are limited to 200 characters."),
+         (PostComposition(body: "x", photos: [ComposedPhoto(altText: long(PostFieldLimits.altText + 1))]), "Alt text is limited to 1000 characters."),
+         (PostComposition(body: "x", photos: [ComposedPhoto(caption: long(PostFieldLimits.caption + 1))]), "Captions are limited to 2000 characters."),
          (PostComposition(body: "x", photos: [ComposedPhoto(altText: "a", caption: "c")]), nil),
-         (PostComposition(body: "x", linkURL: "https://a.example/" + long(PostComposition.maxLinkLength)), "Links are limited to 2000 characters."),
+         (PostComposition(body: "x", linkURL: "https://a.example/" + long(PostFieldLimits.link)), "Links are limited to 2000 characters."),
          (PostComposition(body: "x", linkURL: "httpx://a.example"), "Links must start with http:// or https://"),
          (PostComposition(body: "x", linkURL: "https://"), "Links must start with http:// or https://"),
          (PostComposition(body: "x", linkURL: "not a link"), "Links must start with http:// or https://"),
          (PostComposition(body: "x", linkURL: " HTTP://a.example "), nil),
          (PostComposition(body: "x", linkURL: "  "), nil),
          (PostComposition(body: "x", status: .scheduled), "Pick a time to schedule."),
+         (PostComposition(body: "x", status: .scheduled, publishAt: now.addingTimeInterval(30)), "Schedule at least a minute ahead."),
          (
             PostComposition(body: "x", status: .scheduled, publishAt: now.addingTimeInterval(PostComposition.maximumScheduleHorizon + 1)),
             "Schedule at most a year ahead."
@@ -87,5 +96,23 @@ import Testing
       for (composition, message) in cases {
          #expect(composition.validationMessage(limits: limits, now: now) == message)
       }
+   }
+
+   @Test func photoRulesFromTheServerApplyToPhotosNotYetUploaded() {
+      let strict = PhotoLimits(maxPhotoBytes: 1, photoContentTypes: [], photoAltTextRequired: true, photoCaptionRequired: true)
+      #expect(PostComposition(body: "x", photos: [ComposedPhoto(fileName: "a")]).validationMessage(limits: strict) == "Every photo needs alt text.")
+      #expect(
+         PostComposition(body: "x", photos: [ComposedPhoto(fileName: "a", altText: "alt")]).validationMessage(limits: strict)
+            == "Every photo needs a caption.")
+      #expect(PostComposition(body: "x", photos: [ComposedPhoto(mediaId: 1)]).validationMessage(limits: strict) == nil)
+   }
+
+   @Test func storedPayloadsWithoutTheNewFieldsDecodeWithDefaults() throws {
+      var object = try #require(try JSONSerialization.jsonObject(with: JSONEncoder().encode(PostComposition(body: "b"))) as? [String: Any])
+      for key in ["authorId", "name", "shortName", "slug", "description", "metaTitle", "metaDescription", "metaKeywords", "isFeatured", "featuredPhotoID"] {
+         object.removeValue(forKey: key)
+      }
+      let decoded = try JSONDecoder().decode(PostComposition.self, from: JSONSerialization.data(withJSONObject: object))
+      #expect(decoded == PostComposition(body: "b"))
    }
 }

@@ -56,9 +56,9 @@
          Section("Account") {
             if let account = app.me {
                LabeledContent("Name", value: account.name ?? account.author?.name ?? Self.unknownValue)
-               LabeledContent("Email", value: account.email)
+               LabeledContent("Email", value: account.email ?? Self.unknownValue)
+               LabeledContent("Author", value: account.author?.name ?? "None linked")
                LabeledContent("Can post", value: account.canPost ? "Yes" : "No")
-               if !account.groups.isEmpty { LabeledContent("Groups", value: account.groups.joined(separator: ", ")) }
             }
             else {
                Text("Account details unavailable").foregroundStyle(Theme.muted)
@@ -162,11 +162,11 @@
          }
       }
 
-      /// Triggers the location prompt by asking for a place label. The label is not needed
+      /// Triggers the location prompt by asking for place labels. The labels are not needed
       /// here and the outcome shows in the status row, so a failure is only logged.
       private func requestLocation() async {
          do {
-            _ = try await permissions.currentPlaceLabel()
+            _ = try await permissions.currentPlaceOptions()
          }
          catch {
             Log.ui.notice("Location request from Settings ended without a place: \(error.localizedDescription, privacy: .public)")

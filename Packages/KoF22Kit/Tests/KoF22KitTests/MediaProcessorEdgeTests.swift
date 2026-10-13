@@ -20,7 +20,7 @@ import UniformTypeIdentifiers
       try TestImages.write(to: source, type: .png, gps: true)
       let prepared = try MediaProcessor.prepare(
          source: source, keepLocation: false, acceptedTypes: accepted, maxBytes: generousLimit, workDirectory: directory.appending(path: "work"))
-      #expect(prepared.contentType == .imagePng)
+      #expect(prepared.contentType == "image/png")
       #expect(prepared.fileURL.pathExtension == "png")
       #expect(!MediaProcessor.hasGPS(prepared.fileURL))
    }

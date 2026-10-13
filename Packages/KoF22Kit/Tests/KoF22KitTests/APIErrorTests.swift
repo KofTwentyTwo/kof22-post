@@ -20,6 +20,18 @@ import Testing
       #expect(error.errorDescription == "Invalid post: title is too long")
    }
 
+   @Test func tableErrorsCarryAPlainMessage() {
+      let plain = APIError.decode(status: 400, data: Data(#"{"error":"Missing value in required field: name"}"#.utf8), retryAfter: nil, etag: nil)
+      #expect(plain.code == "http_400")
+      #expect(plain.message == "Missing value in required field: name")
+      let coded = #"{"error":"Bad","code":"validation_failed","details":[{"field":"slug","issue":"taken"},{"issue":"no field"}]}"#
+      let error = APIError.decode(status: 422, data: Data(coded.utf8), retryAfter: nil, etag: nil)
+      #expect(error.code == "validation_failed")
+      #expect(error.details == [APIError.Detail(field: "slug", issue: "taken")])
+      let fieldOnly = APIError.decode(status: 422, data: Data(#"{"details":[{"field":"slug"}]}"#.utf8), retryAfter: nil, etag: nil)
+      #expect(fieldOnly.details == [APIError.Detail(field: "slug", issue: "")])
+   }
+
    @Test func bodyThatIsNotAnEnvelopeFallsBackToTheStatus() {
       let error = APIError.decode(status: 503, data: Data("<html>busy</html>".utf8), retryAfter: "soon", etag: nil)
       #expect(error.code == "http_503")
@@ -84,13 +96,38 @@ import Testing
    }
 
    @Test func fallbackLimitsMatchTheBackend() {
-      let limits = AuthoringLimits.fallback
-      #expect(limits.maxBodyLength == 10_000)
-      #expect(limits.maxTitleLength == 100)
-      #expect(limits.maxTags == 10)
-      #expect(limits.maxPhotosPerPost == 20)
+      let limits = PhotoLimits.fallback
       #expect(limits.maxPhotoBytes == 25 * 1_024 * 1_024)
       #expect(limits.photoContentTypes == ["image/jpeg", "image/png"])
+      #expect(!limits.photoAltTextRequired)
+      #expect(!limits.photoCaptionRequired)
+   }
+
+   @Test func meAndLimitsTolerateMissingKeys() throws {
+      let caller = try JSONDecoder().decode(Me.self, from: Data(#"{"limits":{"photoAltTextRequired":true}}"#.utf8))
+      #expect(caller.email == nil)
+      #expect(caller.permissions.isEmpty)
+      #expect(caller.author == nil)
+      #expect(!caller.canPost)
+      #expect(caller.blogs.isEmpty)
+      #expect(caller.defaultBlog == Post.defaultBlogSlug)
+      #expect(caller.limits.photoAltTextRequired)
+      #expect(caller.limits.maxPhotoBytes == PhotoLimits.fallback.maxPhotoBytes)
+      let bare = try JSONDecoder().decode(Me.self, from: Data("{}".utf8))
+      #expect(bare.limits == .fallback)
+   }
+
+   @Test func datesWithAndWithoutFractionsDecode() throws {
+      let transcoder = SiteDateTranscoder()
+      #expect(try transcoder.decode("2026-01-01T00:00:00Z") == Date(timeIntervalSince1970: 1_767_225_600))
+      #expect(try transcoder.decode("2026-01-01T00:00:00.500000Z") == Date(timeIntervalSince1970: 1_767_225_600.5))
+      #expect(throws: (any Error).self) { try transcoder.decode("yesterday") }
+   }
+
+   @Test func theVersionListNamesTheAppsMajorVersion() {
+      let versions = APIVersions(semanticVersions: ["v2": "2.1.0"], supportedVersions: ["v2"], currentVersion: "v2")
+      #expect(versions.appVersion == "2.1.0")
+      #expect(APIVersions(semanticVersions: [:], supportedVersions: [], currentVersion: "v3").appVersion == nil)
    }
 }
 

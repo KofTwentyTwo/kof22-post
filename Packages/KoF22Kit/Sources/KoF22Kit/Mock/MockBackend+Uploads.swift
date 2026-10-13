@@ -6,39 +6,31 @@
 import Foundation
 import ImageIO
 
-/// The photo upload flow: create a ticket, PUT the bytes to the presigned URL,
-/// then complete the upload to get a media id.
+/// The upload processes (`createUpload`, the presigned PUT, `completeUpload`) and
+/// `linkPreview`.
 extension MockBackend {
-   /// How long a presigned upload URL stays valid (15 minutes).
+   /// How long a presigned upload URL stays valid (15 minutes, as on the server).
    static let uploadLifetime: TimeInterval = 900
-   /// Base of the presigned upload URLs; the upload id is the last path segment.
-   static let uploadBaseURL = "https://mock.s3.kof22.invalid/kof22-website-incoming"
+   /// Host of the fake presigned URLs; never resolved.
+   static let uploadHost = "https://uploads.mock.kof22.invalid/"
 
-   /// `POST /me/uploads`: refuses HEIC (no converter on this server) and files over
-   /// the size limit, then issues a ticket with a presigned PUT URL.
+   /// `POST /media/createUpload`: a ticket for one photo.
    func createUpload(_ body: Data?) throws -> Response {
-      guard let input = Self.decodeBody(UploadCreate.self, from: body) else { return try badBody() }
-      if input.contentType == .imageHeic || input.contentType == .imageHeif {
-         return try problem(Status.unsupportedMediaType, "heic_conversion_unavailable", "HEIC is not accepted by this server; send JPEG")
+      guard let input = Self.decodeBody(UploadRequest.self, from: body) else {
+         return try problem(Status.badRequest, "bad_request", "fileName, contentType and byteSize are required")
       }
-      if input.byteSize > Self.limits.maxPhotoBytes {
-         return try problem(Status.payloadTooLarge, "payload_too_large", "Photos are limited to \(Self.limits.maxPhotoBytes) bytes")
+      guard Self.demoCaller.limits.photoContentTypes.contains(input.contentType) || input.contentType == "image/heic" else {
+         return try problem(Status.unsupportedMediaType, "unsupported_media_type", "Use JPEG or PNG")
       }
-      if input.byteSize <= 0 { return try validation([.init(field: "byteSize", issue: "must be positive")]) }
+      guard input.byteSize <= Self.demoCaller.limits.maxPhotoBytes else {
+         return try problem(Status.unprocessable, "image_too_large", "The photo is too large")
+      }
       let id = UUID().uuidString.lowercased()
       let expires = now().addingTimeInterval(Self.uploadLifetime)
-      state.uploads[id] = StoredUpload(
-         fileName: input.fileName, contentType: input.contentType.rawValue,
-         byteSize: input.byteSize, expiresAt: expires)
+      state.uploads[id] = StoredUpload(fileName: input.fileName, contentType: input.contentType, expiresAt: expires)
       let ticket = UploadTicket(
-         uploadId: id,
-         uploadUrl: "\(Self.uploadBaseURL)/\(id)",
-         method: .put,
-         headers: .init(additionalProperties: ["Content-Type": input.contentType.rawValue]),
-         expiresAt: expires,
-         maxBytes: Self.limits.maxPhotoBytes,
-         completeUrl: "https://api.kof22.com/v1/me/uploads/\(id)/complete"
-      )
+         uploadId: id, uploadUrl: Self.uploadHost + id, headers: ["Content-Type": input.contentType], expiresAt: expires,
+         maxBytes: Self.demoCaller.limits.maxPhotoBytes)
       return try json(Status.created, ticket)
    }
 
@@ -60,18 +52,17 @@ extension MockBackend {
       save()
    }
 
-   /// `POST /me/uploads/{id}/complete`: turns the received file into a media item.
-   /// Completing twice replays the same media item.
+   /// `POST /media/completeUpload/{id}`: turns the received file into a media record of
+   /// the site. Completing twice answers the same record.
    func completeUpload(_ id: String, body: Data?) throws -> Response {
       guard var upload = state.uploads[id] else { return try problem(Status.notFound, "not_found", "Upload not found") }
       //////////////////////////////////////////////////////////////////
       // Every field of the completion body is optional, so a missing //
       // or unreadable body means the defaults, as on the server.     //
       //////////////////////////////////////////////////////////////////
-      let input = Self.decodeBody(UploadComplete.self, from: body) ?? UploadComplete()
-      let locationRemoved = !(input.keepLocation ?? false)
-      if let mediaId = upload.mediaId, let media = state.media[mediaId] {
-         return try json(Status.okay, mediaItem(mediaId, media, locationRemoved: locationRemoved))
+      let input = Self.decodeBody(UploadCompletion.self, from: body) ?? UploadCompletion(altText: nil, caption: nil, keepLocation: false)
+      if let mediaId = upload.mediaId, let media = state.media.first(where: { $0.id == mediaId }), let url = media.publicUrl {
+         return try json(Status.okay, mediaItem(id: mediaId, url: url, media, locationRemoved: !input.keepLocation))
       }
       guard let received = upload.receivedFile else {
          if upload.expiresAt < now() { return try problem(Status.conflict, "upload_expired", "The upload URL expired") }
@@ -83,42 +74,58 @@ extension MockBackend {
       else {
          return try problem(Status.unsupportedMediaType, "unsupported_media_type", "The uploaded file is not an image")
       }
-      let mediaId = state.nextMediaId
+      let mediaId = state.takeId()
       let file = "media-\(mediaId).\(upload.contentType == "image/png" ? "png" : "jpg")"
       let destination = try mediaDirectory().appending(path: file)
       ////////////////////////////////////////////////////////////////////
-      // An in-memory mock's temporary folder can hold a file left by a //
+      // An in-memory fake's temporary folder can hold a file left by a //
       // previous instance; the new media replaces it.                  //
       ////////////////////////////////////////////////////////////////////
       try? FileManager.default.removeItem(at: destination)
       try FileManager.default.moveItem(at: fileURL, to: destination)
-      state.nextMediaId += 1
-      let media = StoredMedia(
-         file: file, mimeType: upload.contentType,
-         width: properties[kCGImagePropertyPixelWidth] as? Int,
-         height: properties[kCGImagePropertyPixelHeight] as? Int,
-         altText: Self.blankToNil(input.altText))
-      state.media[mediaId] = media
+      let url = publicURL(file)
+      let media = Components.Schemas.Media(
+         altText: input.altText?.nilIfBlank, caption: input.caption?.nilIfBlank, createDate: now(), fileName: upload.fileName,
+         height: properties[kCGImagePropertyPixelHeight] as? Int, id: mediaId, isActive: true, mimeType: upload.contentType,
+         modifyDate: now(), name: upload.fileName, publicUrl: url, siteId: Self.siteId, thumbnailUrl: url,
+         width: properties[kCGImagePropertyPixelWidth] as? Int)
+      state.media.append(media)
       upload.mediaId = mediaId
       state.uploads[id] = upload
-      return try json(Status.okay, mediaItem(mediaId, media, locationRemoved: locationRemoved))
+      return try json(Status.okay, mediaItem(id: mediaId, url: url, media, locationRemoved: !input.keepLocation))
    }
 
-   /// Builds the API's media item, with a file URL when the mock keeps files on disk.
-   func mediaItem(_ id: Int64, _ media: StoredMedia, locationRemoved: Bool) -> MediaItem {
-      let stored = "\(Self.mediaScheme):\(media.file)"
-      let url = directory.flatMap { fileURL(forMockMedia: stored, directory: $0)?.absoluteString } ?? stored
-      return MediaItem(
-         mediaId: id, url: url, thumbnailUrl: url, width: media.width, height: media.height,
-         mimeType: media.mimeType, altText: media.altText, caption: nil, locationRemoved: locationRemoved)
+   /// The process answer for the media record `id` at `url`.
+   func mediaItem(id: Int, url: String, _ media: Components.Schemas.Media, locationRemoved: Bool) -> MediaItem {
+      MediaItem(
+         mediaId: Int64(id), url: url, thumbnailUrl: media.thumbnailUrl, width: media.width,
+         height: media.height, mimeType: media.mimeType, altText: media.altText, caption: media.caption, locationRemoved: locationRemoved)
+   }
+
+   /// A file URL when the fake keeps files on disk, else the `mock-media:` form.
+   func publicURL(_ file: String) -> String {
+      let stored = "\(Self.mediaScheme):\(file)"
+      return directory.flatMap { fileURL(forMockMedia: stored, directory: $0)?.absoluteString } ?? stored
    }
 
    /// The folder for received and completed files, created on demand. An in-memory
-   /// mock uses a per-instance temporary folder.
+   /// fake uses a per-instance temporary folder.
    func mediaDirectory() throws -> URL {
       let base = directory ?? FileManager.default.temporaryDirectory.appending(path: "kof22-mock-\(ObjectIdentifier(self).hashValue)")
       let url = base.appending(path: "media", directoryHint: .isDirectory)
       try FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
       return url
+   }
+
+   /// `POST /blogPost/linkPreview`: a preview made from the URL itself (the fake never
+   /// goes online). Only public http(s) addresses are accepted.
+   func linkPreview(_ body: Data?) throws -> Response {
+      guard let input = Self.decodeBody([String: String].self, from: body), let raw = input["url"], let url = URL(string: raw),
+         let scheme = url.scheme?.lowercased(), scheme == "http" || scheme == "https", let host = url.host(), !host.isEmpty
+      else {
+         return try problem(Status.unprocessable, "link_not_allowed", "Only public http or https links can be used")
+      }
+      let title = url.lastPathComponent.isEmpty || url.lastPathComponent == "/" ? host : url.lastPathComponent
+      return try json(Status.okay, LinkPreview(url: raw, title: title, description: "A page on \(host)", imageUrl: nil))
    }
 }

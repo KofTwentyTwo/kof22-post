@@ -62,6 +62,6 @@ generate: $(GENERATOR)  ## Regenerate the API client from openapi/openapi.yaml
 		--output-directory Packages/KoF22Kit/Sources/KoF22API/Generated
 	scripts/merge-generated-types.sh Packages/KoF22Kit/Sources/KoF22API/Generated
 
-update-spec:        ## Show how the live spec differs; APPLY=1 replaces the copy and regenerates
+update-spec: $(GENERATOR)  ## Show how the live spec differs; APPLY=1 replaces the copy and regenerates
 	APPLY=$(APPLY) scripts/update-spec.sh
 	@if [ "$(APPLY)" = "1" ]; then $(MAKE) generate; fi

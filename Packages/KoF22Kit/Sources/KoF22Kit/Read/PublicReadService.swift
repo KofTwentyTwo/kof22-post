@@ -6,10 +6,11 @@
 import Foundation
 import OpenAPIRuntime
 
-/// Anonymous reads of published content (`/v1/blog`, `/v1/post`, `/v1/tag`) through the
-/// generated client. Requests never carry credentials: this client has no auth
-/// middleware at all. Answers are kept in a `ReadCache` so screens do not refetch on every
-/// appearance; pass `forceRefresh` for pull to refresh.
+/// Reads of published content (`/v2/blog`, `/v2/blogPost`, `/v2/blogTag`) for the site
+/// browser, through `SiteService`'s client. Site API v2 shows drafts to a signed-in
+/// caller, so post queries ask for `isPublished=true`. Answers are kept in a `ReadCache`
+/// so screens do not refetch on every appearance; pass `forceRefresh` for pull to
+/// refresh.
 public struct PublicReadService: Sendable {
    /// Posts per page when the caller does not ask for a size.
    public static let defaultPageSize = 20
@@ -25,31 +26,10 @@ public struct PublicReadService: Sendable {
    /// Tags alphabetically.
    static let tagOrder = "name ASC"
 
-   /// The generated client: error mapping and body capture only, never auth.
+   /// The generated client of the `SiteService` this belongs to.
    let client: Client
    /// Recent answers, shared by every copy of this service.
    public let cache: ReadCache
-
-   /// Builds the service on any transport.
-   public init(serverURL: URL, transport: any ClientTransport, cache: ReadCache = ReadCache()) {
-      self.client = Client(
-         serverURL: serverURL,
-         configuration: SiteService.configuration,
-         transport: transport,
-         middlewares: [ErrorEnvelopeMiddleware(), ResponseCaptureMiddleware()]
-      )
-      self.cache = cache
-   }
-
-   /// The service for the real Site API over `URLSession`.
-   public static func live(config: AppConfig = .production, cache: ReadCache = ReadCache()) -> Self {
-      Self(serverURL: config.apiBaseURL, transport: SiteService.liveTransport(), cache: cache)
-   }
-
-   /// The service answered by the in-process mock backend.
-   public static func mock(backend: MockBackend, cache: ReadCache = ReadCache()) -> Self {
-      Self(serverURL: AppConfig.mockAPIBaseURL, transport: MockTransport(backend: backend), cache: cache)
-   }
 
    /// All blogs, oldest first.
    public func blogs(forceRefresh: Bool = false) async throws -> [SiteBlog] {
@@ -69,8 +49,8 @@ public struct PublicReadService: Sendable {
    ) async throws -> ReadPage<SitePost> {
       let page = try await cached("posts:\(blogId):\(pageNo):\(pageSize)", forceRefresh: forceRefresh) {
          try await query(SitePost.self) {
-            try await client.queryPost(
-               query: .init(pageNo: pageNo, pageSize: pageSize, orderBy: Self.newestFirst, blogId: [String(blogId)])
+            try await client.queryBlogPost(
+               query: .init(pageNo: pageNo, pageSize: pageSize, orderBy: Self.newestFirst, blogId: [String(blogId)], isPublished: ["true"])
             ).ok.body.json.value1
          }
       }
@@ -83,7 +63,7 @@ public struct PublicReadService: Sendable {
    /// One published post by id.
    public func post(id: Int, forceRefresh: Bool = false) async throws -> SitePost {
       try await cached(Self.postKey(id), forceRefresh: forceRefresh) {
-         try await unwrappingClientErrors { try await client.getPost(path: .init(id: id)).ok.body.json }
+         try await unwrappingClientErrors { try await client.getBlogPost(path: .init(id: id)).ok.body.json }
       }
    }
 
@@ -91,7 +71,7 @@ public struct PublicReadService: Sendable {
    public func tags(blogId: Int, forceRefresh: Bool = false) async throws -> [SiteTag] {
       try await cached("tags:\(blogId)", forceRefresh: forceRefresh) {
          try await query(SiteTag.self) {
-            try await client.queryTag(
+            try await client.queryBlogTag(
                query: .init(pageNo: Self.firstPage, pageSize: Self.maximumPageSize, orderBy: Self.tagOrder, blogId: [String(blogId)])
             ).ok.body.json.value1
          }.records

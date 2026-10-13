@@ -123,7 +123,7 @@
                .focused(focus, equals: .body)
                .frame(minHeight: Theme.Size.editorMinHeight)
                .scrollContentBackground(.hidden)
-               .onChange(of: model.composition.body) { model.changed() }
+               .onChange(of: model.composition.body) { model.bodyChanged() }
                .accessibilityLabel("Post text")
                .accessibilityIdentifier("compose.body")
          }
@@ -163,9 +163,11 @@
          }
       }
 
-      /// A thumbnail that opens the photo's sheet, badged when alt text is missing.
+      /// A thumbnail that opens the photo's sheet, badged when alt text is missing and
+      /// starred when it is the post's image; its context menu chooses the post image.
       private func thumbnailButton(for photo: ComposedPhoto) -> some View {
-         Button {
+         let isFeatured = model.composition.featuredPhoto?.id == photo.id
+         return Button {
             editingPhoto = photo
          } label: {
             PhotoThumbnail(photo: photo, size: Theme.Size.stripThumbnail)
@@ -177,9 +179,22 @@
                         .foregroundStyle(.black).padding(Theme.Spacing.xSmall)
                   }
                }
+               .overlay(alignment: .topTrailing) {
+                  if isFeatured {
+                     Image(systemName: "star.fill").font(.caption2).foregroundStyle(.black)
+                        .padding(Theme.Spacing.badgeInset)
+                        .background(Theme.accent, in: Circle())
+                        .padding(Theme.Spacing.xSmall)
+                  }
+               }
          }
-         .accessibilityLabel(photo.altText.isEmpty ? "Photo without alt text" : "Photo: \(photo.altText)")
-         .accessibilityHint("Edit alt text or remove")
+         .contextMenu {
+            Button("Use as post image", systemImage: "star") { model.feature(photo) }.disabled(isFeatured)
+         }
+         .accessibilityLabel(
+            (photo.altText.isEmpty ? "Photo without alt text" : "Photo: \(photo.altText)") + (isFeatured ? ", post image" : "")
+         )
+         .accessibilityHint("Edit alt text or remove; touch and hold to use it as the post image")
       }
 
       /// The missing-alt-text count and, with two or more photos, the Arrange button.
@@ -305,6 +320,21 @@
                .onChange(of: model.composition.locationLabel) { model.changed() }
             if model.isLocating {
                ProgressView().controlSize(.small)
+            }
+            else if model.locationOptions.count > 1 {
+               Menu {
+                  ForEach(model.locationOptions, id: \.self) { option in
+                     Button(option) {
+                        model.composition.locationLabel = option
+                        model.changed()
+                     }
+                  }
+                  Divider()
+                  Button("Look up again", systemImage: "location.fill") { Task { await model.useCurrentLocation() } }
+               } label: {
+                  Image(systemName: "list.bullet.circle")
+               }
+               .accessibilityLabel("Nearby places")
             }
             else {
                Button {

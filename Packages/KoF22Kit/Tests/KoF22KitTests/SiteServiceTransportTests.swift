@@ -83,18 +83,17 @@ import Testing
       #expect(service.uploader is URLSessionUploadPerformer)
    }
 
-   @Test func versionsNeedNoSignIn() async throws {
+   @Test func everyRequestNeedsASession() async throws {
       let auth = AuthSession(mode: .mock, store: MemorySecureStore())
       let service = SiteService.mock(backend: MockBackend(directory: nil), auth: auth)
-      let versions = try await service.versions()
-      #expect(versions.supportedVersions.contains("v1"))
-      await #expect(throws: AuthError.signedOut) { try await service.me() }
+      await #expect(throws: AuthError.signedOut) { try await service.versions() }
+      try await auth.signIn(using: NoWebAuthenticator())
+      #expect(try await service.versions().appVersion == "2.1.0")
    }
 
    @Test func uploadTicketWithoutAUsableURLIsRejected() async throws {
       let (service, _, _) = try await makeMockService()
-      let ticket = UploadTicket(
-         uploadId: "u1", uploadUrl: "", method: .put, headers: .init(), expiresAt: .now, maxBytes: 1_024, completeUrl: "")
+      let ticket = UploadTicket(uploadId: "u1", uploadUrl: "", headers: [:], expiresAt: .now, maxBytes: 1_024)
       let file = TestImages.temporaryDirectory().appending(path: "photo.jpg")
       await #expect(throws: URLError(.badURL)) { try await service.putUpload(fileURL: file, ticket: ticket) }
    }
@@ -128,16 +127,16 @@ final class SentRequests: @unchecked Sendable {
 }
 
 @Suite struct MiddlewareEdgeTests {
-   let request = HTTPRequest(method: .get, scheme: "https", authority: "api.kof22.com", path: "/v1/me")
+   let request = HTTPRequest(method: .get, scheme: "https", authority: "api.kof22.com", path: "/v2/me")
    let baseURL = URL(literal: "https://api.kof22.com")
 
    @Test func rejectedTokenIsRefreshedAndTheSameBodyReplayed() async throws {
       let auth = AuthSession(mode: .mock, store: MemorySecureStore())
       try await auth.signIn(using: NoWebAuthenticator())
       let sent = SentRequests()
-      let post = HTTPRequest(method: .post, scheme: "https", authority: "api.kof22.com", path: "/v1/me/posts")
+      let post = HTTPRequest(method: .post, scheme: "https", authority: "api.kof22.com", path: "/v2/blogPost/")
       let (response, _) = try await AuthMiddleware(auth: auth)
-         .intercept(post, body: HTTPBody(#"{"body":"hello"}"#), baseURL: baseURL, operationID: "createPost") { request, body, _ in
+         .intercept(post, body: HTTPBody(#"{"body":"hello"}"#), baseURL: baseURL, operationID: "createBlogPost") { request, body, _ in
             let bytes = try await Data(collecting: try #require(body), upTo: .max)
             let count = sent.record(request.headerFields[.authorization] ?? "", bytes)
             return (HTTPResponse(status: count == 1 ? .unauthorized : .created), nil)
@@ -153,7 +152,7 @@ final class SentRequests: @unchecked Sendable {
       let huge = HTTPBody(Data(count: ErrorEnvelopeMiddleware.maximumErrorBodyBytes * 2))
       let error = await #expect(throws: APIError.self) {
          _ = try await ErrorEnvelopeMiddleware()
-            .intercept(request, body: nil, baseURL: baseURL, operationID: "getMe") { _, _, _ in
+            .intercept(request, body: nil, baseURL: baseURL, operationID: "me") { _, _, _ in
                (HTTPResponse(status: .internalServerError), huge)
             }
       }
@@ -164,30 +163,51 @@ final class SentRequests: @unchecked Sendable {
    @Test func errorWithoutABodyUsesTheStatus() async throws {
       let error = await #expect(throws: APIError.self) {
          _ = try await ErrorEnvelopeMiddleware()
-            .intercept(request, body: nil, baseURL: baseURL, operationID: "getMe") { _, _, _ in
+            .intercept(request, body: nil, baseURL: baseURL, operationID: "me") { _, _, _ in
                (HTTPResponse(status: .notFound), nil)
             }
       }
       #expect(error?.code == "http_404")
    }
 
-   @Test func explicitNullLeavesBodiesWithoutTheSentinelAlone() {
-      let plain = Data(#"{"body":"b"}"#.utf8)
-      #expect(ExplicitNullMiddleware.rewrite(plain) == plain)
-      let array = Data(#"["__kof22_null__"]"#.utf8)
-      #expect(ExplicitNullMiddleware.rewrite(array) == array)
+   @Test func explicitNullsAreAddedOnlyForAbsentKeysOfAnObject() throws {
+      let rewritten = ExplicitNullMiddleware.rewrite(Data(#"{"title":"t","linkUrl":"x"}"#.utf8), nulls: ["linkUrl", "locationLabel"])
+      let object = try #require(try JSONSerialization.jsonObject(with: rewritten) as? [String: Any])
+      #expect(object["linkUrl"] as? String == "x")
+      #expect(object["locationLabel"] is NSNull)
+      let array = Data(#"["x"]"#.utf8)
+      #expect(ExplicitNullMiddleware.rewrite(array, nulls: ["x"]) == array)
       let notJSON = Data("not json".utf8)
-      #expect(ExplicitNullMiddleware.rewrite(notJSON) == notJSON)
+      #expect(ExplicitNullMiddleware.rewrite(notJSON, nulls: ["x"]) == notJSON)
    }
 
-   @Test func explicitNullOnlyTouchesPostUpdates() async throws {
-      let body = Data(#"{"linkUrl":"__kof22_null__"}"#.utf8)
-      let (_, forwarded) = try await ExplicitNullMiddleware()
-         .intercept(request, body: HTTPBody(body), baseURL: baseURL, operationID: "createPost") { _, body, _ in
-            (HTTPResponse(status: .ok), body)
-         }
-      let sent = try await Data(collecting: try #require(forwarded), upTo: .max)
-      #expect(sent == body)
+   @Test func explicitNullsOnlyTouchPostUpdatesThatAskForThem() async throws {
+      let body = Data(#"{"title":"t"}"#.utf8)
+      let forward: @Sendable (HTTPRequest, HTTPBody?, URL) async throws -> (HTTPResponse, HTTPBody?) = { _, body, _ in
+         (HTTPResponse(status: .ok), body)
+      }
+      let middleware = ExplicitNullMiddleware()
+      let (_, other) = try await ExplicitNullMiddleware.$fields.withValue(["linkUrl"]) {
+         try await middleware.intercept(request, body: HTTPBody(body), baseURL: baseURL, operationID: "createBlogPost", next: forward)
+      }
+      #expect(try await Data(collecting: try #require(other), upTo: .max) == body)
+      let (_, none) = try await middleware.intercept(request, body: HTTPBody(body), baseURL: baseURL, operationID: "updateBlogPost", next: forward)
+      #expect(try await Data(collecting: try #require(none), upTo: .max) == body)
+      let (_, update) = try await ExplicitNullMiddleware.$fields.withValue(["linkUrl"]) {
+         try await middleware.intercept(request, body: HTTPBody(body), baseURL: baseURL, operationID: "updateBlogPost", next: forward)
+      }
+      let sent = try await Data(collecting: try #require(update), upTo: .max)
+      #expect(String(bytes: sent, encoding: .utf8)?.contains(#""linkUrl":null"#) == true)
+   }
+
+   @Test func anUnreadableErrorBodyStillYieldsTheStatus() async throws {
+      let error = await #expect(throws: APIError.self) {
+         _ = try await ErrorEnvelopeMiddleware()
+            .intercept(request, body: nil, baseURL: baseURL, operationID: "me") { _, _, _ in
+               (HTTPResponse(status: .badGateway), HTTPBody(FailingSequence(), length: .unknown, iterationBehavior: .single))
+            }
+      }
+      #expect(error?.code == "http_502")
    }
 }
 
@@ -249,4 +269,19 @@ final class SentRequests: @unchecked Sendable {
       let url = URL(literal: "com.kof22.post://oauth/callback?error=access_denied&state=abc")
       #expect(throws: AuthError.authorizationDenied("access_denied")) { try client.code(fromCallback: url, expectedState: "abc") }
    }
+}
+
+/// A byte stream that fails on the first read.
+struct FailingSequence: AsyncSequence, Sendable {
+   /// Bytes as `HTTPBody` reads them.
+   typealias Element = ArraySlice<UInt8>
+
+   /// The iterator that throws.
+   struct Iterator: AsyncIteratorProtocol {
+      /// Always fails.
+      mutating func next() async throws -> ArraySlice<UInt8>? { throw RigError.deliberate }
+   }
+
+   /// A failing iterator.
+   func makeAsyncIterator() -> Iterator { Iterator() }
 }

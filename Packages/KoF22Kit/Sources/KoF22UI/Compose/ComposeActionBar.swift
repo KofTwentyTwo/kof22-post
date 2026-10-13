@@ -25,12 +25,10 @@
       @Binding var showCamera: Bool
       /// Expands the link and location section.
       @Binding var showDetails: Bool
-      /// Presents the schedule sheet.
-      @Binding var showSchedule: Bool
       /// Shows the discard confirmation.
       @Binding var confirmDiscard: Bool
-      /// Queues the post with the given status.
-      let onSubmit: (PostStatus) -> Void
+      /// Queues the post with the status chosen in the publish section.
+      let onSubmit: () -> Void
 
       /// The attachment buttons on the left, the menu and Post on the right.
       var body: some View {
@@ -91,14 +89,10 @@
          .accessibilityIdentifier("compose.addPhotos")
       }
 
-      /// Title toggle, save as draft, schedule and discard.
+      /// Title toggle and discard.
       private var optionsMenu: some View {
          Menu {
             Toggle("Title", isOn: $model.showTitle)
-            if !model.isEditing || model.composition.status != .published {
-               Button("Save as draft", systemImage: "doc") { onSubmit(.draft) }
-            }
-            Button("Schedule…", systemImage: "calendar.badge.clock") { showSchedule = true }
             if !model.isEditing {
                Button("Discard", systemImage: "trash", role: .destructive) { confirmDiscard = true }
             }
@@ -109,13 +103,13 @@
          .accessibilityIdentifier("compose.more")
       }
 
-      /// Publishes a new post, or saves an edit with its current status (published when it
-      /// already is). Dimmed and disabled while the post is empty or being queued.
+      /// Sends the post with the status chosen in the publish section; the label says
+      /// what will happen. Dimmed and disabled while the post is empty or being queued.
       private var postButton: some View {
          Button {
-            onSubmit(model.isEditing && model.composition.status != .published ? model.composition.status : .published)
+            onSubmit()
          } label: {
-            Text(model.isEditing ? "Save" : "Post")
+            Text(postLabel)
                .font(Theme.mono(.body, weight: .bold))
                .padding(.horizontal, Theme.Spacing.buttonHorizontal)
                .padding(.vertical, Theme.Spacing.medium)
@@ -128,50 +122,15 @@
       }
    }
 
-   /// Picks the publish date for a scheduled post.
-   struct ComposeScheduleSheet: View {
-      /// Seconds in a day.
-      private static let secondsPerDay: TimeInterval = 86_400
-      /// Days ahead a post can be scheduled.
-      private static let schedulingHorizonDays: TimeInterval = 365
-      /// Default lead time for a new schedule: one hour.
-      static let defaultLead: TimeInterval = 3600
-      /// Shortest lead time accepted, so the post is not already due when it is sent.
-      private static let minimumLead: TimeInterval = 120
-
-      /// The chosen publish date.
-      @Binding var date: Date
-      /// Whether the sheet is shown.
-      @Binding var isPresented: Bool
-      /// Called with the chosen date when Schedule is tapped.
-      let onSchedule: (Date) -> Void
-
-      /// A graphical date picker from two minutes to a year ahead, with Cancel and Schedule.
-      var body: some View {
-         NavigationStack {
-            Form {
-               DatePicker("Publish at", selection: $date, in: Self.allowedRange)
-                  .datePickerStyle(.graphical)
-                  .tint(Theme.accent)
-            }
-            .navigationTitle("Schedule")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-               ToolbarItem(placement: .cancellationAction) { Button("Cancel") { isPresented = false } }
-               ToolbarItem(placement: .confirmationAction) {
-                  Button("Schedule") {
-                     isPresented = false
-                     onSchedule(date)
-                  }
-               }
-            }
+   extension ComposeActionBar {
+      /// "Save" for edits, else what the chosen status does.
+      var postLabel: String {
+         if model.isEditing { return "Save" }
+         switch model.composition.status {
+         case .draft: return "Save draft"
+         case .scheduled: return "Schedule"
+         case .published: return "Post"
          }
-         .presentationDetents([.large])
-      }
-
-      /// Dates a post can be scheduled for, measured from now.
-      private static var allowedRange: ClosedRange<Date> {
-         Date.now.addingTimeInterval(minimumLead)...Date.now.addingTimeInterval(schedulingHorizonDays * secondsPerDay)
       }
    }
 

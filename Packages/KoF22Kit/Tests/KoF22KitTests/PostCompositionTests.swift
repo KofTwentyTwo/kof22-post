@@ -8,12 +8,13 @@ import Testing
 
 @testable import KoF22Kit
 
-/// What the composer produces and how it maps onto the API's create and update bodies.
+/// What the composer produces and how it resolves into the values a post is sent with.
 @Suite struct PostCompositionTests {
    /// A server post with a link, a location and one photo.
    static let serverPost = Post(
-      id: 4, blogId: 2, blog: "deep-thoughts", status: .scheduled, title: "Title", body: "Body", slug: "title",
-      publishAt: Date(timeIntervalSince1970: 5_000), tags: ["Swift"], locationLabel: "Lisbon",
+      id: 4, blogId: 2, blog: "deep-thoughts", authorId: 3, status: .scheduled, title: "Title", name: "Name", shortName: "Short",
+      slug: "title", body: "Body", description: "Desc", metaTitle: "MT", metaDescription: "MD", metaKeywords: "a, b", isFeatured: true,
+      featuredMediaId: 9, publishAt: Date(timeIntervalSince1970: 5_000), tags: ["Swift"], locationLabel: "Lisbon",
       link: PostLink(url: "https://example.com", title: nil, description: nil, imageUrl: nil),
       media: [
          PostPhoto(mediaId: 8, url: "https://cdn/8.jpg", thumbnailUrl: nil, altText: "Alt", caption: nil),
@@ -33,6 +34,14 @@ import Testing
       #expect(composition.photos.last?.remoteURL == "https://cdn/9-thumb.jpg")
       #expect(composition.photos.last?.altText == "")
       #expect(composition.photos.last?.caption == "Cap")
+      #expect(composition.authorId == 3)
+      #expect(composition.name == "Name")
+      #expect(composition.shortName == "Short")
+      #expect(composition.description == "Desc")
+      #expect(composition.metaKeywords == "a, b")
+      #expect(composition.isFeatured)
+      #expect(composition.featuredPhotoID == composition.photos.last?.id)
+      #expect(composition.featuredPhoto?.mediaId == 9)
    }
 
    @Test func summaryPrefersTheTitleThenTheBody() {
@@ -49,48 +58,66 @@ import Testing
       #expect(PostComposition(linkURL: "https://a.example").isEmpty == false)
    }
 
-   @Test func validationNamesTheFirstProblem() {
-      let now = Date(timeIntervalSince1970: 10_000)
-      let limits = AuthoringLimits.fallback
-      let tooMany = (0...limits.maxTags).map { "t\($0)" }
-      let photos = (0...limits.maxPhotosPerPost).map { _ in ComposedPhoto() }
-      let cases: [(PostComposition, String?)] = [
-         (PostComposition(body: String(repeating: "b", count: limits.maxBodyLength + 1)), "Posts are limited to 10000 characters."),
-         (PostComposition(title: String(repeating: "t", count: limits.maxTitleLength + 1), body: "x"), "Titles are limited to 100 characters."),
-         (PostComposition(body: "x", tags: tooMany), "At most 10 tags."),
-         (PostComposition(photos: photos), "At most 20 photos per post."),
-         (PostComposition(body: "x", status: .scheduled, publishAt: now.addingTimeInterval(30)), "Schedule at least a minute ahead."),
-         (PostComposition(body: "x", status: .scheduled, publishAt: now.addingTimeInterval(120)), nil),
-         (PostComposition(body: "x", linkURL: "https://ok.example"), nil),
-      ]
-      for (composition, message) in cases {
-         #expect(composition.validationMessage(limits: limits, now: now) == message)
-      }
+   @Test func aBareDraftFillsEveryDetailByRule() {
+      let body = "# Morning at the lake\nThe *water* was still and the [herons](https://x.example) were out early."
+      let draft = PostComposition(body: body, tags: ["Birds", "birds", "Lake"]).draft()
+      #expect(draft.title == "Morning at the lake")
+      #expect(draft.name == "Morning at the lake")
+      #expect(draft.shortName == "Morning at the lake")
+      #expect(draft.slug == "morning-at-the-lake")
+      #expect(draft.description.hasPrefix("Morning at the lake The water was still and the herons"))
+      #expect(draft.metaTitle == "Morning at the lake")
+      #expect(draft.metaDescription == draft.description)
+      #expect(draft.metaKeywords == "Birds, Lake")
+      #expect(draft.readTime == 1)
+      #expect(draft.excerpt == draft.description)
+      #expect(draft.status == .published)
+      #expect(draft.publishAt == nil)
+      #expect(draft.linkURL == nil)
+      #expect(draft.locationLabel == nil)
+      #expect(draft.featuredMediaId == nil)
    }
 
-   @Test func createBodyOmitsBlanksAndUnscheduledTimes() {
-      let photos = [ComposedPhoto(mediaId: 3, altText: " ", caption: "Cap"), ComposedPhoto(fileName: "local.jpg")]
-      let published = PostComposition(
-         title: " ", body: "b", locationLabel: "", publishAt: .distantFuture, photos: photos
-      ).createBody()
-      #expect(published.title == nil)
-      #expect(published.locationLabel == nil)
-      #expect(published.publishAt == nil)
-      #expect(published.media == [MediaAttachment(mediaId: 3, altText: nil, caption: "Cap")])
-      let scheduled = PostComposition(body: "b", status: .scheduled, publishAt: .distantFuture).createBody()
-      #expect(scheduled.publishAt == .distantFuture)
+   @Test func typedDetailsWinAndAreClipped() {
+      let long = String(repeating: "word ", count: 120)
+      let draft = PostComposition(
+         authorId: 2, title: " Title ", name: long, shortName: long, slug: "Hello Wörld!", description: long, metaTitle: "SEO",
+         metaDescription: "Meta", metaKeywords: "x, y , x", body: "b", linkURL: " https://a.example ", locationLabel: " Here ",
+         status: .scheduled, publishAt: .distantFuture, isFeatured: true
+      ).draft()
+      #expect(draft.authorId == 2)
+      #expect(draft.title == "Title")
+      #expect(draft.name.count <= PostFieldLimits.name)
+      #expect(draft.shortName.count <= PostFieldLimits.shortName)
+      #expect(draft.slug == "hello-world")
+      #expect(draft.description.count <= PostFieldLimits.description)
+      #expect(draft.metaTitle == "SEO")
+      #expect(draft.metaDescription == "Meta")
+      #expect(draft.metaKeywords == "x, y")
+      #expect(draft.linkURL == "https://a.example")
+      #expect(draft.locationLabel == "Here")
+      #expect(draft.publishAt == .distantFuture)
+      #expect(draft.isFeatured)
    }
 
-   @Test func updateBodySendsTheFullTrimmedState() {
-      let (update, clearLink) = PostComposition(
-         title: " T ", body: "b", linkURL: "https://x.example", locationLabel: " Porto ", status: .scheduled,
-         publishAt: .distantFuture
-      ).updateBody()
-      #expect(update.title == "T")
-      #expect(update.locationLabel == "Porto")
-      #expect(update.linkUrl == "https://x.example")
-      #expect(update.publishAt == .distantFuture)
-      #expect(!clearLink)
+   @Test func aTitleWithoutLettersStillGetsASlug() {
+      #expect(PostComposition(title: "!!!", body: "b").draft().slug == "field-note")
+   }
+
+   @Test func uploadedPhotosAttachInOrderAndTheFeaturedOneIsChosen() {
+      let first = ComposedPhoto(mediaId: 3, altText: " ", caption: "Cap")
+      let local = ComposedPhoto(fileName: "local.jpg")
+      let second = ComposedPhoto(mediaId: 4, altText: "Alt")
+      var composition = PostComposition(photos: [first, local, second])
+      #expect(composition.bodyForServer == "📷")
+      var draft = composition.draft()
+      #expect(draft.media == [.init(mediaId: 3, altText: nil, caption: "Cap"), .init(mediaId: 4, altText: "Alt", caption: nil)])
+      #expect(draft.featuredMediaId == 3)
+      composition.featuredPhotoID = second.id
+      draft = composition.draft()
+      #expect(draft.featuredMediaId == 4)
+      composition.featuredPhotoID = local.id
+      #expect(composition.draft().featuredMediaId == nil)
    }
 
    @Test func attachingMediaPrefersTheThumbnail() {

@@ -5,18 +5,18 @@
 
 import Foundation
 
-/// A published post as anyone can read it (`GET /v1/post/...`), with tag links and photos.
-public typealias SitePost = Components.Schemas.Post
-/// A blog (`GET /v1/blog/...`).
+/// A published post (`GET /v2/blogPost/...`), with tag links and photos when read by id.
+public typealias SitePost = Components.Schemas.BlogPost
+/// A blog (`GET /v2/blog/...`).
 public typealias SiteBlog = Components.Schemas.Blog
-/// A blog tag (`GET /v1/tag/...`).
-public typealias SiteTag = Components.Schemas.Tag
-/// A tag applied to a published post; resolve `tagId` with the blog's tags.
-public typealias SitePostTagLink = Components.Schemas.PostTagLink
-/// A photo attached to a published post, in display order.
-public typealias SitePostMedia = Components.Schemas.PostMedia
+/// A blog tag (`GET /v2/blogTag/...`).
+public typealias SiteTag = Components.Schemas.BlogTag
+/// A tag applied to a post; resolve `blogTagId` with the blog's tags.
+public typealias SitePostTagLink = Components.Schemas.BlogPostTagInt
+/// A photo attached to a post, in display order.
+public typealias SitePostMedia = Components.Schemas.BlogPostMedia
 
-/// One page of an anonymous `/query` result: `{"records":[...],"count","pageNo","pageSize"}`.
+/// One page of a `/query` result: `{"records":[...],"count","pageNo","pageSize"}`.
 public struct ReadPage<Record: Codable & Hashable & Sendable>: Codable, Hashable, Sendable {
    /// The records on this page.
    public var records: [Record]

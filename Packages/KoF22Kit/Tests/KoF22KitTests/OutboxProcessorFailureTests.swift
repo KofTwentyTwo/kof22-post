@@ -88,7 +88,7 @@ import Testing
 
    @Test func deletingRemovesThePostAndItsCachedCopy() async throws {
       let rig = try await OutboxRig.make()
-      let post = try await rig.service.createPost(PostCreate(body: "to delete"), idempotencyKey: "k-delete-cached")
+      let post = try await rig.service.createPost(PostComposition(body: "to delete").draft())
       try await rig.store.cache([post])
       let id = try await rig.store.enqueue(PostComposition(post: post), operation: .delete, serverPostID: post.id, ifMatch: post.version)
       await rig.processor.drain()

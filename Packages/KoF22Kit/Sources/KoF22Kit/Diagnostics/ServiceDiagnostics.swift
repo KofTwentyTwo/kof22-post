@@ -68,26 +68,29 @@ public struct ServiceDiagnostics: Sendable {
       }
    }
 
-   /// `/versions.json`: 200 with the version list; reports the current version's semver.
+   /// The API major version the app is built for.
+   static let supportedMajor = "v2"
+
+   /// `/versions.json`: 200 and `supportedVersions` includes the app's major version;
+   /// reports its semantic version (`{"semanticVersions":{"v2":"2.1.0"},
+   /// "supportedVersions":["v2"],"currentVersion":"v2"}`).
    func checkVersions() async -> DiagnosticCheck {
       await check(id: "versions", title: "API version", url: config.apiBaseURL.appending(path: "versions.json")) { data, status in
          guard status == Self.okStatus else { return (false, "HTTP \(status)") }
-         let versions: APIVersions
-         do {
-            versions = try JSONDecoder().decode(APIVersions.self, from: data)
-         }
-         catch {
-            Log.api.warning("Diagnostics: versions.json is not readable: \(error.localizedDescription, privacy: .public)")
+         guard let list = Self.jsonObject(data), let supported = list["supportedVersions"] as? [String] else {
             return (false, "The version list is not readable")
          }
-         let current = versions.versions.first { $0.version == versions.currentVersion }
-         return (true, "\(versions.currentVersion) \(current?.semver ?? "(no semver)")")
+         let semver = (list["semanticVersions"] as? [String: String])?[Self.supportedMajor] ?? "(no semver)"
+         guard supported.contains(Self.supportedMajor) else {
+            return (false, "This app needs \(Self.supportedMajor); the server supports \(supported.joined(separator: ", "))")
+         }
+         return (true, "\(Self.supportedMajor) \(semver)")
       }
    }
 
-   /// `/v1/blog/query?pageSize=1`: 200 with a `records` array, without credentials.
+   /// `/v2/blog/query?pageSize=1`: 200 with a `records` array, without credentials.
    func checkAnonymousRead() async -> DiagnosticCheck {
-      let url = config.apiBaseURL.appending(path: "v1/blog/query").appending(queryItems: [URLQueryItem(name: "pageSize", value: "1")])
+      let url = config.apiBaseURL.appending(path: "v2/blog/query").appending(queryItems: [URLQueryItem(name: "pageSize", value: "1")])
       return await check(id: "read", title: "Public content", url: url) { data, status in
          guard status == Self.okStatus else { return (false, "HTTP \(status)") }
          guard let page = Self.jsonObject(data), page["records"] is [Any] else { return (false, "The reply has no records") }

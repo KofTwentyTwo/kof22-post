@@ -19,7 +19,7 @@ import Testing
 
    /// A minimal server post.
    static func post(body: String, updatedAt: Date?) -> Post {
-      Post(id: 1, blogId: 1, blog: "quick-bits", status: .published, title: body, body: body, slug: "s", tags: [], media: [], updatedAt: updatedAt, version: "v")
+      Post(id: 1, blogId: 1, blog: "quick-bits", status: .published, title: body, slug: "s", body: body, updatedAt: updatedAt, version: "v")
    }
 
    @Test func codingFailuresAreReportedAsNil() {

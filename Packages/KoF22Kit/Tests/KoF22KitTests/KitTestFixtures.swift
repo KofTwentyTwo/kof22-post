@@ -173,16 +173,17 @@ struct MockCaller {
 
    /// Sends one request with an optional JSON-encodable body.
    func call(
-      _ operation: String, path: String = "/", query: [String: String] = [:], headers: [String: String] = [:],
-      json: (any Encodable & Sendable)? = nil
-   ) async throws -> MockBackend.Response {
+      _ operation: String, path: String = "/", query: [String: String] = [:], json: (any Encodable & Sendable)? = nil
+   ) async throws
+      -> MockBackend.Response
+   {
       let body = try json.map { try MockBackend.encoder.encode($0) }
-      return try await backend.handle(operation: operation, path: path, query: query, headers: headers, body: body)
+      return try await backend.handle(operation: operation, path: path, query: query, body: body)
    }
 
    /// Sends one request with a raw body.
-   func call(_ operation: String, path: String = "/", headers: [String: String] = [:], raw: Data?) async throws -> MockBackend.Response {
-      try await backend.handle(operation: operation, path: path, query: [:], headers: headers, body: raw)
+   func call(_ operation: String, path: String = "/", raw: Data?) async throws -> MockBackend.Response {
+      try await backend.handle(operation: operation, path: path, query: [:], body: raw)
    }
 
    /// Decodes a reply body.
@@ -190,30 +191,87 @@ struct MockCaller {
       try MockBackend.decoder.decode(type, from: response.body ?? Data())
    }
 
-   /// The error envelope code of a reply.
-   func errorCode(_ response: MockBackend.Response) throws -> String {
-      try decode(Components.Schemas._Error.self, response).error.code
+   /// The reply as the client's error.
+   func error(_ response: MockBackend.Response) -> APIError {
+      APIError.decode(status: response.status, data: response.body ?? Data(), retryAfter: nil, etag: nil)
    }
 
-   /// The first validation detail field of a reply.
-   func firstIssueField(_ response: MockBackend.Response) throws -> String? {
-      try decode(Components.Schemas._Error.self, response).error.details?.first?.field
+   /// Inserts a post record and reads it back.
+   func create(_ record: Components.Schemas.BlogPost) async throws -> Components.Schemas.BlogPost {
+      let response = try await call("createBlogPost", path: "/v2/blogPost/", json: record)
+      guard response.status == MockBackend.Status.created else { throw error(response) }
+      let id = try decode([String: Int].self, response)["id"] ?? 0
+      return try decode(Components.Schemas.BlogPost.self, try await call("getBlogPost", path: "/v2/blogPost/\(id)"))
    }
 
-   /// Creates a post and returns it, failing when the backend refuses it.
-   func create(_ input: PostCreate, key: String = "key-\(UUID().uuidString)") async throws -> Post {
-      let response = try await call("createPost", path: "/v1/me/posts", headers: ["idempotency-key": key], json: input)
-      return try decode(Post.self, response)
+   /// A minimal valid post record for the default blog.
+   static func record(_ body: String, title: String? = nil, published: Bool = true) -> Components.Schemas.BlogPost {
+      Components.Schemas.BlogPost(
+         authorId: MockBackend.ownerAuthorID, blogId: MockBackend.quickBitsID, content: body, isFeatured: false, isPublished: published,
+         readTime: 1, title: title, viewCount: 0)
    }
 
    /// Creates an upload ticket, PUTs `file` and completes it, returning the media item.
-   func upload(file: URL, contentType: UploadCreate.ContentTypePayload = .imageJpeg) async throws -> MediaItem {
+   func upload(file: URL, contentType: String = "image/jpeg", altText: String? = nil) async throws -> MediaItem {
       let ticketResponse = try await call(
-         "createUpload", path: "/v1/me/uploads",
-         json: UploadCreate(fileName: file.lastPathComponent, contentType: contentType, byteSize: 1))
+         "createUpload", path: "/v2/media/createUpload", json: UploadRequest(fileName: file.lastPathComponent, contentType: contentType, byteSize: 1))
       let ticket = try decode(UploadTicket.self, ticketResponse)
       try await backend.receiveUpload(id: ticket.uploadId, from: file)
-      let completed = try await call("completeUpload", path: "/v1/me/uploads/\(ticket.uploadId)/complete", json: UploadComplete())
+      let completed = try await call(
+         "completeUpload", path: "/v2/media/completeUpload/\(ticket.uploadId)",
+         json: UploadCompletion(altText: altText, caption: nil, keepLocation: false))
       return try decode(MediaItem.self, completed)
    }
+}
+
+/// A session with fixed tokens: `token` until a 401, then `fresh`. Counts refreshes.
+final class StaticAuth: SessionAuthenticating, @unchecked Sendable {
+   /// Guards `refreshCount`.
+   private let lock = NSLock()
+   /// The first token.
+   let token: String
+   /// The token after a refresh.
+   let fresh: String
+   /// Refreshes so far.
+   private var refreshed = 0
+
+   /// Creates a session handing out `token`, then `fresh` after a refresh.
+   init(token: String = "token-1", fresh: String = "token-2") {
+      self.token = token
+      self.fresh = fresh
+   }
+
+   /// How many times a refresh was forced.
+   var refreshCount: Int { lock.withLock { refreshed } }
+
+   /// Always signed in.
+   var isSignedIn: Bool { true }
+
+   /// The current token.
+   func accessToken() async throws -> String { lock.withLock { refreshed == 0 ? token : fresh } }
+
+   /// Switches to `fresh`.
+   func forceRefresh(rejected token: String) async throws -> String {
+      lock.withLock {
+         refreshed += 1
+         return fresh
+      }
+   }
+
+   /// Nothing to do.
+   func signIn(using authenticator: any WebAuthenticator) async throws {}
+
+   /// Nothing to do.
+   func signOut() async {}
+}
+
+/// A service over `transport` with a fixed-token session and an uploader that refuses.
+func fixtureService(_ transport: any ClientTransport, auth: StaticAuth = StaticAuth(), cache: ReadCache = ReadCache()) -> SiteService {
+   SiteService(serverURL: URL(literal: "https://api.kof22.com"), transport: transport, auth: auth, uploader: RefusingUploader(), cache: cache)
+}
+
+/// An uploader that must never be reached.
+struct RefusingUploader: UploadPerformer {
+   /// Always fails.
+   func put(fileURL: URL, to url: URL, headers: [String: String]) async throws { throw RigError.deliberate }
 }

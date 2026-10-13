@@ -12,7 +12,7 @@ public struct PreparedPhoto: Sendable, Equatable {
    /// The prepared file in the work directory.
    public var fileURL: URL
    /// The content type declared to the server.
-   public var contentType: UploadCreate.ContentTypePayload
+   public var contentType: String
    /// The file's size in bytes.
    public var byteSize: Int64
 }
@@ -86,16 +86,16 @@ public enum MediaProcessor {
       try FileManager.default.createDirectory(at: workDirectory, withIntermediateDirectories: true)
 
       var output: URL
-      var contentType: UploadCreate.ContentTypePayload
+      var contentType: String
       if let targetEdge {
-         contentType = .imageJpeg
+         contentType = "image/jpeg"
          output = workDirectory.appending(path: UUID().uuidString + ".jpg")
          let quality = size == .large ? UploadSizePreference.largeJPEGQuality : jpegQuality
          try encodeJPEG(image, keepLocation: keepLocation, maxPixelSize: targetEdge, quality: quality, to: output)
       }
       else if passThrough {
-         contentType = type.conforms(to: .png) ? .imagePng : .imageJpeg
-         output = workDirectory.appending(path: UUID().uuidString + (contentType == .imagePng ? ".png" : ".jpg"))
+         contentType = type.conforms(to: .png) ? "image/png" : "image/jpeg"
+         output = workDirectory.appending(path: UUID().uuidString + (contentType == "image/png" ? ".png" : ".jpg"))
          if keepLocation {
             try FileManager.default.copyItem(at: source, to: output)
          }
@@ -104,7 +104,7 @@ public enum MediaProcessor {
          }
       }
       else {
-         contentType = .imageJpeg
+         contentType = "image/jpeg"
          output = workDirectory.appending(path: UUID().uuidString + ".jpg")
          try encodeJPEG(image, keepLocation: keepLocation, maxPixelSize: nil, quality: jpegQuality, to: output)
       }
@@ -114,7 +114,7 @@ public enum MediaProcessor {
       while byteSize > maxBytes {
          guard maxPixel >= minimumShrinkPixelSize else { throw MediaError.tooLarge }
          removeLeftover(output)
-         contentType = .imageJpeg
+         contentType = "image/jpeg"
          output = workDirectory.appending(path: UUID().uuidString + ".jpg")
          try encodeJPEG(image, keepLocation: keepLocation, maxPixelSize: maxPixel, quality: shrinkQuality, to: output)
          byteSize = try fileSize(output)

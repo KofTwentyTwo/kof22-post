@@ -5,18 +5,18 @@
 
 import Foundation
 
-/// An in-process stand-in for the Site API v1 authoring endpoints and the anonymous
-/// content reads the app uses, following the
-/// behaviour documented in Website-Backend (`AuthoringService`, `MediaUploadService`,
-/// `IdempotencyStore`): validation limits, idempotent replays, ETag/If-Match,
-/// scheduled publishing, presigned uploads and the error envelope.
+/// An in-process fake of the Site API v2 operations the app uses, for demo mode (App
+/// Review signs in with it) and tests, which must never reach production. It follows
+/// the backend's documented behaviour: `/me`, the `blogPost`, `blogTag`, `blog`,
+/// `author`, `media` and `site` tables with the query filter syntax, the authoring
+/// rules of `BlogAuthoringCustomizer` (blank title, name, short name and slug derived,
+/// slug unique per blog), media links copied from the media record, scheduled
+/// publishing, presigned uploads and both error envelopes.
 ///
-/// It works on the generated schema types, so a spec change that the mock does not
-/// follow fails to compile. State is persisted as JSON when a directory is given.
-/// The endpoint handlers live in extensions grouped by area (posts, uploads, tags and
-/// links, responses, text helpers) so each file stays small enough to review.
+/// State is kept in the generated record types and persisted as JSON when a directory
+/// is given, so the app and the Share Extension see the same posts.
 public actor MockBackend {
-   /// A reply ready to hand back to the generated client through `MockTransport`.
+   /// A reply ready to hand back through `MockTransport`.
    public struct Response: Sendable {
       /// The HTTP status code.
       public var status: Int
@@ -32,63 +32,35 @@ public actor MockBackend {
       var fileName: String
       /// The MIME type the client announced; decides the stored file extension.
       var contentType: String
-      /// The size the client announced.
-      var byteSize: Int64
       /// After this instant the presigned PUT is refused.
       var expiresAt: Date
       /// The file received through the presigned PUT, if any.
       var receivedFile: String?
-      /// Set once the upload has been completed, so a repeat complete replays it.
-      var mediaId: Int64?
+      /// Set once the upload has been completed.
+      var mediaId: Int?
    }
 
-   /// A completed photo in the media library.
-   struct StoredMedia: Codable {
-      /// The file name inside the media directory.
-      var file: String
-      /// The MIME type of the stored file.
-      var mimeType: String
-      /// Pixel width read from the image, when available.
-      var width: Int?
-      /// Pixel height read from the image, when available.
-      var height: Int?
-      /// Alt text given when the upload was completed.
-      var altText: String?
-   }
-
-   /// A recorded response for an idempotency key, replayed for the same body.
-   struct Replay: Codable {
-      /// SHA-256 of the request body the key was first used with.
-      var bodyHash: String
-      /// The status of the original response.
-      var status: Int
-      /// The body of the original response.
-      var body: Data?
-      /// The headers of the original response.
-      var headers: [String: String]
-   }
-
-   /// Everything the mock knows, persisted as one JSON document.
+   /// Everything the fake knows, persisted as one JSON document.
    struct State: Codable {
-      /// The id the next created post receives.
-      var nextPostId: Int64 = 1
-      /// The id the next completed upload receives.
-      var nextMediaId: Int64 = 1
-      /// The id the next new tag receives; seeded tags start here.
-      var nextTagId: Int64 = 100
-      /// All posts, in creation order.
-      var posts: [Post] = []
+      /// The id the next created record receives (posts, tags, media, links).
+      var nextId = 1_000
+      /// All posts, with their tag and media links nested.
+      var posts: [Components.Schemas.BlogPost] = []
       /// All tags of all blogs.
-      var tags: [AuthoringTag] = []
+      var tags: [Components.Schemas.BlogTag] = []
+      /// Media records.
+      var media: [Components.Schemas.Media] = []
       /// Upload tickets by upload id.
       var uploads: [String: StoredUpload] = [:]
-      /// Completed media by media id.
-      var media: [Int64: StoredMedia] = [:]
-      /// Idempotent replays keyed by `operation:key`.
-      var replays: [String: Replay] = [:]
+
+      /// Returns a fresh id.
+      mutating func takeId() -> Int {
+         defer { nextId += 1 }
+         return nextId
+      }
    }
 
-   /// HTTP status codes the mock answers with.
+   /// HTTP status codes the fake answers with.
    enum Status {
       /// 200 OK.
       static let okay = 200
@@ -104,50 +76,33 @@ public actor MockBackend {
       static let notFound = 404
       /// 409 Conflict.
       static let conflict = 409
-      /// 412 Precondition Failed.
-      static let preconditionFailed = 412
-      /// 413 Payload Too Large.
-      static let payloadTooLarge = 413
       /// 415 Unsupported Media Type.
       static let unsupportedMediaType = 415
       /// 422 Unprocessable Content.
       static let unprocessable = 422
-      /// 428 Precondition Required.
-      static let preconditionRequired = 428
-      /// Statuses that count as success and are recorded for idempotent replay.
-      static let success = 200..<300
    }
 
-   /// Id of the second seeded blog.
-   static let deepThoughtsID: Int64 = 2
-
-   /// The blogs the signed-in author can post to.
-   public static let blogs: [BlogRef] = [
-      BlogRef(id: 1, slug: "quick-bits", name: "Quick Bits", isDefault: true),
-      BlogRef(id: deepThoughtsID, slug: "deep-thoughts", name: "Deep Thoughts", isDefault: false),
-   ]
-
-   /// The blog used when a request names none.
-   static let defaultBlog = "quick-bits"
-
-   /// Scheme of the media URLs stored in posts; resolved to files when served.
+   /// Scheme of the media URLs; resolved to files when served.
    static let mediaScheme = "mock-media"
-
-   /// Name of the persisted state document inside the mock directory.
+   /// Name of the persisted state document inside the fake's directory.
    static let stateFileName = "state.json"
+   /// The site posts and media belong to.
+   static let siteId = 1
+   /// The public website the fake's `siteUrl` values point at.
+   static let websiteBase = "https://www.kof22.com"
 
    /// The current state; read fresh from disk before every request.
    var state = State()
-   /// Where state and media are kept, or nil for an in-memory mock.
+   /// Where state and media are kept, or nil for an in-memory fake.
    let directory: URL?
    /// The clock, injected so tests can control expiry and scheduling.
-   let now: @Sendable () -> Date
+   public nonisolated let now: @Sendable () -> Date
    /// Artificial delay before each request, so the UI can show progress.
    private let latency: Duration
    /// When true every request fails like a device with no connection.
    public var simulateOffline = false
 
-   /// Opens the mock, restoring saved state from `directory` when there is any and
+   /// Opens the fake, restoring saved state from `directory` when there is any and
    /// seeding sample posts and tags otherwise.
    public init(directory: URL?, latency: Duration = .zero, now: @escaping @Sendable () -> Date = { .now }) {
       self.directory = directory
@@ -159,7 +114,7 @@ public actor MockBackend {
    /// Turns the simulated loss of connectivity on or off.
    public func setSimulateOffline(_ value: Bool) { simulateOffline = value }
 
-   /// Forgets every post, upload and replay and starts again from the seed data.
+   /// Forgets every post and upload and starts again from the seed data.
    public func reset() {
       state = Self.seed(now: now())
       if let directory {
@@ -171,43 +126,59 @@ public actor MockBackend {
       save()
    }
 
-   /// Handles one request routed by its OpenAPI operation id. Path parameters
-   /// (post id, upload id) are read from the path segments.
-   public func handle(
-      operation: String, path: String, query: [String: String], headers: [String: String], body: Data?
-   ) async throws -> Response {
+   /// Handles one request routed by its operation id; record ids and the upload id are
+   /// read from the path.
+   public func handle(operation: String, path: String, query: [String: String], body: Data?) async throws -> Response {
       if latency > .zero { try await Task.sleep(for: latency) }
       if simulateOffline { throw URLError(.notConnectedToInternet) }
       reload()
       promoteScheduled()
       defer { save() }
-      let segments = path.split(separator: "/").map(String.init)
+      let last = String(path.split(separator: "/").last ?? "")
       switch operation {
-      case "getApiVersions": return try json(Status.okay, versions())
-      case "getMe": return try json(Status.okay, me())
-      case "listMyTags": return try listTags(query)
-      case "getLinkPreview": return try linkPreview(body)
-      case "createUpload":
-         return try idempotent("createUpload", headers: headers, body: body) { try createUpload(body) }
-      case "completeUpload": return try completeUpload(segments.dropLast().last ?? "", body: body)
-      case "queryBlog", "queryTag", "queryPost", "getPost": return try handleRead(operation, segments: segments, query: query)
-      default: return try handlePostOperation(operation, segments: segments, query: query, headers: headers, body: body)
+      case "me", "versions", "createUpload", "completeUpload", "linkPreview": return try handleProcess(operation, last: last, body: body)
+      case "queryBlogPost": return try page(filter(state.posts.map(listed), query), query)
+      case "createBlogPost": return try createPost(body)
+      case "updateBlogPost": return try updatePost(Int(last), body: body)
+      case "deleteBlogPost": return try deletePost(Int(last))
+      case "createBlogTag": return try createTag(body)
+      default: return try handleTable(operation, id: Int(last), query: query)
       }
    }
 
-   /// Routes the post endpoints, which share the post-id path parameter.
-   private func handlePostOperation(
-      _ operation: String, segments: [String], query: [String: String], headers: [String: String], body: Data?
-   ) throws -> Response {
+   /// The process endpoints; `last` is the final path segment (the upload id).
+   private func handleProcess(_ operation: String, last: String, body: Data?) throws -> Response {
       switch operation {
-      case "listMyPosts": return try listPosts(query)
-      case "createPost":
-         return try idempotent("createPost", headers: headers, body: body) { try createPost(body) }
-      case "getMyPost": return try withPost(segments) { try json(Status.okay, $0, etag: $0.version) }
-      case "updatePost": return try updatePost(postID(segments), headers: headers, body: body)
-      case "deletePost": return try deletePost(postID(segments), headers: headers)
-      default: return try problem(Status.notFound, "not_found", "No such endpoint")
+      case "me": try json(Status.okay, Self.demoCaller)
+      case "versions": try json(Status.okay, Self.versions)
+      case "createUpload": try createUpload(body)
+      case "completeUpload": try completeUpload(last, body: body)
+      default: try linkPreview(body)
       }
+   }
+
+   /// The read-only table operations: queries and reads by id.
+   private func handleTable(_ operation: String, id: Int?, query: [String: String]) throws -> Response {
+      switch operation {
+      case "getBlogPost": try record(state.posts.first { $0.id == id })
+      case "queryBlogTag": try page(filter(state.tags, query), query)
+      case "queryBlog": try page(filter(Self.blogs, query), query)
+      case "getBlog": try record(Self.blogs.first { $0.id == id })
+      case "queryAuthor": try page(filter(Self.authors, query), query)
+      case "getAuthor": try record(Self.authors.first { $0.id == id })
+      case "getMedia": try record(state.media.first { $0.id == id })
+      case "querySite": try page(filter(Self.sites, query), query)
+      case "getSite": try record(Self.sites.first { $0.id == id })
+      default: try tableError(Status.notFound, "No such endpoint: \(operation)")
+      }
+   }
+
+   /// A post as a query returns it: without its nested tag and media lists.
+   func listed(_ post: Components.Schemas.BlogPost) -> Components.Schemas.BlogPost {
+      var copy = post
+      copy.tags = nil
+      copy.media = nil
+      return copy
    }
 
    /// Resolves the `mock-media:` URLs stored in posts to files on disk.
@@ -216,11 +187,73 @@ public actor MockBackend {
       return base.appending(path: "media").appending(path: String(url.dropFirst(Self.mediaScheme.count + 1)))
    }
 
-   // MARK: - Persistence
+   ///////////////
+   // Responses //
+   ///////////////
+
+   /// Encodes like the backend: ISO 8601 dates with milliseconds, sorted keys.
+   static let encoder: JSONEncoder = {
+      let encoder = JSONEncoder()
+      encoder.dateEncodingStrategy = .custom { date, encoder in
+         var container = encoder.singleValueContainer()
+         try container.encode(Date.ISO8601FormatStyle(includingFractionalSeconds: true).format(date))
+      }
+      encoder.outputFormatting = [.sortedKeys]
+      return encoder
+   }()
+
+   /// Decodes request bodies and the saved state.
+   static let decoder = SiteService.decoder
+
+   /// Decodes a request body, or nil when it is missing or malformed (answered with 400).
+   static func decodeBody<Body: Decodable>(_ type: Body.Type, from body: Data?) -> Body? {
+      /////////////////////////////////////////////////////
+      // The caller turns nil into a 400 for the client. //
+      /////////////////////////////////////////////////////
+      return body.flatMap { try? decoder.decode(type, from: $0) }
+   }
+
+   /// A JSON response.
+   func json(_ status: Int, _ value: some Encodable) throws -> Response {
+      Response(status: status, body: try Self.encoder.encode(value), headers: ["Content-Type": "application/json"])
+   }
+
+   /// One record, or the table 404.
+   func record(_ value: (some Encodable)?) throws -> Response {
+      guard let value else { return try tableError(Status.notFound, "The requested record was not found.") }
+      return try json(Status.okay, value)
+   }
+
+   /// A table operation's error: `{"error":"message"}`.
+   func tableError(_ status: Int, _ message: String) throws -> Response {
+      try json(status, ["error": message])
+   }
+
+   /// A process error: `{"error":{"code","message","status","details"}}`.
+   func problem(_ status: Int, _ code: String, _ message: String) throws -> Response {
+      let envelope: [String: [String: String]] = ["error": ["code": code, "message": message, "status": String(status)]]
+      return try json(status, envelope)
+   }
+
+   /// A query page `{"pageNo","pageSize","count","records"}`.
+   func page<Record: Codable>(_ records: [Record], _ query: [String: String]) throws -> Response {
+      let pageNo = max(Int(query["pageNo"] ?? "") ?? 1, 1)
+      let pageSize = min(max(Int(query["pageSize"] ?? "") ?? Self.defaultPageSize, 1), Self.maximumPageSize)
+      let slice = Array(records.dropFirst((pageNo - 1) * pageSize).prefix(pageSize))
+      return try json(Status.okay, QueryEnvelope(records: slice, count: records.count, pageNo: pageNo, pageSize: pageSize))
+   }
+
+   /// Records per page when a query names none.
+   static let defaultPageSize = 50
+   /// Largest page.
+   static let maximumPageSize = 1_000
+
+   /////////////////
+   // Persistence //
+   /////////////////
 
    /// Reads the saved state document. A missing file is the normal first run; a file
-   /// that cannot be read or decoded is logged and the caller falls back to a fresh
-   /// state rather than failing every request.
+   /// that cannot be read is logged and the caller seeds a fresh state.
    static func loadState(from directory: URL?) -> State? {
       guard let directory else { return nil }
       let file = directory.appending(path: stateFileName)

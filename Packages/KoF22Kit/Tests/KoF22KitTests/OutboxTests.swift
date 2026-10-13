@@ -23,7 +23,7 @@ import UniformTypeIdentifiers
       let stripped = try MediaProcessor.prepare(
          source: source, keepLocation: false, acceptedTypes: ["image/jpeg", "image/png"],
          maxBytes: 1 << 24, workDirectory: directory.appending(path: "out"))
-      #expect(stripped.contentType == .imageJpeg)
+      #expect(stripped.contentType == "image/jpeg")
       #expect(!MediaProcessor.hasGPS(stripped.fileURL))
 
       let kept = try MediaProcessor.prepare(
@@ -40,7 +40,7 @@ import UniformTypeIdentifiers
       let prepared = try MediaProcessor.prepare(
          source: source, keepLocation: false, acceptedTypes: ["image/jpeg", "image/png"],
          maxBytes: 1 << 24, workDirectory: directory)
-      #expect(prepared.contentType == .imageJpeg)
+      #expect(prepared.contentType == "image/jpeg")
       #expect(prepared.fileURL.pathExtension == "jpg")
       #expect(!MediaProcessor.hasGPS(prepared.fileURL))
    }
@@ -67,12 +67,12 @@ import UniformTypeIdentifiers
       #expect(composition.summary == "1 photo post")
    }
 
-   /// Removing a link that the post had on the server asks the update to clear it.
+   /// Removing a link leaves the draft without one, which the update then clears.
    @Test func removingAnExistingLinkClearsItOnUpdate() {
       var composition = PostComposition(body: "x", linkURL: "https://a.example", originalHadLink: true)
-      #expect(composition.updateBody().clearLink == false)
+      #expect(composition.draft().linkURL == "https://a.example")
       composition.linkURL = ""
-      #expect(composition.updateBody().clearLink == true)
+      #expect(composition.draft().linkURL == nil)
    }
 
    /// Empty posts, scheduling without a time and non-web links are rejected; a plain body passes.
@@ -85,9 +85,9 @@ import UniformTypeIdentifiers
 
    /// Title derivation and slugs follow the backend's rules.
    @Test func titleDerivationMatchesBackendRules() {
-      #expect(MockBackend.deriveTitle("\n\n# A [link](https://x) and `code`\nrest") == "A link and code")
-      #expect(MockBackend.deriveTitle("   ") == "Field note")
-      #expect(MockBackend.slugify("Héllo, Wörld!") == "hello-world")
+      #expect(PostText.deriveTitle("\n\n# A [link](https://x) and `code`\nrest") == "A link and code")
+      #expect(PostText.deriveTitle("   ") == "Field note")
+      #expect(PostText.slugify("Héllo, Wörld!") == "hello-world")
    }
 }
 
@@ -191,13 +191,13 @@ import UniformTypeIdentifiers
    @Test func retryAfterLostResponseDoesNotDoublePost() async throws {
       let fixture = try await makeFixture()
       let id = try await fixture.store.enqueue(PostComposition(body: "exactly once"), operation: .create)
-      let key = try #require(try await fixture.store.snapshot(id)).idempotencyKey
       ////////////////////////////////////////////////////////////////////
       // Simulate: the server accepted the create but the app died      //
       // before recording it.                                           //
       ////////////////////////////////////////////////////////////////////
-      _ = try await fixture.service.createPost(PostComposition(body: "exactly once").createBody(), idempotencyKey: key)
+      _ = try await fixture.service.createPost(PostComposition(body: "exactly once").draft())
       await fixture.processor.drain()
+      #expect(try await fixture.store.snapshot(id)?.state == .sent)
       let page = try await fixture.service.myPosts(limit: 50)
       #expect(page.items.filter { $0.body == "exactly once" }.count == 1)
    }
@@ -216,8 +216,10 @@ import UniformTypeIdentifiers
    /// An edit based on a stale version becomes a conflict, and overwrite sends it anyway.
    @Test func staleEditBecomesConflictAndOverwriteResolvesIt() async throws {
       let fixture = try await makeFixture()
-      let original = try await fixture.service.createPost(PostCreate(body: "v1"), idempotencyKey: "k-conflict-1")
-      _ = try await fixture.service.updatePost(id: original.id, PostUpdate(body: "changed on web"), ifMatch: original.version)
+      let original = try await fixture.service.createPost(PostComposition(body: "v1").draft())
+      var web = PostComposition(post: original)
+      web.body = "changed on web"
+      _ = try await fixture.service.updatePost(id: original.id, web.draft(), ifMatch: original.version)
 
       var edit = PostComposition(post: original)
       edit.body = "v2 from phone"
@@ -297,7 +299,7 @@ extension OutboxTests {
    /// A second queued edit of the same post uses the version produced by the first.
    @Test func secondQueuedEditUsesTheVersionFromTheFirst() async throws {
       let fixture = try await makeFixture()
-      let post = try await fixture.service.createPost(PostCreate(body: "v1"), idempotencyKey: "k-carry-1")
+      let post = try await fixture.service.createPost(PostComposition(body: "v1").draft())
       var firstEdit = PostComposition(post: post)
       firstEdit.body = "v2"
       var secondEdit = PostComposition(post: post)

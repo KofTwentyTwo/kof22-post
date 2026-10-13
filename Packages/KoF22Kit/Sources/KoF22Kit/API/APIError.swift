@@ -5,10 +5,10 @@
 
 import Foundation
 import HTTPTypes
-import KoF22API
 
-/// A non-2xx response decoded from the Site API error envelope
-/// `{"error":{"code","message","status","details"}}`.
+/// A non-2xx response decoded from a Site API v2 error body. The API's own processes
+/// answer `{"error":{"code","message","status","details"}}`; table operations answer
+/// `{"error":"message"}`, sometimes with a top-level `code` and `details`.
 public struct APIError: Error, Sendable, Equatable, LocalizedError {
    /// One field-level problem from a validation failure, so the composer can point at the
    /// field the server rejected.
@@ -66,20 +66,26 @@ public struct APIError: Error, Sendable, Equatable, LocalizedError {
          || code == "idempotency_in_progress"
    }
 
-   /// Builds an error from a raw response. A body that is not the envelope (a proxy page,
-   /// an empty body) still yields a usable error built from the status code.
+   /// Builds an error from a raw response. A body that is not one of the envelopes (a
+   /// proxy page, an empty body) still yields a usable error built from the status code.
    static func decode(status: Int, data: Data, retryAfter: String?, etag: String?) -> Self {
       ////////////////////////////////////////////////////////////
-      // a body that is not the envelope is expected (proxies,  //
+      // a body that is not an envelope is expected (proxies,   //
       // empty bodies); the status code alone is the fallback.  //
       ////////////////////////////////////////////////////////////
-      let envelope = try? JSONDecoder().decode(Components.Schemas._Error.self, from: data)
-      let body = envelope?.error
+      let root = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any] ?? [:]
+      let nested = root["error"] as? [String: Any]
+      let code = (nested?["code"] as? String) ?? (root["code"] as? String)
+      let message = (nested?["message"] as? String) ?? (root["error"] as? String)
+      let rawDetails = (nested?["details"] as? [[String: Any]]) ?? (root["details"] as? [[String: Any]]) ?? []
       return Self(
          status: status,
-         code: body?.code ?? "http_\(status)",
-         message: body?.message ?? HTTPURLResponse.localizedString(forStatusCode: status).capitalized,
-         details: body?.details?.map { Detail(field: $0.field, issue: $0.issue) } ?? [],
+         code: code ?? "http_\(status)",
+         message: message ?? HTTPURLResponse.localizedString(forStatusCode: status).capitalized,
+         details: rawDetails.compactMap { item in
+            guard let field = item["field"] as? String else { return nil }
+            return Detail(field: field, issue: item["issue"] as? String ?? "")
+         },
          retryAfter: retryAfter.flatMap(TimeInterval.init),
          currentETag: etag
       )
@@ -157,7 +163,7 @@ public enum ErrorClassifier {
       "insufficient_scope": "This sign-in doesn't include permission to publish. Sign out and sign in again.",
       "not_found": "Not found. It may have been deleted.",
       "conflict": "The server reported a conflict. Try again.",
-      "slug_conflict": "Another post already uses this address. Change the title and try again.",
+      "slug_conflict": "Another post already uses this address. Change the slug and try again.",
       "idempotency_in_progress": "The server is still working on this request. It will be retried.",
       "idempotency_key_reused": "This request was already sent with different content.",
       "delete_blocked": "This post can't be deleted right now.",

@@ -69,6 +69,14 @@ final class KoF22PostUITests: XCTestCase {
       body.typeText(text)
    }
 
+   /// Dismisses the keyboard and scrolls until `element` can be tapped: the composer is
+   /// taller than the screen, and a tap on a covered element lands on the bottom bar.
+   private func reveal(_ element: XCUIElement) {
+      let done = app.buttons["keyboard.done"]
+      if done.exists { done.tap() }
+      for _ in 0..<Self.maxScrolls where !element.isHittable { app.swipeUp() }
+   }
+
    /// Signing in lands on the composer with its Post button.
    func testSignInOpensComposer() {
       signIn()
@@ -90,6 +98,43 @@ final class KoF22PostUITests: XCTestCase {
 
       tab("Posts")
       XCTAssertTrue(app.staticTexts["Hello from the UI test"].waitForExistence(timeout: Self.standardTimeout))
+   }
+
+   /// Suggest fills the details, the post is saved as a featured draft, and the post's
+   /// detail shows what the server stored.
+   func testDetailsSuggestionAndDraftWithFields() {
+      signIn()
+      write("Rebuilt the shed roof today with reclaimed cedar boards from the old fence.")
+      let details = app.buttons["compose.details"]
+      reveal(details)
+      details.tap()
+      app.buttons["compose.suggest"].tap()
+      let name = app.textFields["compose.detail.name"]
+      XCTAssertTrue(name.waitForExistence(timeout: Self.standardTimeout))
+      XCTAssertFalse((name.value as? String ?? "").isEmpty)
+      let status = app.segmentedControls["compose.status"]
+      reveal(status)
+      status.buttons["Draft"].tap()
+      let featured = app.switches["compose.featured"]
+      (featured.switches.firstMatch.exists ? featured.switches.firstMatch : featured).tap()
+      XCTAssertEqual(app.buttons["compose.post"].label, "Save draft")
+      app.buttons["compose.post"].tap()
+      XCTAssertTrue(app.staticTexts["Sent"].waitForExistence(timeout: Self.sendTimeout))
+
+      tab("Posts")
+      let row = app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH %@", "Rebuilt the shed roof")).firstMatch
+      XCTAssertTrue(row.waitForExistence(timeout: Self.standardTimeout))
+      row.tap()
+      XCTAssertTrue(app.staticTexts["Featured"].waitForExistence(timeout: Self.standardTimeout))
+      let fields = app.otherElements["post.fields"]
+      for _ in 0..<Self.maxScrolls where !fields.exists { app.swipeUp() }
+      ///////////////////////////////////////////////////////////////
+      // The wording comes from the on-device model when the        //
+      // simulator has one, so only the slug's shape is checked.    //
+      ///////////////////////////////////////////////////////////////
+      XCTAssertTrue(
+         app.staticTexts.matching(NSPredicate(format: "label MATCHES %@ AND label != %@", "[a-z0-9]+(-[a-z0-9]+)+", "quick-bits"))
+            .firstMatch.exists)
    }
 
    /// A post written offline stays queued and is sent once the connection returns.
@@ -129,7 +174,7 @@ final class KoF22PostUITests: XCTestCase {
       XCTAssertTrue(quickBits.waitForExistence(timeout: Self.standardTimeout))
       quickBits.tap()
       XCTAssertTrue(
-         app.staticTexts["Welcome to the mock Site API. Posts you write here stay on this device."]
+         app.staticTexts["Welcome to the demo of KoF22 Postr. Posts you write here stay on this device."]
             .waitForExistence(timeout: Self.standardTimeout))
    }
 

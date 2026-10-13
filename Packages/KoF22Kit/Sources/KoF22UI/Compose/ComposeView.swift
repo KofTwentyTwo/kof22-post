@@ -26,10 +26,6 @@
       @State private var pickerItems: [PhotosPickerItem] = []
       /// Whether the camera is presented.
       @State private var showCamera = false
-      /// Whether the schedule sheet is presented.
-      @State private var showSchedule = false
-      /// Date chosen in the schedule sheet; one hour ahead by default.
-      @State private var scheduleDate = Date.now.addingTimeInterval(ComposeScheduleSheet.defaultLead)
       /// Photo whose alt-text sheet is open.
       @State private var editingPhoto: ComposedPhoto?
       /// Whether the arrange-photos sheet is presented.
@@ -70,9 +66,6 @@
                PhotoDetailSheet(photo: photo, onSave: model.update, onRemove: model.removePhoto)
             }
             .sheet(isPresented: $arranging) { ArrangePhotosSheet(model: model) }
-            .sheet(isPresented: $showSchedule) {
-               ComposeScheduleSheet(date: $scheduleDate, isPresented: $showSchedule) { date in submit(.scheduled, at: date) }
-            }
             .fullScreenCover(isPresented: $showCamera) {
                CameraPicker { data in model.addPhoto(data: data, ext: CameraPicker.fileExtension) }.ignoresSafeArea()
             }
@@ -122,7 +115,7 @@
          }
          .photosPicker(
             isPresented: $showPhotoPicker, selection: $pickerItems,
-            maxSelectionCount: max(model.limits.maxPhotosPerPost - model.composition.photos.count, 1),
+            maxSelectionCount: nil,
             matching: .images, photoLibrary: .shared()
          )
          .alert("Allow full photo access", isPresented: $photoAccessPrompt) {
@@ -136,7 +129,8 @@
          }
       }
 
-      /// Header, optional title, editor, photos, tags and, when used, link and location.
+      /// Header, optional title, editor, photos, tags, link and location when used, the
+      /// details and SEO fields, and when and how the post is published.
       private var sections: some View {
          VStack(alignment: .leading, spacing: Theme.Spacing.xLarge) {
             ComposeHeader(model: model, showsCursor: focus == nil && model.composition.isEmpty)
@@ -147,18 +141,29 @@
             if showDetails || !model.composition.linkURL.isEmpty || !model.composition.locationLabel.isEmpty {
                ComposeDetailsSection(model: model, focus: $focus)
             }
+            ComposeDetailsSEOSection(model: model)
+            ComposePublishSection(model: model)
          }
       }
 
       /// The optional title; Return moves on to the body.
       private var titleField: some View {
-         TextField("Title (optional)", text: $model.composition.title)
+         TextField("Title (optional)", text: title)
             .font(.title3.weight(.semibold))
             .focused($focus, equals: .title)
             .submitLabel(.next)
             .onSubmit { focus = .body }
-            .onChange(of: model.composition.title) { model.changed() }
             .accessibilityIdentifier("compose.title")
+      }
+
+      /// The title; typing marks it as the user's, so suggestions keep it.
+      private var title: Binding<String> {
+         Binding(
+            get: { model.composition.title },
+            set: { value in
+               model.composition.title = value
+               model.detailEdited(.title)
+            })
       }
 
       /// The bottom bar with the attachment buttons, the options menu and Post.
@@ -166,9 +171,9 @@
          ComposeActionBar(
             model: model, isModal: onDone != nil, focus: $focus, showPhotoPicker: $showPhotoPicker,
             photoAccessPrompt: $photoAccessPrompt, showCamera: $showCamera, showDetails: $showDetails,
-            showSchedule: $showSchedule, confirmDiscard: $confirmDiscard
-         ) { status in
-            submit(status)
+            confirmDiscard: $confirmDiscard
+         ) {
+            submit(model.composition.status, at: model.composition.publishAt)
          }
       }
 

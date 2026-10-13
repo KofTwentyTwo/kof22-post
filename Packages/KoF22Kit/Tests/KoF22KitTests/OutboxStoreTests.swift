@@ -18,8 +18,8 @@ import Testing
    /// A minimal server post for the cache.
    static func post(id: Int64, body: String, updatedAt: Date) -> Post {
       Post(
-         id: id, blogId: 1, blog: "quick-bits", status: .draft, title: body, body: body, slug: "s\(id)", tags: [], media: [],
-         updatedAt: updatedAt, version: "v\(id)")
+         id: id, blogId: 1, blog: "quick-bits", status: .draft, title: body, slug: "s\(id)", body: body, updatedAt: updatedAt,
+         version: "v\(id)")
    }
 
    @Test func aDraftBecomesTheQueuedItem() async throws {

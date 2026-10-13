@@ -32,10 +32,14 @@
       private static let autosaveDelay: Duration = .seconds(1)
       /// Number of tag suggestions requested.
       private static let tagSuggestionLimit = 8
-      /// Longest tag name accepted.
-      private static let maxTagLength = 50
+      /// Longest tag name accepted (`blogTag.name`).
+      private static let maxTagLength = PostFieldLimits.tag
+      /// Pause after the last body edit before details are suggested.
+      static let suggestDebounceMilliseconds = 2_000
+      /// Shortest body worth asking the model about, in characters.
+      static let minimumSuggestBodyLength = 20
       /// Extension used when a picked item reports no type.
-      private static let fallbackExtension = "jpg"
+      static let fallbackExtension = "jpg"
 
       /// The post being written.
       public var composition: PostComposition
@@ -48,39 +52,60 @@
       /// Text typed in the tag field and not yet turned into a tag.
       public var tagInput = ""
       /// Existing tags matching `tagInput`, excluding ones already added.
-      public private(set) var tagSuggestions: [AuthoringTag] = []
+      public private(set) var tagSuggestions: [BlogTagRef] = []
       /// Preview of `composition.linkURL`, once fetched.
       public private(set) var linkPreview: LinkPreview?
       /// Why the link preview could not be fetched.
       public private(set) var linkPreviewError: String?
       /// Whether picked photos are still being copied in.
-      public private(set) var isLoadingPhotos = false
+      public internal(set) var isLoadingPhotos = false
       /// A message for the composer's alert, or nil.
       public var message: String?
       /// Whether the post is being queued.
       public var isSubmitting = false
       /// Whether the current location is being looked up.
-      public private(set) var isLocating = false
+      public internal(set) var isLocating = false
+      /// Place labels found for the current position, most specific first.
+      public internal(set) var locationOptions: [String] = []
+      /// Whether the on-device model is writing details.
+      public internal(set) var isSuggesting = false
+      /// Why the last suggestion failed, or nil.
+      public internal(set) var suggestionError: String?
+      /// Detail fields the user typed in; automatic suggestions leave them alone.
+      public var editedDetails: Set<PostDetailField> = []
 
       /// The app's composition root.
-      private let app: AppModel
+      let app: AppModel
       /// Pending tag-suggestion lookup, cancelled by the next keystroke.
       private var tagTask: Task<Void, Never>?
       /// Pending link-preview fetch, cancelled by the next edit.
       private var linkTask: Task<Void, Never>?
       /// Pending autosave, cancelled by the next change.
       private var autosaveTask: Task<Void, Never>?
+      /// Pending automatic suggestion, cancelled by the next body edit.
+      var suggestTask: Task<Void, Never>?
+      /// Writes the details; replaceable in tests.
+      let suggester: any PostDetailSuggesting
 
       /// Creates a composer for `composition`, or an empty post on the default blog. The
       /// title field starts visible when there is a title or the blog is not Quick Bits.
-      public init(app: AppModel, composition: PostComposition? = nil, mode: Mode = .new, draftID: UUID? = nil) {
+      public init(
+         app: AppModel, composition: PostComposition? = nil, mode: Mode = .new, draftID: UUID? = nil,
+         suggester: any PostDetailSuggesting = OnDevicePostSuggester()
+      ) {
          self.app = app
+         self.suggester = suggester
          self.mode = mode
          self.draftID = draftID
          let initial = composition ?? PostComposition(blog: app.defaultBlog)
          self.composition = initial
          self.showTitle = !initial.title.isEmpty || initial.blog != AppModel.fallbackBlogSlug
+         if case .edit = mode { editedDetails = Set(PostDetailField.allCases) }
          if !initial.linkURL.isEmpty { linkChanged() }
+         ////////////////////////////////////////////////////////////////
+         // shared or prefilled text gets details without a keystroke //
+         ////////////////////////////////////////////////////////////////
+         if case .new = mode, !initial.body.isEmpty { bodyChanged() }
       }
 
       /// Whether this composer edits a post already on the server.
@@ -89,15 +114,21 @@
          return false
       }
 
-      /// Authoring limits of the signed-in account.
-      public var limits: AuthoringLimits { app.limits }
+      /// Photo rules of the signed-in account.
+      public var limits: PhotoLimits { app.limits }
+
+      /// Whether on-device suggestions can run on this iPhone.
+      public var canSuggest: Bool { suggester.isAvailable }
+
+      /// Why on-device suggestions are unavailable, for the details section.
+      public var suggestionUnavailableReason: String? { suggester.unavailableReason }
 
       /// Number of photos that still need alt text.
       public var photosMissingAltText: Int { composition.photos.filter { $0.altText.isEmpty }.count }
 
       /// Waits for `duration`. Returns false when the task was cancelled meanwhile, which is
       /// how a newer keystroke replaces a pending lookup.
-      private static func debounce(_ duration: Duration) async -> Bool {
+      static func debounce(_ duration: Duration) async -> Bool {
          do {
             try await Task.sleep(for: duration)
             return !Task.isCancelled
@@ -127,7 +158,7 @@
          let service = app.service
          tagTask = Task {
             guard await Self.debounce(.milliseconds(Self.tagDebounceMilliseconds)) else { return }
-            let found: [AuthoringTag]
+            let found: [BlogTagRef]
             do {
                found = try await service.tags(matching: query, blog: blog, limit: Self.tagSuggestionLimit)
             }
@@ -150,7 +181,7 @@
          let name = raw.trimmingCharacters(in: CharacterSet(charactersIn: "#, ").union(.whitespacesAndNewlines))
          tagInput = ""
          tagSuggestions = []
-         guard !name.isEmpty, name.count <= Self.maxTagLength, composition.tags.count < limits.maxTags,
+         guard !name.isEmpty, name.count <= Self.maxTagLength,
             !composition.tags.contains(where: { $0.caseInsensitiveCompare(name) == .orderedSame })
          else { return }
          composition.tags.append(name)
@@ -192,115 +223,8 @@
 
    }
 
-   /// Photos, location, autosave and submitting.
+   /// Autosave and submitting.
    extension ComposeModel {
-      ////////////
-      // Photos //
-      ////////////
-
-      /// Copies picked photos into the shared photos directory, up to the per-post limit.
-      /// With full library access the original (with its metadata) is read from Photos;
-      /// otherwise the picker's copy is used.
-      public func addPhotos(_ items: [PhotosPickerItem]) async {
-         isLoadingPhotos = true
-         defer { isLoadingPhotos = false }
-         for item in items {
-            guard composition.photos.count < limits.maxPhotosPerPost else {
-               message = "At most \(limits.maxPhotosPerPost) photos per post."
-               break
-            }
-            do {
-               if let identifier = item.itemIdentifier, let (data, fileExtension) = await Permissions.shared.originalData(assetIdentifier: identifier) {
-                  composition.photos.append(ComposedPhoto(fileName: try Self.store(data, fileExtension: fileExtension)))
-                  continue
-               }
-               guard let data = try await item.loadTransferable(type: Data.self) else {
-                  Log.media.notice("A picked item had no image data and was skipped")
-                  continue
-               }
-               let fileExtension = item.supportedContentTypes.first?.preferredFilenameExtension ?? Self.fallbackExtension
-               composition.photos.append(ComposedPhoto(fileName: try Self.store(data, fileExtension: fileExtension)))
-            }
-            catch {
-               Log.media.warning("A picked photo could not be loaded: \(error.localizedDescription, privacy: .public)")
-               message = "A photo could not be loaded: \(error.localizedDescription)"
-            }
-         }
-         changed()
-      }
-
-      /// Adds a photo from raw bytes, such as a camera capture, when under the limit.
-      public func addPhoto(data: Data, ext: String) {
-         guard composition.photos.count < limits.maxPhotosPerPost else { return }
-         do {
-            let name = try Self.store(data, fileExtension: ext)
-            composition.photos.append(ComposedPhoto(fileName: name))
-            changed()
-         }
-         catch {
-            Log.media.warning("A captured photo could not be saved: \(error.localizedDescription, privacy: .public)")
-            message = "The photo could not be saved: \(error.localizedDescription)"
-         }
-      }
-
-      /// Removes `photo` from the post and deletes its local file.
-      public func removePhoto(_ photo: ComposedPhoto) {
-         composition.photos.removeAll { $0.id == photo.id }
-         Self.deleteLocalFile(of: photo)
-         changed()
-      }
-
-      /// Reorders photos, as the arrange sheet's drag handles do.
-      public func movePhotos(from source: IndexSet, to destination: Int) {
-         composition.photos.move(fromOffsets: source, toOffset: destination)
-         changed()
-      }
-
-      /// Replaces the photo with the same id, for example after editing its alt text.
-      public func update(_ photo: ComposedPhoto) {
-         guard let index = composition.photos.firstIndex(where: { $0.id == photo.id }) else { return }
-         composition.photos[index] = photo
-         changed()
-      }
-
-      /// Writes photo bytes to the shared photos directory under a new unique name and
-      /// returns that name.
-      nonisolated static func store(_ data: Data, fileExtension: String) throws -> String {
-         let name = "\(UUID().uuidString).\(fileExtension)"
-         try data.write(to: SharedContainer.photosDirectory.appending(path: name), options: .completeFileProtectionUntilFirstUserAuthentication)
-         return name
-      }
-
-      /// Deletes a photo's local copy. A file that cannot be removed only wastes space in
-      /// the app group, so the failure is logged rather than shown.
-      private static func deleteLocalFile(of photo: ComposedPhoto) {
-         guard let url = photo.localURL() else { return }
-         do {
-            try FileManager.default.removeItem(at: url)
-         }
-         catch {
-            Log.media.notice("A local photo could not be deleted: \(error.localizedDescription, privacy: .public)")
-         }
-      }
-
-      //////////////
-      // Location //
-      //////////////
-
-      /// Fills the location label from the current position (prompts for access).
-      public func useCurrentLocation() async {
-         isLocating = true
-         defer { isLocating = false }
-         do {
-            composition.locationLabel = try await Permissions.shared.currentPlaceLabel()
-            changed()
-         }
-         catch {
-            Log.ui.notice("Current location unavailable: \(error.localizedDescription, privacy: .public)")
-            message = error.localizedDescription
-         }
-      }
-
       /////////////////////////
       // Autosave and submit //
       /////////////////////////

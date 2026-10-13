@@ -11,7 +11,7 @@ public import struct Foundation.Date
 #endif
 /// A type that performs HTTP operations defined by the OpenAPI document.
 public protocol APIProtocol: Sendable {
-    /// Search for Blog Post records by query string
+    /// Search for Authors records by query string
     ///
     /// Execute a query on this table, using query criteria as specified in query string parameters.
     ///
@@ -37,17 +37,136 @@ public protocol APIProtocol: Sendable {
     ///   * Not Like: `myField=!LIKE value` (using standard SQL % and _ wildcards)
     ///
     ///
-    /// - Remark: HTTP `GET /v1/post/query`.
-    /// - Remark: Generated from `#/paths//v1/post/query/get(queryPost)`.
-    func queryPost(_ input: Operations.QueryPost.Input) async throws -> Operations.QueryPost.Output
-    /// Get one Blog Post by Id
+    /// - Remark: HTTP `GET /v2/author/query`.
+    /// - Remark: Generated from `#/paths//v2/author/query/get(queryAuthor)`.
+    func queryAuthor(_ input: Operations.QueryAuthor.Input) async throws -> Operations.QueryAuthor.Output
+    /// Get one Authors by Id
     ///
     /// Get one record from this table, by specifying its primary key as a path parameter.
     ///
     ///
-    /// - Remark: HTTP `GET /v1/post/{id}`.
-    /// - Remark: Generated from `#/paths//v1/post/{id}/get(getPost)`.
-    func getPost(_ input: Operations.GetPost.Input) async throws -> Operations.GetPost.Output
+    /// - Remark: HTTP `GET /v2/author/{id}`.
+    /// - Remark: Generated from `#/paths//v2/author/{id}/get(getAuthor)`.
+    func getAuthor(_ input: Operations.GetAuthor.Input) async throws -> Operations.GetAuthor.Output
+    /// Search for Blog Posts records by query string
+    ///
+    /// Execute a query on this table, using query criteria as specified in query string parameters.
+    ///
+    /// * Pagination is managed via the `pageNo` & `pageSize` query string parameters.  pageNo starts at 1.  pageSize defaults to 50.
+    /// * By default, the response includes the total count of records that match the query criteria.  The count can be omitted by specifying `includeCount=false`
+    /// * By default, results are sorted by the table's primary key, descending.  This can be changed by specifying the `orderBy` query string parameter, following SQL ORDER BY syntax (e.g., `fieldName1 ASC, fieldName2 DESC`)
+    /// * By default, all given query criteria are combined using logical AND.  This can be changed by specifying the query string parameter `booleanOperator=OR`.
+    /// * Each field on the table can be used as a query criteria.  Each query criteria field can be specified on the query string any number of times.
+    /// * By default, all criteria use the equals operator (e.g., `myField=value` means records will be returned where myField equals value).  Alternative operators can be used as follows:
+    ///   * Equals: `myField=value`
+    ///   * Not Equals: `myField=!value`
+    ///   * Less Than: `myField=&lt;value`
+    ///   * Greater Than: `myField=&gt;value`
+    ///   * Less Than or Equals: `myField=&lt;=value`
+    ///   * Greater Than or Equals: `myField=&gt;=value`
+    ///   * Empty (or null): `myField=EMPTY`
+    ///   * Not Empty: `myField=!EMPTY`
+    ///   * Between: `myField=BETWEEN value1,value2` (two values must be given, separated by commas)
+    ///   * Not Between: `myField=!BETWEEN value1,value2` (two values must be given, separated by commas)
+    ///   * In: `myField=IN value1,value2,...,valueN` (one or more values must be given, separated by commas)
+    ///   * Not In: `myField=!IN value1,value2,...,valueN` (one or more values must be given, separated by commas)
+    ///   * Like: `myField=LIKE value` (using standard SQL % and _ wildcards)
+    ///   * Not Like: `myField=!LIKE value` (using standard SQL % and _ wildcards)
+    ///
+    ///
+    /// - Remark: HTTP `GET /v2/blogPost/query`.
+    /// - Remark: Generated from `#/paths//v2/blogPost/query/get(queryBlogPost)`.
+    func queryBlogPost(_ input: Operations.QueryBlogPost.Input) async throws -> Operations.QueryBlogPost.Output
+    /// Get one Blog Posts by Id
+    ///
+    /// Get one record from this table, by specifying its primary key as a path parameter.
+    ///
+    ///
+    /// - Remark: HTTP `GET /v2/blogPost/{id}`.
+    /// - Remark: Generated from `#/paths//v2/blogPost/{id}/get(getBlogPost)`.
+    func getBlogPost(_ input: Operations.GetBlogPost.Input) async throws -> Operations.GetBlogPost.Output
+    /// Update one Blog Posts
+    ///
+    /// Update one record in this table, by specifying its primary key as a path parameter, and by supplying values to be updated in the request body.
+    ///
+    /// * Only the fields provided in the request body will be updated.
+    /// * To remove a value from a field, supply the key for the field, with a null value.
+    /// * The request body does not need to contain all fields from the table.  Rather, only the fields to be updated should be supplied.
+    /// * Any unrecognized field names in the body will cause a 400 error.
+    /// * Any read-only (non-editable) fields provided in the body will be silently ignored.
+    /// * Note that if the request body includes the primary key, it will be ignored.  Only the primary key value path parameter will be used.
+    ///
+    /// Upon success, a status code of 204 (`No Content`) is returned, with no response body.
+    ///
+    ///
+    /// - Remark: HTTP `PATCH /v2/blogPost/{id}`.
+    /// - Remark: Generated from `#/paths//v2/blogPost/{id}/patch(updateBlogPost)`.
+    func updateBlogPost(_ input: Operations.UpdateBlogPost.Input) async throws -> Operations.UpdateBlogPost.Output
+    /// Delete one Blog Posts
+    ///
+    /// Delete one record from this table, by specifying its primary key as a path parameter.
+    ///
+    /// Upon success, a status code of 204 (`No Content`) is returned, with no response body.
+    ///
+    ///
+    /// - Remark: HTTP `DELETE /v2/blogPost/{id}`.
+    /// - Remark: Generated from `#/paths//v2/blogPost/{id}/delete(deleteBlogPost)`.
+    func deleteBlogPost(_ input: Operations.DeleteBlogPost.Input) async throws -> Operations.DeleteBlogPost.Output
+    /// Create one Blog Posts
+    ///
+    /// Insert one record into this table by supplying the values to be inserted in the request body.
+    /// * The request body should not include a value for the table's primary key.  Rather, a value will be generated and returned in a successful response's body.
+    /// * Any unrecognized field names in the body will cause a 400 error.
+    /// * Any read-only (non-editable) fields provided in the body will be silently ignored.
+    ///
+    /// Upon success, a status code of 201 (`Created`) is returned, and the generated value for the primary key will be returned in the response body object.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v2/blogPost/`.
+    /// - Remark: Generated from `#/paths//v2/blogPost//post(createBlogPost)`.
+    func createBlogPost(_ input: Operations.CreateBlogPost.Input) async throws -> Operations.CreateBlogPost.Output
+    /// Search for Blog Tags records by query string
+    ///
+    /// Execute a query on this table, using query criteria as specified in query string parameters.
+    ///
+    /// * Pagination is managed via the `pageNo` & `pageSize` query string parameters.  pageNo starts at 1.  pageSize defaults to 50.
+    /// * By default, the response includes the total count of records that match the query criteria.  The count can be omitted by specifying `includeCount=false`
+    /// * By default, results are sorted by the table's primary key, descending.  This can be changed by specifying the `orderBy` query string parameter, following SQL ORDER BY syntax (e.g., `fieldName1 ASC, fieldName2 DESC`)
+    /// * By default, all given query criteria are combined using logical AND.  This can be changed by specifying the query string parameter `booleanOperator=OR`.
+    /// * Each field on the table can be used as a query criteria.  Each query criteria field can be specified on the query string any number of times.
+    /// * By default, all criteria use the equals operator (e.g., `myField=value` means records will be returned where myField equals value).  Alternative operators can be used as follows:
+    ///   * Equals: `myField=value`
+    ///   * Not Equals: `myField=!value`
+    ///   * Less Than: `myField=&lt;value`
+    ///   * Greater Than: `myField=&gt;value`
+    ///   * Less Than or Equals: `myField=&lt;=value`
+    ///   * Greater Than or Equals: `myField=&gt;=value`
+    ///   * Empty (or null): `myField=EMPTY`
+    ///   * Not Empty: `myField=!EMPTY`
+    ///   * Between: `myField=BETWEEN value1,value2` (two values must be given, separated by commas)
+    ///   * Not Between: `myField=!BETWEEN value1,value2` (two values must be given, separated by commas)
+    ///   * In: `myField=IN value1,value2,...,valueN` (one or more values must be given, separated by commas)
+    ///   * Not In: `myField=!IN value1,value2,...,valueN` (one or more values must be given, separated by commas)
+    ///   * Like: `myField=LIKE value` (using standard SQL % and _ wildcards)
+    ///   * Not Like: `myField=!LIKE value` (using standard SQL % and _ wildcards)
+    ///
+    ///
+    /// - Remark: HTTP `GET /v2/blogTag/query`.
+    /// - Remark: Generated from `#/paths//v2/blogTag/query/get(queryBlogTag)`.
+    func queryBlogTag(_ input: Operations.QueryBlogTag.Input) async throws -> Operations.QueryBlogTag.Output
+    /// Create one Blog Tags
+    ///
+    /// Insert one record into this table by supplying the values to be inserted in the request body.
+    /// * The request body should not include a value for the table's primary key.  Rather, a value will be generated and returned in a successful response's body.
+    /// * Any unrecognized field names in the body will cause a 400 error.
+    /// * Any read-only (non-editable) fields provided in the body will be silently ignored.
+    ///
+    /// Upon success, a status code of 201 (`Created`) is returned, and the generated value for the primary key will be returned in the response body object.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v2/blogTag/`.
+    /// - Remark: Generated from `#/paths//v2/blogTag//post(createBlogTag)`.
+    func createBlogTag(_ input: Operations.CreateBlogTag.Input) async throws -> Operations.CreateBlogTag.Output
     /// Search for Blogs records by query string
     ///
     /// Execute a query on this table, using query criteria as specified in query string parameters.
@@ -74,18 +193,26 @@ public protocol APIProtocol: Sendable {
     ///   * Not Like: `myField=!LIKE value` (using standard SQL % and _ wildcards)
     ///
     ///
-    /// - Remark: HTTP `GET /v1/blog/query`.
-    /// - Remark: Generated from `#/paths//v1/blog/query/get(queryBlog)`.
+    /// - Remark: HTTP `GET /v2/blog/query`.
+    /// - Remark: Generated from `#/paths//v2/blog/query/get(queryBlog)`.
     func queryBlog(_ input: Operations.QueryBlog.Input) async throws -> Operations.QueryBlog.Output
     /// Get one Blogs by Id
     ///
     /// Get one record from this table, by specifying its primary key as a path parameter.
     ///
     ///
-    /// - Remark: HTTP `GET /v1/blog/{id}`.
-    /// - Remark: Generated from `#/paths//v1/blog/{id}/get(getBlog)`.
+    /// - Remark: HTTP `GET /v2/blog/{id}`.
+    /// - Remark: Generated from `#/paths//v2/blog/{id}/get(getBlog)`.
     func getBlog(_ input: Operations.GetBlog.Input) async throws -> Operations.GetBlog.Output
-    /// Search for Tags records by query string
+    /// Get one Media by Id
+    ///
+    /// Get one record from this table, by specifying its primary key as a path parameter.
+    ///
+    ///
+    /// - Remark: HTTP `GET /v2/media/{id}`.
+    /// - Remark: Generated from `#/paths//v2/media/{id}/get(getMedia)`.
+    func getMedia(_ input: Operations.GetMedia.Input) async throws -> Operations.GetMedia.Output
+    /// Search for Sites records by query string
     ///
     /// Execute a query on this table, using query criteria as specified in query string parameters.
     ///
@@ -111,93 +238,22 @@ public protocol APIProtocol: Sendable {
     ///   * Not Like: `myField=!LIKE value` (using standard SQL % and _ wildcards)
     ///
     ///
-    /// - Remark: HTTP `GET /v1/tag/query`.
-    /// - Remark: Generated from `#/paths//v1/tag/query/get(queryTag)`.
-    func queryTag(_ input: Operations.QueryTag.Input) async throws -> Operations.QueryTag.Output
-    /// Get one Tags by Id
+    /// - Remark: HTTP `GET /v2/site/query`.
+    /// - Remark: Generated from `#/paths//v2/site/query/get(querySite)`.
+    func querySite(_ input: Operations.QuerySite.Input) async throws -> Operations.QuerySite.Output
+    /// Get one Sites by Id
     ///
     /// Get one record from this table, by specifying its primary key as a path parameter.
     ///
     ///
-    /// - Remark: HTTP `GET /v1/tag/{id}`.
-    /// - Remark: Generated from `#/paths//v1/tag/{id}/get(getTag)`.
-    func getTag(_ input: Operations.GetTag.Input) async throws -> Operations.GetTag.Output
-    /// List API versions
-    ///
-    /// Supported path versions and the full semantic version of each.
-    ///
-    /// - Remark: HTTP `GET /versions.json`.
-    /// - Remark: Generated from `#/paths//versions.json/get(getApiVersions)`.
-    func getApiVersions(_ input: Operations.GetApiVersions.Input) async throws -> Operations.GetApiVersions.Output
-    /// Who am I
-    ///
-    /// The signed-in publisher, their author profile, the blogs they can post to and the limits.
-    ///
-    /// - Remark: HTTP `GET /v1/me`.
-    /// - Remark: Generated from `#/paths//v1/me/get(getMe)`.
-    func getMe(_ input: Operations.GetMe.Input) async throws -> Operations.GetMe.Output
-    /// List my posts
-    ///
-    /// My posts, most recently changed first, with cursor pagination.
-    ///
-    /// - Remark: HTTP `GET /v1/me/posts`.
-    /// - Remark: Generated from `#/paths//v1/me/posts/get(listMyPosts)`.
-    func listMyPosts(_ input: Operations.ListMyPosts.Input) async throws -> Operations.ListMyPosts.Output
-    /// Create a post
-    ///
-    /// Creates a draft, publishes immediately (`status: published`) or schedules (`status: scheduled` with `publishAt`). Retry-safe with `Idempotency-Key`.
-    ///
-    /// - Remark: HTTP `POST /v1/me/posts`.
-    /// - Remark: Generated from `#/paths//v1/me/posts/post(createPost)`.
-    func createPost(_ input: Operations.CreatePost.Input) async throws -> Operations.CreatePost.Output
-    /// Get one of my posts
-    ///
-    /// - Remark: HTTP `GET /v1/me/posts/{postId}`.
-    /// - Remark: Generated from `#/paths//v1/me/posts/{postId}/get(getMyPost)`.
-    func getMyPost(_ input: Operations.GetMyPost.Input) async throws -> Operations.GetMyPost.Output
-    /// Update one of my posts
-    ///
-    /// Omitted fields are unchanged; `null` clears optional fields. `tags` and `media` replace the whole list. Requires `If-Match` with the current ETag.
-    ///
-    /// - Remark: HTTP `PATCH /v1/me/posts/{postId}`.
-    /// - Remark: Generated from `#/paths//v1/me/posts/{postId}/patch(updatePost)`.
-    func updatePost(_ input: Operations.UpdatePost.Input) async throws -> Operations.UpdatePost.Output
-    /// Delete one of my posts
-    ///
-    /// - Remark: HTTP `DELETE /v1/me/posts/{postId}`.
-    /// - Remark: Generated from `#/paths//v1/me/posts/{postId}/delete(deletePost)`.
-    func deletePost(_ input: Operations.DeletePost.Input) async throws -> Operations.DeletePost.Output
-    /// Start a photo upload
-    ///
-    /// Returns a presigned `uploadUrl`. PUT the file bytes there with the returned headers (within 15 minutes; PUT is retry-safe), then call `completeUpload`. JPEG, PNG and HEIC (when the server converter is enabled); at most 25 MB. Photos only.
-    ///
-    /// - Remark: HTTP `POST /v1/me/uploads`.
-    /// - Remark: Generated from `#/paths//v1/me/uploads/post(createUpload)`.
-    func createUpload(_ input: Operations.CreateUpload.Input) async throws -> Operations.CreateUpload.Output
-    /// Finish a photo upload
-    ///
-    /// Verifies the uploaded bytes, converts HEIC, strips EXIF location data unless `keepLocation` is true, generates renditions and returns the media to attach to a post. Calling it again returns the same media.
-    ///
-    /// - Remark: HTTP `POST /v1/me/uploads/{uploadId}/complete`.
-    /// - Remark: Generated from `#/paths//v1/me/uploads/{uploadId}/complete/post(completeUpload)`.
-    func completeUpload(_ input: Operations.CompleteUpload.Input) async throws -> Operations.CompleteUpload.Output
-    /// Tag autocomplete
-    ///
-    /// - Remark: HTTP `GET /v1/me/tags`.
-    /// - Remark: Generated from `#/paths//v1/me/tags/get(listMyTags)`.
-    func listMyTags(_ input: Operations.ListMyTags.Input) async throws -> Operations.ListMyTags.Output
-    /// Preview a link
-    ///
-    /// Fetches title, description and image server-side (public addresses only).
-    ///
-    /// - Remark: HTTP `POST /v1/me/link-preview`.
-    /// - Remark: Generated from `#/paths//v1/me/link-preview/post(getLinkPreview)`.
-    func getLinkPreview(_ input: Operations.GetLinkPreview.Input) async throws -> Operations.GetLinkPreview.Output
+    /// - Remark: HTTP `GET /v2/site/{id}`.
+    /// - Remark: Generated from `#/paths//v2/site/{id}/get(getSite)`.
+    func getSite(_ input: Operations.GetSite.Input) async throws -> Operations.GetSite.Output
 }
 
 /// Convenience overloads for operation inputs.
 extension APIProtocol {
-    /// Search for Blog Post records by query string
+    /// Search for Authors records by query string
     ///
     /// Execute a query on this table, using query criteria as specified in query string parameters.
     ///
@@ -223,31 +279,208 @@ extension APIProtocol {
     ///   * Not Like: `myField=!LIKE value` (using standard SQL % and _ wildcards)
     ///
     ///
-    /// - Remark: HTTP `GET /v1/post/query`.
-    /// - Remark: Generated from `#/paths//v1/post/query/get(queryPost)`.
-    public func queryPost(
-        query: Operations.QueryPost.Input.Query = .init(),
-        headers: Operations.QueryPost.Input.Headers = .init()
-    ) async throws -> Operations.QueryPost.Output {
-        try await queryPost(Operations.QueryPost.Input(
+    /// - Remark: HTTP `GET /v2/author/query`.
+    /// - Remark: Generated from `#/paths//v2/author/query/get(queryAuthor)`.
+    public func queryAuthor(
+        query: Operations.QueryAuthor.Input.Query = .init(),
+        headers: Operations.QueryAuthor.Input.Headers = .init()
+    ) async throws -> Operations.QueryAuthor.Output {
+        try await queryAuthor(Operations.QueryAuthor.Input(
             query: query,
             headers: headers
         ))
     }
-    /// Get one Blog Post by Id
+    /// Get one Authors by Id
     ///
     /// Get one record from this table, by specifying its primary key as a path parameter.
     ///
     ///
-    /// - Remark: HTTP `GET /v1/post/{id}`.
-    /// - Remark: Generated from `#/paths//v1/post/{id}/get(getPost)`.
-    public func getPost(
-        path: Operations.GetPost.Input.Path,
-        headers: Operations.GetPost.Input.Headers = .init()
-    ) async throws -> Operations.GetPost.Output {
-        try await getPost(Operations.GetPost.Input(
+    /// - Remark: HTTP `GET /v2/author/{id}`.
+    /// - Remark: Generated from `#/paths//v2/author/{id}/get(getAuthor)`.
+    public func getAuthor(
+        path: Operations.GetAuthor.Input.Path,
+        headers: Operations.GetAuthor.Input.Headers = .init()
+    ) async throws -> Operations.GetAuthor.Output {
+        try await getAuthor(Operations.GetAuthor.Input(
             path: path,
             headers: headers
+        ))
+    }
+    /// Search for Blog Posts records by query string
+    ///
+    /// Execute a query on this table, using query criteria as specified in query string parameters.
+    ///
+    /// * Pagination is managed via the `pageNo` & `pageSize` query string parameters.  pageNo starts at 1.  pageSize defaults to 50.
+    /// * By default, the response includes the total count of records that match the query criteria.  The count can be omitted by specifying `includeCount=false`
+    /// * By default, results are sorted by the table's primary key, descending.  This can be changed by specifying the `orderBy` query string parameter, following SQL ORDER BY syntax (e.g., `fieldName1 ASC, fieldName2 DESC`)
+    /// * By default, all given query criteria are combined using logical AND.  This can be changed by specifying the query string parameter `booleanOperator=OR`.
+    /// * Each field on the table can be used as a query criteria.  Each query criteria field can be specified on the query string any number of times.
+    /// * By default, all criteria use the equals operator (e.g., `myField=value` means records will be returned where myField equals value).  Alternative operators can be used as follows:
+    ///   * Equals: `myField=value`
+    ///   * Not Equals: `myField=!value`
+    ///   * Less Than: `myField=&lt;value`
+    ///   * Greater Than: `myField=&gt;value`
+    ///   * Less Than or Equals: `myField=&lt;=value`
+    ///   * Greater Than or Equals: `myField=&gt;=value`
+    ///   * Empty (or null): `myField=EMPTY`
+    ///   * Not Empty: `myField=!EMPTY`
+    ///   * Between: `myField=BETWEEN value1,value2` (two values must be given, separated by commas)
+    ///   * Not Between: `myField=!BETWEEN value1,value2` (two values must be given, separated by commas)
+    ///   * In: `myField=IN value1,value2,...,valueN` (one or more values must be given, separated by commas)
+    ///   * Not In: `myField=!IN value1,value2,...,valueN` (one or more values must be given, separated by commas)
+    ///   * Like: `myField=LIKE value` (using standard SQL % and _ wildcards)
+    ///   * Not Like: `myField=!LIKE value` (using standard SQL % and _ wildcards)
+    ///
+    ///
+    /// - Remark: HTTP `GET /v2/blogPost/query`.
+    /// - Remark: Generated from `#/paths//v2/blogPost/query/get(queryBlogPost)`.
+    public func queryBlogPost(
+        query: Operations.QueryBlogPost.Input.Query = .init(),
+        headers: Operations.QueryBlogPost.Input.Headers = .init()
+    ) async throws -> Operations.QueryBlogPost.Output {
+        try await queryBlogPost(Operations.QueryBlogPost.Input(
+            query: query,
+            headers: headers
+        ))
+    }
+    /// Get one Blog Posts by Id
+    ///
+    /// Get one record from this table, by specifying its primary key as a path parameter.
+    ///
+    ///
+    /// - Remark: HTTP `GET /v2/blogPost/{id}`.
+    /// - Remark: Generated from `#/paths//v2/blogPost/{id}/get(getBlogPost)`.
+    public func getBlogPost(
+        path: Operations.GetBlogPost.Input.Path,
+        headers: Operations.GetBlogPost.Input.Headers = .init()
+    ) async throws -> Operations.GetBlogPost.Output {
+        try await getBlogPost(Operations.GetBlogPost.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// Update one Blog Posts
+    ///
+    /// Update one record in this table, by specifying its primary key as a path parameter, and by supplying values to be updated in the request body.
+    ///
+    /// * Only the fields provided in the request body will be updated.
+    /// * To remove a value from a field, supply the key for the field, with a null value.
+    /// * The request body does not need to contain all fields from the table.  Rather, only the fields to be updated should be supplied.
+    /// * Any unrecognized field names in the body will cause a 400 error.
+    /// * Any read-only (non-editable) fields provided in the body will be silently ignored.
+    /// * Note that if the request body includes the primary key, it will be ignored.  Only the primary key value path parameter will be used.
+    ///
+    /// Upon success, a status code of 204 (`No Content`) is returned, with no response body.
+    ///
+    ///
+    /// - Remark: HTTP `PATCH /v2/blogPost/{id}`.
+    /// - Remark: Generated from `#/paths//v2/blogPost/{id}/patch(updateBlogPost)`.
+    public func updateBlogPost(
+        path: Operations.UpdateBlogPost.Input.Path,
+        headers: Operations.UpdateBlogPost.Input.Headers = .init(),
+        body: Operations.UpdateBlogPost.Input.Body
+    ) async throws -> Operations.UpdateBlogPost.Output {
+        try await updateBlogPost(Operations.UpdateBlogPost.Input(
+            path: path,
+            headers: headers,
+            body: body
+        ))
+    }
+    /// Delete one Blog Posts
+    ///
+    /// Delete one record from this table, by specifying its primary key as a path parameter.
+    ///
+    /// Upon success, a status code of 204 (`No Content`) is returned, with no response body.
+    ///
+    ///
+    /// - Remark: HTTP `DELETE /v2/blogPost/{id}`.
+    /// - Remark: Generated from `#/paths//v2/blogPost/{id}/delete(deleteBlogPost)`.
+    public func deleteBlogPost(
+        path: Operations.DeleteBlogPost.Input.Path,
+        headers: Operations.DeleteBlogPost.Input.Headers = .init()
+    ) async throws -> Operations.DeleteBlogPost.Output {
+        try await deleteBlogPost(Operations.DeleteBlogPost.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// Create one Blog Posts
+    ///
+    /// Insert one record into this table by supplying the values to be inserted in the request body.
+    /// * The request body should not include a value for the table's primary key.  Rather, a value will be generated and returned in a successful response's body.
+    /// * Any unrecognized field names in the body will cause a 400 error.
+    /// * Any read-only (non-editable) fields provided in the body will be silently ignored.
+    ///
+    /// Upon success, a status code of 201 (`Created`) is returned, and the generated value for the primary key will be returned in the response body object.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v2/blogPost/`.
+    /// - Remark: Generated from `#/paths//v2/blogPost//post(createBlogPost)`.
+    public func createBlogPost(
+        headers: Operations.CreateBlogPost.Input.Headers = .init(),
+        body: Operations.CreateBlogPost.Input.Body
+    ) async throws -> Operations.CreateBlogPost.Output {
+        try await createBlogPost(Operations.CreateBlogPost.Input(
+            headers: headers,
+            body: body
+        ))
+    }
+    /// Search for Blog Tags records by query string
+    ///
+    /// Execute a query on this table, using query criteria as specified in query string parameters.
+    ///
+    /// * Pagination is managed via the `pageNo` & `pageSize` query string parameters.  pageNo starts at 1.  pageSize defaults to 50.
+    /// * By default, the response includes the total count of records that match the query criteria.  The count can be omitted by specifying `includeCount=false`
+    /// * By default, results are sorted by the table's primary key, descending.  This can be changed by specifying the `orderBy` query string parameter, following SQL ORDER BY syntax (e.g., `fieldName1 ASC, fieldName2 DESC`)
+    /// * By default, all given query criteria are combined using logical AND.  This can be changed by specifying the query string parameter `booleanOperator=OR`.
+    /// * Each field on the table can be used as a query criteria.  Each query criteria field can be specified on the query string any number of times.
+    /// * By default, all criteria use the equals operator (e.g., `myField=value` means records will be returned where myField equals value).  Alternative operators can be used as follows:
+    ///   * Equals: `myField=value`
+    ///   * Not Equals: `myField=!value`
+    ///   * Less Than: `myField=&lt;value`
+    ///   * Greater Than: `myField=&gt;value`
+    ///   * Less Than or Equals: `myField=&lt;=value`
+    ///   * Greater Than or Equals: `myField=&gt;=value`
+    ///   * Empty (or null): `myField=EMPTY`
+    ///   * Not Empty: `myField=!EMPTY`
+    ///   * Between: `myField=BETWEEN value1,value2` (two values must be given, separated by commas)
+    ///   * Not Between: `myField=!BETWEEN value1,value2` (two values must be given, separated by commas)
+    ///   * In: `myField=IN value1,value2,...,valueN` (one or more values must be given, separated by commas)
+    ///   * Not In: `myField=!IN value1,value2,...,valueN` (one or more values must be given, separated by commas)
+    ///   * Like: `myField=LIKE value` (using standard SQL % and _ wildcards)
+    ///   * Not Like: `myField=!LIKE value` (using standard SQL % and _ wildcards)
+    ///
+    ///
+    /// - Remark: HTTP `GET /v2/blogTag/query`.
+    /// - Remark: Generated from `#/paths//v2/blogTag/query/get(queryBlogTag)`.
+    public func queryBlogTag(
+        query: Operations.QueryBlogTag.Input.Query = .init(),
+        headers: Operations.QueryBlogTag.Input.Headers = .init()
+    ) async throws -> Operations.QueryBlogTag.Output {
+        try await queryBlogTag(Operations.QueryBlogTag.Input(
+            query: query,
+            headers: headers
+        ))
+    }
+    /// Create one Blog Tags
+    ///
+    /// Insert one record into this table by supplying the values to be inserted in the request body.
+    /// * The request body should not include a value for the table's primary key.  Rather, a value will be generated and returned in a successful response's body.
+    /// * Any unrecognized field names in the body will cause a 400 error.
+    /// * Any read-only (non-editable) fields provided in the body will be silently ignored.
+    ///
+    /// Upon success, a status code of 201 (`Created`) is returned, and the generated value for the primary key will be returned in the response body object.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v2/blogTag/`.
+    /// - Remark: Generated from `#/paths//v2/blogTag//post(createBlogTag)`.
+    public func createBlogTag(
+        headers: Operations.CreateBlogTag.Input.Headers = .init(),
+        body: Operations.CreateBlogTag.Input.Body
+    ) async throws -> Operations.CreateBlogTag.Output {
+        try await createBlogTag(Operations.CreateBlogTag.Input(
+            headers: headers,
+            body: body
         ))
     }
     /// Search for Blogs records by query string
@@ -276,8 +509,8 @@ extension APIProtocol {
     ///   * Not Like: `myField=!LIKE value` (using standard SQL % and _ wildcards)
     ///
     ///
-    /// - Remark: HTTP `GET /v1/blog/query`.
-    /// - Remark: Generated from `#/paths//v1/blog/query/get(queryBlog)`.
+    /// - Remark: HTTP `GET /v2/blog/query`.
+    /// - Remark: Generated from `#/paths//v2/blog/query/get(queryBlog)`.
     public func queryBlog(
         query: Operations.QueryBlog.Input.Query = .init(),
         headers: Operations.QueryBlog.Input.Headers = .init()
@@ -292,8 +525,8 @@ extension APIProtocol {
     /// Get one record from this table, by specifying its primary key as a path parameter.
     ///
     ///
-    /// - Remark: HTTP `GET /v1/blog/{id}`.
-    /// - Remark: Generated from `#/paths//v1/blog/{id}/get(getBlog)`.
+    /// - Remark: HTTP `GET /v2/blog/{id}`.
+    /// - Remark: Generated from `#/paths//v2/blog/{id}/get(getBlog)`.
     public func getBlog(
         path: Operations.GetBlog.Input.Path,
         headers: Operations.GetBlog.Input.Headers = .init()
@@ -303,7 +536,23 @@ extension APIProtocol {
             headers: headers
         ))
     }
-    /// Search for Tags records by query string
+    /// Get one Media by Id
+    ///
+    /// Get one record from this table, by specifying its primary key as a path parameter.
+    ///
+    ///
+    /// - Remark: HTTP `GET /v2/media/{id}`.
+    /// - Remark: Generated from `#/paths//v2/media/{id}/get(getMedia)`.
+    public func getMedia(
+        path: Operations.GetMedia.Input.Path,
+        headers: Operations.GetMedia.Input.Headers = .init()
+    ) async throws -> Operations.GetMedia.Output {
+        try await getMedia(Operations.GetMedia.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// Search for Sites records by query string
     ///
     /// Execute a query on this table, using query criteria as specified in query string parameters.
     ///
@@ -329,182 +578,31 @@ extension APIProtocol {
     ///   * Not Like: `myField=!LIKE value` (using standard SQL % and _ wildcards)
     ///
     ///
-    /// - Remark: HTTP `GET /v1/tag/query`.
-    /// - Remark: Generated from `#/paths//v1/tag/query/get(queryTag)`.
-    public func queryTag(
-        query: Operations.QueryTag.Input.Query = .init(),
-        headers: Operations.QueryTag.Input.Headers = .init()
-    ) async throws -> Operations.QueryTag.Output {
-        try await queryTag(Operations.QueryTag.Input(
+    /// - Remark: HTTP `GET /v2/site/query`.
+    /// - Remark: Generated from `#/paths//v2/site/query/get(querySite)`.
+    public func querySite(
+        query: Operations.QuerySite.Input.Query = .init(),
+        headers: Operations.QuerySite.Input.Headers = .init()
+    ) async throws -> Operations.QuerySite.Output {
+        try await querySite(Operations.QuerySite.Input(
             query: query,
             headers: headers
         ))
     }
-    /// Get one Tags by Id
+    /// Get one Sites by Id
     ///
     /// Get one record from this table, by specifying its primary key as a path parameter.
     ///
     ///
-    /// - Remark: HTTP `GET /v1/tag/{id}`.
-    /// - Remark: Generated from `#/paths//v1/tag/{id}/get(getTag)`.
-    public func getTag(
-        path: Operations.GetTag.Input.Path,
-        headers: Operations.GetTag.Input.Headers = .init()
-    ) async throws -> Operations.GetTag.Output {
-        try await getTag(Operations.GetTag.Input(
+    /// - Remark: HTTP `GET /v2/site/{id}`.
+    /// - Remark: Generated from `#/paths//v2/site/{id}/get(getSite)`.
+    public func getSite(
+        path: Operations.GetSite.Input.Path,
+        headers: Operations.GetSite.Input.Headers = .init()
+    ) async throws -> Operations.GetSite.Output {
+        try await getSite(Operations.GetSite.Input(
             path: path,
             headers: headers
-        ))
-    }
-    /// List API versions
-    ///
-    /// Supported path versions and the full semantic version of each.
-    ///
-    /// - Remark: HTTP `GET /versions.json`.
-    /// - Remark: Generated from `#/paths//versions.json/get(getApiVersions)`.
-    public func getApiVersions(headers: Operations.GetApiVersions.Input.Headers = .init()) async throws -> Operations.GetApiVersions.Output {
-        try await getApiVersions(Operations.GetApiVersions.Input(headers: headers))
-    }
-    /// Who am I
-    ///
-    /// The signed-in publisher, their author profile, the blogs they can post to and the limits.
-    ///
-    /// - Remark: HTTP `GET /v1/me`.
-    /// - Remark: Generated from `#/paths//v1/me/get(getMe)`.
-    public func getMe(headers: Operations.GetMe.Input.Headers = .init()) async throws -> Operations.GetMe.Output {
-        try await getMe(Operations.GetMe.Input(headers: headers))
-    }
-    /// List my posts
-    ///
-    /// My posts, most recently changed first, with cursor pagination.
-    ///
-    /// - Remark: HTTP `GET /v1/me/posts`.
-    /// - Remark: Generated from `#/paths//v1/me/posts/get(listMyPosts)`.
-    public func listMyPosts(
-        query: Operations.ListMyPosts.Input.Query = .init(),
-        headers: Operations.ListMyPosts.Input.Headers = .init()
-    ) async throws -> Operations.ListMyPosts.Output {
-        try await listMyPosts(Operations.ListMyPosts.Input(
-            query: query,
-            headers: headers
-        ))
-    }
-    /// Create a post
-    ///
-    /// Creates a draft, publishes immediately (`status: published`) or schedules (`status: scheduled` with `publishAt`). Retry-safe with `Idempotency-Key`.
-    ///
-    /// - Remark: HTTP `POST /v1/me/posts`.
-    /// - Remark: Generated from `#/paths//v1/me/posts/post(createPost)`.
-    public func createPost(
-        headers: Operations.CreatePost.Input.Headers = .init(),
-        body: Operations.CreatePost.Input.Body
-    ) async throws -> Operations.CreatePost.Output {
-        try await createPost(Operations.CreatePost.Input(
-            headers: headers,
-            body: body
-        ))
-    }
-    /// Get one of my posts
-    ///
-    /// - Remark: HTTP `GET /v1/me/posts/{postId}`.
-    /// - Remark: Generated from `#/paths//v1/me/posts/{postId}/get(getMyPost)`.
-    public func getMyPost(
-        path: Operations.GetMyPost.Input.Path,
-        headers: Operations.GetMyPost.Input.Headers = .init()
-    ) async throws -> Operations.GetMyPost.Output {
-        try await getMyPost(Operations.GetMyPost.Input(
-            path: path,
-            headers: headers
-        ))
-    }
-    /// Update one of my posts
-    ///
-    /// Omitted fields are unchanged; `null` clears optional fields. `tags` and `media` replace the whole list. Requires `If-Match` with the current ETag.
-    ///
-    /// - Remark: HTTP `PATCH /v1/me/posts/{postId}`.
-    /// - Remark: Generated from `#/paths//v1/me/posts/{postId}/patch(updatePost)`.
-    public func updatePost(
-        path: Operations.UpdatePost.Input.Path,
-        headers: Operations.UpdatePost.Input.Headers,
-        body: Operations.UpdatePost.Input.Body
-    ) async throws -> Operations.UpdatePost.Output {
-        try await updatePost(Operations.UpdatePost.Input(
-            path: path,
-            headers: headers,
-            body: body
-        ))
-    }
-    /// Delete one of my posts
-    ///
-    /// - Remark: HTTP `DELETE /v1/me/posts/{postId}`.
-    /// - Remark: Generated from `#/paths//v1/me/posts/{postId}/delete(deletePost)`.
-    public func deletePost(
-        path: Operations.DeletePost.Input.Path,
-        headers: Operations.DeletePost.Input.Headers = .init()
-    ) async throws -> Operations.DeletePost.Output {
-        try await deletePost(Operations.DeletePost.Input(
-            path: path,
-            headers: headers
-        ))
-    }
-    /// Start a photo upload
-    ///
-    /// Returns a presigned `uploadUrl`. PUT the file bytes there with the returned headers (within 15 minutes; PUT is retry-safe), then call `completeUpload`. JPEG, PNG and HEIC (when the server converter is enabled); at most 25 MB. Photos only.
-    ///
-    /// - Remark: HTTP `POST /v1/me/uploads`.
-    /// - Remark: Generated from `#/paths//v1/me/uploads/post(createUpload)`.
-    public func createUpload(
-        headers: Operations.CreateUpload.Input.Headers = .init(),
-        body: Operations.CreateUpload.Input.Body
-    ) async throws -> Operations.CreateUpload.Output {
-        try await createUpload(Operations.CreateUpload.Input(
-            headers: headers,
-            body: body
-        ))
-    }
-    /// Finish a photo upload
-    ///
-    /// Verifies the uploaded bytes, converts HEIC, strips EXIF location data unless `keepLocation` is true, generates renditions and returns the media to attach to a post. Calling it again returns the same media.
-    ///
-    /// - Remark: HTTP `POST /v1/me/uploads/{uploadId}/complete`.
-    /// - Remark: Generated from `#/paths//v1/me/uploads/{uploadId}/complete/post(completeUpload)`.
-    public func completeUpload(
-        path: Operations.CompleteUpload.Input.Path,
-        headers: Operations.CompleteUpload.Input.Headers = .init(),
-        body: Operations.CompleteUpload.Input.Body? = nil
-    ) async throws -> Operations.CompleteUpload.Output {
-        try await completeUpload(Operations.CompleteUpload.Input(
-            path: path,
-            headers: headers,
-            body: body
-        ))
-    }
-    /// Tag autocomplete
-    ///
-    /// - Remark: HTTP `GET /v1/me/tags`.
-    /// - Remark: Generated from `#/paths//v1/me/tags/get(listMyTags)`.
-    public func listMyTags(
-        query: Operations.ListMyTags.Input.Query = .init(),
-        headers: Operations.ListMyTags.Input.Headers = .init()
-    ) async throws -> Operations.ListMyTags.Output {
-        try await listMyTags(Operations.ListMyTags.Input(
-            query: query,
-            headers: headers
-        ))
-    }
-    /// Preview a link
-    ///
-    /// Fetches title, description and image server-side (public addresses only).
-    ///
-    /// - Remark: HTTP `POST /v1/me/link-preview`.
-    /// - Remark: Generated from `#/paths//v1/me/link-preview/post(getLinkPreview)`.
-    public func getLinkPreview(
-        headers: Operations.GetLinkPreview.Input.Headers = .init(),
-        body: Operations.GetLinkPreview.Input.Body
-    ) async throws -> Operations.GetLinkPreview.Output {
-        try await getLinkPreview(Operations.GetLinkPreview.Input(
-            headers: headers,
-            body: body
         ))
     }
 }
@@ -538,41 +636,13 @@ public enum Components {}
 // Merged from Types+Components+Headers.swift
 extension Components {
     /// Types generated from the `#/components/headers` section of the OpenAPI document.
-    public enum Headers {
-        /// Version of the returned post, for If-Match.
-        ///
-        /// - Remark: Generated from `#/components/headers/ETag`.
-        public typealias ETag = Swift.String
-        /// URL of the created resource.
-        ///
-        /// - Remark: Generated from `#/components/headers/Location`.
-        public typealias Location = Swift.String
-        /// Seconds to wait before retrying.
-        ///
-        /// - Remark: Generated from `#/components/headers/RetryAfter`.
-        public typealias RetryAfter = Swift.Int
-    }
+    public enum Headers {}
 }
 
 // Merged from Types+Components+Parameters.swift
 extension Components {
     /// Types generated from the `#/components/parameters` section of the OpenAPI document.
-    public enum Parameters {
-        /// - Remark: Generated from `#/components/parameters/PostId`.
-        public typealias PostId = Swift.Int64
-        /// - Remark: Generated from `#/components/parameters/UploadId`.
-        public typealias UploadId = Swift.String
-        /// 8-255 characters; the same key and body replays the first response for 24 hours.
-        ///
-        /// - Remark: Generated from `#/components/parameters/IdempotencyKey`.
-        public typealias IdempotencyKey = Swift.String
-        /// The ETag from the last read of this post.
-        ///
-        /// - Remark: Generated from `#/components/parameters/IfMatch`.
-        public typealias IfMatch = Swift.String
-        /// - Remark: Generated from `#/components/parameters/IfMatchOptional`.
-        public typealias IfMatchOptional = Swift.String
-    }
+    public enum Parameters {}
 }
 
 // Merged from Types+Components+RequestBodies.swift
@@ -800,356 +870,6 @@ extension Components {
                 self.body = body
             }
         }
-        public struct BadRequest: Sendable, Hashable {
-            /// - Remark: Generated from `#/components/responses/BadRequest/content`.
-            @frozen public enum Body: Sendable, Hashable {
-                /// - Remark: Generated from `#/components/responses/BadRequest/content/application\/json`.
-                case json(Components.Schemas._Error)
-                /// The associated value of the enum case if `self` is `.json`.
-                ///
-                /// - Throws: An error if `self` is not `.json`.
-                /// - SeeAlso: `.json`.
-                public var json: Components.Schemas._Error {
-                    get throws {
-                        switch self {
-                        case let .json(body):
-                            return body
-                        }
-                    }
-                }
-            }
-            /// Received HTTP response body
-            public var body: Components.Responses.BadRequest.Body
-            /// Creates a new `BadRequest`.
-            ///
-            /// - Parameters:
-            ///   - body: Received HTTP response body
-            public init(body: Components.Responses.BadRequest.Body) {
-                self.body = body
-            }
-        }
-        public struct Unauthorized: Sendable, Hashable {
-            /// - Remark: Generated from `#/components/responses/Unauthorized/content`.
-            @frozen public enum Body: Sendable, Hashable {
-                /// - Remark: Generated from `#/components/responses/Unauthorized/content/application\/json`.
-                case json(Components.Schemas._Error)
-                /// The associated value of the enum case if `self` is `.json`.
-                ///
-                /// - Throws: An error if `self` is not `.json`.
-                /// - SeeAlso: `.json`.
-                public var json: Components.Schemas._Error {
-                    get throws {
-                        switch self {
-                        case let .json(body):
-                            return body
-                        }
-                    }
-                }
-            }
-            /// Received HTTP response body
-            public var body: Components.Responses.Unauthorized.Body
-            /// Creates a new `Unauthorized`.
-            ///
-            /// - Parameters:
-            ///   - body: Received HTTP response body
-            public init(body: Components.Responses.Unauthorized.Body) {
-                self.body = body
-            }
-        }
-        public struct Forbidden: Sendable, Hashable {
-            /// - Remark: Generated from `#/components/responses/Forbidden/content`.
-            @frozen public enum Body: Sendable, Hashable {
-                /// - Remark: Generated from `#/components/responses/Forbidden/content/application\/json`.
-                case json(Components.Schemas._Error)
-                /// The associated value of the enum case if `self` is `.json`.
-                ///
-                /// - Throws: An error if `self` is not `.json`.
-                /// - SeeAlso: `.json`.
-                public var json: Components.Schemas._Error {
-                    get throws {
-                        switch self {
-                        case let .json(body):
-                            return body
-                        }
-                    }
-                }
-            }
-            /// Received HTTP response body
-            public var body: Components.Responses.Forbidden.Body
-            /// Creates a new `Forbidden`.
-            ///
-            /// - Parameters:
-            ///   - body: Received HTTP response body
-            public init(body: Components.Responses.Forbidden.Body) {
-                self.body = body
-            }
-        }
-        public struct NotFound: Sendable, Hashable {
-            /// - Remark: Generated from `#/components/responses/NotFound/content`.
-            @frozen public enum Body: Sendable, Hashable {
-                /// - Remark: Generated from `#/components/responses/NotFound/content/application\/json`.
-                case json(Components.Schemas._Error)
-                /// The associated value of the enum case if `self` is `.json`.
-                ///
-                /// - Throws: An error if `self` is not `.json`.
-                /// - SeeAlso: `.json`.
-                public var json: Components.Schemas._Error {
-                    get throws {
-                        switch self {
-                        case let .json(body):
-                            return body
-                        }
-                    }
-                }
-            }
-            /// Received HTTP response body
-            public var body: Components.Responses.NotFound.Body
-            /// Creates a new `NotFound`.
-            ///
-            /// - Parameters:
-            ///   - body: Received HTTP response body
-            public init(body: Components.Responses.NotFound.Body) {
-                self.body = body
-            }
-        }
-        public struct Conflict: Sendable, Hashable {
-            /// - Remark: Generated from `#/components/responses/Conflict/content`.
-            @frozen public enum Body: Sendable, Hashable {
-                /// - Remark: Generated from `#/components/responses/Conflict/content/application\/json`.
-                case json(Components.Schemas._Error)
-                /// The associated value of the enum case if `self` is `.json`.
-                ///
-                /// - Throws: An error if `self` is not `.json`.
-                /// - SeeAlso: `.json`.
-                public var json: Components.Schemas._Error {
-                    get throws {
-                        switch self {
-                        case let .json(body):
-                            return body
-                        }
-                    }
-                }
-            }
-            /// Received HTTP response body
-            public var body: Components.Responses.Conflict.Body
-            /// Creates a new `Conflict`.
-            ///
-            /// - Parameters:
-            ///   - body: Received HTTP response body
-            public init(body: Components.Responses.Conflict.Body) {
-                self.body = body
-            }
-        }
-        public struct PreconditionFailed: Sendable, Hashable {
-            /// - Remark: Generated from `#/components/responses/PreconditionFailed/headers`.
-            public struct Headers: Sendable, Hashable {
-                /// Version of the returned post, for If-Match.
-                ///
-                /// - Remark: Generated from `#/components/responses/PreconditionFailed/headers/ETag`.
-                public var eTag: Components.Headers.ETag?
-                /// Creates a new `Headers`.
-                ///
-                /// - Parameters:
-                ///   - eTag: Version of the returned post, for If-Match.
-                public init(eTag: Components.Headers.ETag? = nil) {
-                    self.eTag = eTag
-                }
-            }
-            /// Received HTTP response headers
-            public var headers: Components.Responses.PreconditionFailed.Headers
-            /// - Remark: Generated from `#/components/responses/PreconditionFailed/content`.
-            @frozen public enum Body: Sendable, Hashable {
-                /// - Remark: Generated from `#/components/responses/PreconditionFailed/content/application\/json`.
-                case json(Components.Schemas._Error)
-                /// The associated value of the enum case if `self` is `.json`.
-                ///
-                /// - Throws: An error if `self` is not `.json`.
-                /// - SeeAlso: `.json`.
-                public var json: Components.Schemas._Error {
-                    get throws {
-                        switch self {
-                        case let .json(body):
-                            return body
-                        }
-                    }
-                }
-            }
-            /// Received HTTP response body
-            public var body: Components.Responses.PreconditionFailed.Body
-            /// Creates a new `PreconditionFailed`.
-            ///
-            /// - Parameters:
-            ///   - headers: Received HTTP response headers
-            ///   - body: Received HTTP response body
-            public init(
-                headers: Components.Responses.PreconditionFailed.Headers = .init(),
-                body: Components.Responses.PreconditionFailed.Body
-            ) {
-                self.headers = headers
-                self.body = body
-            }
-        }
-        public struct PreconditionRequired: Sendable, Hashable {
-            /// - Remark: Generated from `#/components/responses/PreconditionRequired/content`.
-            @frozen public enum Body: Sendable, Hashable {
-                /// - Remark: Generated from `#/components/responses/PreconditionRequired/content/application\/json`.
-                case json(Components.Schemas._Error)
-                /// The associated value of the enum case if `self` is `.json`.
-                ///
-                /// - Throws: An error if `self` is not `.json`.
-                /// - SeeAlso: `.json`.
-                public var json: Components.Schemas._Error {
-                    get throws {
-                        switch self {
-                        case let .json(body):
-                            return body
-                        }
-                    }
-                }
-            }
-            /// Received HTTP response body
-            public var body: Components.Responses.PreconditionRequired.Body
-            /// Creates a new `PreconditionRequired`.
-            ///
-            /// - Parameters:
-            ///   - body: Received HTTP response body
-            public init(body: Components.Responses.PreconditionRequired.Body) {
-                self.body = body
-            }
-        }
-        public struct PayloadTooLarge: Sendable, Hashable {
-            /// - Remark: Generated from `#/components/responses/PayloadTooLarge/content`.
-            @frozen public enum Body: Sendable, Hashable {
-                /// - Remark: Generated from `#/components/responses/PayloadTooLarge/content/application\/json`.
-                case json(Components.Schemas._Error)
-                /// The associated value of the enum case if `self` is `.json`.
-                ///
-                /// - Throws: An error if `self` is not `.json`.
-                /// - SeeAlso: `.json`.
-                public var json: Components.Schemas._Error {
-                    get throws {
-                        switch self {
-                        case let .json(body):
-                            return body
-                        }
-                    }
-                }
-            }
-            /// Received HTTP response body
-            public var body: Components.Responses.PayloadTooLarge.Body
-            /// Creates a new `PayloadTooLarge`.
-            ///
-            /// - Parameters:
-            ///   - body: Received HTTP response body
-            public init(body: Components.Responses.PayloadTooLarge.Body) {
-                self.body = body
-            }
-        }
-        public struct UnsupportedMediaType: Sendable, Hashable {
-            /// - Remark: Generated from `#/components/responses/UnsupportedMediaType/content`.
-            @frozen public enum Body: Sendable, Hashable {
-                /// - Remark: Generated from `#/components/responses/UnsupportedMediaType/content/application\/json`.
-                case json(Components.Schemas._Error)
-                /// The associated value of the enum case if `self` is `.json`.
-                ///
-                /// - Throws: An error if `self` is not `.json`.
-                /// - SeeAlso: `.json`.
-                public var json: Components.Schemas._Error {
-                    get throws {
-                        switch self {
-                        case let .json(body):
-                            return body
-                        }
-                    }
-                }
-            }
-            /// Received HTTP response body
-            public var body: Components.Responses.UnsupportedMediaType.Body
-            /// Creates a new `UnsupportedMediaType`.
-            ///
-            /// - Parameters:
-            ///   - body: Received HTTP response body
-            public init(body: Components.Responses.UnsupportedMediaType.Body) {
-                self.body = body
-            }
-        }
-        public struct ValidationFailed: Sendable, Hashable {
-            /// - Remark: Generated from `#/components/responses/ValidationFailed/content`.
-            @frozen public enum Body: Sendable, Hashable {
-                /// - Remark: Generated from `#/components/responses/ValidationFailed/content/application\/json`.
-                case json(Components.Schemas._Error)
-                /// The associated value of the enum case if `self` is `.json`.
-                ///
-                /// - Throws: An error if `self` is not `.json`.
-                /// - SeeAlso: `.json`.
-                public var json: Components.Schemas._Error {
-                    get throws {
-                        switch self {
-                        case let .json(body):
-                            return body
-                        }
-                    }
-                }
-            }
-            /// Received HTTP response body
-            public var body: Components.Responses.ValidationFailed.Body
-            /// Creates a new `ValidationFailed`.
-            ///
-            /// - Parameters:
-            ///   - body: Received HTTP response body
-            public init(body: Components.Responses.ValidationFailed.Body) {
-                self.body = body
-            }
-        }
-        public struct TooManyRequests: Sendable, Hashable {
-            /// - Remark: Generated from `#/components/responses/TooManyRequests/headers`.
-            public struct Headers: Sendable, Hashable {
-                /// Seconds to wait before retrying.
-                ///
-                /// - Remark: Generated from `#/components/responses/TooManyRequests/headers/Retry-After`.
-                public var retryAfter: Components.Headers.RetryAfter?
-                /// Creates a new `Headers`.
-                ///
-                /// - Parameters:
-                ///   - retryAfter: Seconds to wait before retrying.
-                public init(retryAfter: Components.Headers.RetryAfter? = nil) {
-                    self.retryAfter = retryAfter
-                }
-            }
-            /// Received HTTP response headers
-            public var headers: Components.Responses.TooManyRequests.Headers
-            /// - Remark: Generated from `#/components/responses/TooManyRequests/content`.
-            @frozen public enum Body: Sendable, Hashable {
-                /// - Remark: Generated from `#/components/responses/TooManyRequests/content/application\/json`.
-                case json(Components.Schemas._Error)
-                /// The associated value of the enum case if `self` is `.json`.
-                ///
-                /// - Throws: An error if `self` is not `.json`.
-                /// - SeeAlso: `.json`.
-                public var json: Components.Schemas._Error {
-                    get throws {
-                        switch self {
-                        case let .json(body):
-                            return body
-                        }
-                    }
-                }
-            }
-            /// Received HTTP response body
-            public var body: Components.Responses.TooManyRequests.Body
-            /// Creates a new `TooManyRequests`.
-            ///
-            /// - Parameters:
-            ///   - headers: Received HTTP response headers
-            ///   - body: Received HTTP response body
-            public init(
-                headers: Components.Responses.TooManyRequests.Headers = .init(),
-                body: Components.Responses.TooManyRequests.Body
-            ) {
-                self.headers = headers
-                self.body = body
-            }
-        }
     }
 }
 
@@ -1192,142 +912,443 @@ extension Components {
                 case pageSize
             }
         }
-        /// - Remark: Generated from `#/components/schemas/post`.
-        public struct Post: Codable, Hashable, Sendable {
-            /// Author for the Blog Post.  Values in this field come from the primary key of the Author table
+        /// - Remark: Generated from `#/components/schemas/author`.
+        public struct Author: Codable, Hashable, Sendable {
+            /// Create Date for the Authors.
             ///
-            /// - Remark: Generated from `#/components/schemas/post/authorId`.
-            public var authorId: Swift.Int?
-            /// Blog for the Blog Post.  Values in this field come from the primary key of the Blogs table
+            /// - Remark: Generated from `#/components/schemas/author/createDate`.
+            public var createDate: Foundation.Date?
+            /// Description for the Authors.
             ///
-            /// - Remark: Generated from `#/components/schemas/post/blogId`.
-            public var blogId: Swift.Int?
-            /// Content for the Blog Post.
-            ///
-            /// - Remark: Generated from `#/components/schemas/post/content`.
-            public var content: Swift.String?
-            /// Description for the Blog Post.
-            ///
-            /// - Remark: Generated from `#/components/schemas/post/description`.
+            /// - Remark: Generated from `#/components/schemas/author/description`.
             public var description: Swift.String?
-            /// Excerpt for the Blog Post.
+            /// Display Order for the Authors.
             ///
-            /// - Remark: Generated from `#/components/schemas/post/excerpt`.
-            public var excerpt: Swift.String?
-            /// Featured Image URL for the Blog Post.
+            /// - Remark: Generated from `#/components/schemas/author/displayOrder`.
+            public var displayOrder: Swift.Int?
+            /// Email for the Authors.  Returned only to callers whose session may see it (field security lock).
             ///
-            /// - Remark: Generated from `#/components/schemas/post/featuredImage`.
-            public var featuredImage: Swift.String?
-            /// Featured Media for the Blog Post.  Values in this field come from the primary key of the Media table
+            /// - Remark: Generated from `#/components/schemas/author/email`.
+            public var email: Swift.String?
+            /// Id for the Authors.
             ///
-            /// - Remark: Generated from `#/components/schemas/post/featuredMediaId`.
-            public var featuredMediaId: Swift.Int?
-            /// Id for the Blog Post.
-            ///
-            /// - Remark: Generated from `#/components/schemas/post/id`.
+            /// - Remark: Generated from `#/components/schemas/author/id`.
             public var id: Swift.Int?
-            /// Is Featured for the Blog Post.
+            /// Is Active for the Authors.
             ///
-            /// - Remark: Generated from `#/components/schemas/post/isFeatured`.
-            public var isFeatured: Swift.Bool?
-            /// Link Description for the Blog Post.
+            /// - Remark: Generated from `#/components/schemas/author/isActive`.
+            public var isActive: Swift.Bool?
+            /// Modify Date for the Authors.
             ///
-            /// - Remark: Generated from `#/components/schemas/post/linkDescription`.
-            public var linkDescription: Swift.String?
-            /// Link Image URL for the Blog Post.
-            ///
-            /// - Remark: Generated from `#/components/schemas/post/linkImageUrl`.
-            public var linkImageUrl: Swift.String?
-            /// Link Title for the Blog Post.
-            ///
-            /// - Remark: Generated from `#/components/schemas/post/linkTitle`.
-            public var linkTitle: Swift.String?
-            /// Link URL for the Blog Post.
-            ///
-            /// - Remark: Generated from `#/components/schemas/post/linkUrl`.
-            public var linkUrl: Swift.String?
-            /// Location for the Blog Post.
-            ///
-            /// - Remark: Generated from `#/components/schemas/post/locationLabel`.
-            public var locationLabel: Swift.String?
-            /// Meta Description for the Blog Post.
-            ///
-            /// - Remark: Generated from `#/components/schemas/post/metaDescription`.
-            public var metaDescription: Swift.String?
-            /// Meta Keywords for the Blog Post.
-            ///
-            /// - Remark: Generated from `#/components/schemas/post/metaKeywords`.
-            public var metaKeywords: Swift.String?
-            /// Meta Title for the Blog Post.
-            ///
-            /// - Remark: Generated from `#/components/schemas/post/metaTitle`.
-            public var metaTitle: Swift.String?
-            /// Modify Date for the Blog Post.
-            ///
-            /// - Remark: Generated from `#/components/schemas/post/modifyDate`.
+            /// - Remark: Generated from `#/components/schemas/author/modifyDate`.
             public var modifyDate: Foundation.Date?
-            /// Name for the Blog Post.
+            /// Name for the Authors.  Required when inserting.
             ///
-            /// - Remark: Generated from `#/components/schemas/post/name`.
+            /// - Remark: Generated from `#/components/schemas/author/name`.
             public var name: Swift.String?
-            /// Publish Date for the Blog Post.
+            /// Absolute URL of the record's page (or, for media, its public file); null when it has none or is not public.
             ///
-            /// - Remark: Generated from `#/components/schemas/post/publishDate`.
-            public var publishDate: Foundation.Date?
-            /// Read Time for the Blog Post.
+            /// - Remark: Generated from `#/components/schemas/author/siteUrl`.
+            public var siteUrl: Swift.String?
+            /// Profile Image Url for the Authors.
             ///
-            /// - Remark: Generated from `#/components/schemas/post/readTime`.
-            public var readTime: Swift.Int?
-            /// Slug for the Blog Post.
+            /// - Remark: Generated from `#/components/schemas/author/profileImageUrl`.
+            public var profileImageUrl: Swift.String?
+            /// Profile Media for the Authors.  Values in this field come from the primary key of the Media table
             ///
-            /// - Remark: Generated from `#/components/schemas/post/slug`.
+            /// - Remark: Generated from `#/components/schemas/author/profileMediaId`.
+            public var profileMediaId: Swift.Int?
+            /// Short Name for the Authors.  Required when inserting.
+            ///
+            /// - Remark: Generated from `#/components/schemas/author/shortName`.
+            public var shortName: Swift.String?
+            /// Site-relative path of the record's page on the website (from the CMS page URL patterns); null when it has none or is not public.
+            ///
+            /// - Remark: Generated from `#/components/schemas/author/sitePath`.
+            public var sitePath: Swift.String?
+            /// Slug for the Authors.  Required when inserting.
+            ///
+            /// - Remark: Generated from `#/components/schemas/author/slug`.
             public var slug: Swift.String?
-            /// Title for the Blog Post.
+            /// Social Links for the Authors.
             ///
-            /// - Remark: Generated from `#/components/schemas/post/title`.
-            public var title: Swift.String?
-            /// - Remark: Generated from `#/components/schemas/post/tags`.
-            public var tags: [Components.Schemas.PostTagLink]?
-            /// - Remark: Generated from `#/components/schemas/post/media`.
-            public var media: [Components.Schemas.PostMedia]?
-            /// Creates a new `Post`.
+            /// - Remark: Generated from `#/components/schemas/author/socialLinks`.
+            public var socialLinks: Swift.String?
+            /// Website for the Authors.
+            ///
+            /// - Remark: Generated from `#/components/schemas/author/website`.
+            public var website: Swift.String?
+            /// Creates a new `Author`.
             ///
             /// - Parameters:
-            ///   - authorId: Author for the Blog Post.  Values in this field come from the primary key of the Author table
-            ///   - blogId: Blog for the Blog Post.  Values in this field come from the primary key of the Blogs table
-            ///   - content: Content for the Blog Post.
-            ///   - description: Description for the Blog Post.
-            ///   - excerpt: Excerpt for the Blog Post.
-            ///   - featuredImage: Featured Image URL for the Blog Post.
-            ///   - featuredMediaId: Featured Media for the Blog Post.  Values in this field come from the primary key of the Media table
-            ///   - id: Id for the Blog Post.
-            ///   - isFeatured: Is Featured for the Blog Post.
-            ///   - linkDescription: Link Description for the Blog Post.
-            ///   - linkImageUrl: Link Image URL for the Blog Post.
-            ///   - linkTitle: Link Title for the Blog Post.
-            ///   - linkUrl: Link URL for the Blog Post.
-            ///   - locationLabel: Location for the Blog Post.
-            ///   - metaDescription: Meta Description for the Blog Post.
-            ///   - metaKeywords: Meta Keywords for the Blog Post.
-            ///   - metaTitle: Meta Title for the Blog Post.
-            ///   - modifyDate: Modify Date for the Blog Post.
-            ///   - name: Name for the Blog Post.
-            ///   - publishDate: Publish Date for the Blog Post.
-            ///   - readTime: Read Time for the Blog Post.
-            ///   - slug: Slug for the Blog Post.
-            ///   - title: Title for the Blog Post.
+            ///   - createDate: Create Date for the Authors.
+            ///   - description: Description for the Authors.
+            ///   - displayOrder: Display Order for the Authors.
+            ///   - email: Email for the Authors.  Returned only to callers whose session may see it (field security lock).
+            ///   - id: Id for the Authors.
+            ///   - isActive: Is Active for the Authors.
+            ///   - modifyDate: Modify Date for the Authors.
+            ///   - name: Name for the Authors.  Required when inserting.
+            ///   - siteUrl: Absolute URL of the record's page (or, for media, its public file); null when it has none or is not public.
+            ///   - profileImageUrl: Profile Image Url for the Authors.
+            ///   - profileMediaId: Profile Media for the Authors.  Values in this field come from the primary key of the Media table
+            ///   - shortName: Short Name for the Authors.  Required when inserting.
+            ///   - sitePath: Site-relative path of the record's page on the website (from the CMS page URL patterns); null when it has none or is not public.
+            ///   - slug: Slug for the Authors.  Required when inserting.
+            ///   - socialLinks: Social Links for the Authors.
+            ///   - website: Website for the Authors.
+            public init(
+                createDate: Foundation.Date? = nil,
+                description: Swift.String? = nil,
+                displayOrder: Swift.Int? = nil,
+                email: Swift.String? = nil,
+                id: Swift.Int? = nil,
+                isActive: Swift.Bool? = nil,
+                modifyDate: Foundation.Date? = nil,
+                name: Swift.String? = nil,
+                siteUrl: Swift.String? = nil,
+                profileImageUrl: Swift.String? = nil,
+                profileMediaId: Swift.Int? = nil,
+                shortName: Swift.String? = nil,
+                sitePath: Swift.String? = nil,
+                slug: Swift.String? = nil,
+                socialLinks: Swift.String? = nil,
+                website: Swift.String? = nil
+            ) {
+                self.createDate = createDate
+                self.description = description
+                self.displayOrder = displayOrder
+                self.email = email
+                self.id = id
+                self.isActive = isActive
+                self.modifyDate = modifyDate
+                self.name = name
+                self.siteUrl = siteUrl
+                self.profileImageUrl = profileImageUrl
+                self.profileMediaId = profileMediaId
+                self.shortName = shortName
+                self.sitePath = sitePath
+                self.slug = slug
+                self.socialLinks = socialLinks
+                self.website = website
+            }
+            public enum CodingKeys: String, CodingKey {
+                case createDate
+                case description
+                case displayOrder
+                case email
+                case id
+                case isActive
+                case modifyDate
+                case name
+                case siteUrl
+                case profileImageUrl
+                case profileMediaId
+                case shortName
+                case sitePath
+                case slug
+                case socialLinks
+                case website
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/authorSearchResult`.
+        public struct AuthorSearchResult: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/authorSearchResult/value1`.
+            public var value1: Components.Schemas.BaseSearchResultFields
+            /// Creates a new `AuthorSearchResult`.
+            ///
+            /// - Parameters:
+            ///   - value1:
+            public init(value1: Components.Schemas.BaseSearchResultFields) {
+                self.value1 = value1
+            }
+            public init(from decoder: any Swift.Decoder) throws {
+                self.value1 = try .init(from: decoder)
+            }
+            public func encode(to encoder: any Swift.Encoder) throws {
+                try self.value1.encode(to: encoder)
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/blogPostMedia`.
+        public struct BlogPostMedia: Codable, Hashable, Sendable {
+            /// Alt Text for the Blog Post Media.
+            ///
+            /// - Remark: Generated from `#/components/schemas/blogPostMedia/altText`.
+            public var altText: Swift.String?
+            /// Blog Post for the Blog Post Media.  Required when inserting.  Values in this field come from the primary key of the Blog Posts table
+            ///
+            /// - Remark: Generated from `#/components/schemas/blogPostMedia/blogPostId`.
+            public var blogPostId: Swift.Int?
+            /// Caption for the Blog Post Media.
+            ///
+            /// - Remark: Generated from `#/components/schemas/blogPostMedia/caption`.
+            public var caption: Swift.String?
+            /// Create Date for the Blog Post Media.
+            ///
+            /// - Remark: Generated from `#/components/schemas/blogPostMedia/createDate`.
+            public var createDate: Foundation.Date?
+            /// Height for the Blog Post Media.
+            ///
+            /// - Remark: Generated from `#/components/schemas/blogPostMedia/height`.
+            public var height: Swift.Int?
+            /// Id for the Blog Post Media.
+            ///
+            /// - Remark: Generated from `#/components/schemas/blogPostMedia/id`.
+            public var id: Swift.Int?
+            /// Media for the Blog Post Media.  Required when inserting.  Values in this field come from the primary key of the Media table
+            ///
+            /// - Remark: Generated from `#/components/schemas/blogPostMedia/mediaId`.
+            public var mediaId: Swift.Int?
+            /// Modify Date for the Blog Post Media.
+            ///
+            /// - Remark: Generated from `#/components/schemas/blogPostMedia/modifyDate`.
+            public var modifyDate: Foundation.Date?
+            /// Sort Order for the Blog Post Media.  Required when inserting.
+            ///
+            /// - Remark: Generated from `#/components/schemas/blogPostMedia/sortOrder`.
+            public var sortOrder: Swift.Int?
+            /// Thumbnail Url for the Blog Post Media.
+            ///
+            /// - Remark: Generated from `#/components/schemas/blogPostMedia/thumbnailUrl`.
+            public var thumbnailUrl: Swift.String?
+            /// Url for the Blog Post Media.  Required when inserting.
+            ///
+            /// - Remark: Generated from `#/components/schemas/blogPostMedia/url`.
+            public var url: Swift.String?
+            /// Width for the Blog Post Media.
+            ///
+            /// - Remark: Generated from `#/components/schemas/blogPostMedia/width`.
+            public var width: Swift.Int?
+            /// Creates a new `BlogPostMedia`.
+            ///
+            /// - Parameters:
+            ///   - altText: Alt Text for the Blog Post Media.
+            ///   - blogPostId: Blog Post for the Blog Post Media.  Required when inserting.  Values in this field come from the primary key of the Blog Posts table
+            ///   - caption: Caption for the Blog Post Media.
+            ///   - createDate: Create Date for the Blog Post Media.
+            ///   - height: Height for the Blog Post Media.
+            ///   - id: Id for the Blog Post Media.
+            ///   - mediaId: Media for the Blog Post Media.  Required when inserting.  Values in this field come from the primary key of the Media table
+            ///   - modifyDate: Modify Date for the Blog Post Media.
+            ///   - sortOrder: Sort Order for the Blog Post Media.  Required when inserting.
+            ///   - thumbnailUrl: Thumbnail Url for the Blog Post Media.
+            ///   - url: Url for the Blog Post Media.  Required when inserting.
+            ///   - width: Width for the Blog Post Media.
+            public init(
+                altText: Swift.String? = nil,
+                blogPostId: Swift.Int? = nil,
+                caption: Swift.String? = nil,
+                createDate: Foundation.Date? = nil,
+                height: Swift.Int? = nil,
+                id: Swift.Int? = nil,
+                mediaId: Swift.Int? = nil,
+                modifyDate: Foundation.Date? = nil,
+                sortOrder: Swift.Int? = nil,
+                thumbnailUrl: Swift.String? = nil,
+                url: Swift.String? = nil,
+                width: Swift.Int? = nil
+            ) {
+                self.altText = altText
+                self.blogPostId = blogPostId
+                self.caption = caption
+                self.createDate = createDate
+                self.height = height
+                self.id = id
+                self.mediaId = mediaId
+                self.modifyDate = modifyDate
+                self.sortOrder = sortOrder
+                self.thumbnailUrl = thumbnailUrl
+                self.url = url
+                self.width = width
+            }
+            public enum CodingKeys: String, CodingKey {
+                case altText
+                case blogPostId
+                case caption
+                case createDate
+                case height
+                case id
+                case mediaId
+                case modifyDate
+                case sortOrder
+                case thumbnailUrl
+                case url
+                case width
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/blogPost`.
+        public struct BlogPost: Codable, Hashable, Sendable {
+            /// Author for the Blog Posts.  Required when inserting.  Values in this field come from the primary key of the Authors table
+            ///
+            /// - Remark: Generated from `#/components/schemas/blogPost/authorId`.
+            public var authorId: Swift.Int?
+            /// Blog for the Blog Posts.  Required when inserting.  Values in this field come from the primary key of the Blogs table
+            ///
+            /// - Remark: Generated from `#/components/schemas/blogPost/blogId`.
+            public var blogId: Swift.Int?
+            /// Content for the Blog Posts.  Required when inserting.
+            ///
+            /// - Remark: Generated from `#/components/schemas/blogPost/content`.
+            public var content: Swift.String?
+            /// Create Date for the Blog Posts.
+            ///
+            /// - Remark: Generated from `#/components/schemas/blogPost/createDate`.
+            public var createDate: Foundation.Date?
+            /// Description for the Blog Posts.
+            ///
+            /// - Remark: Generated from `#/components/schemas/blogPost/description`.
+            public var description: Swift.String?
+            /// Excerpt for the Blog Posts.
+            ///
+            /// - Remark: Generated from `#/components/schemas/blogPost/excerpt`.
+            public var excerpt: Swift.String?
+            /// Featured Image URL for the Blog Posts.
+            ///
+            /// - Remark: Generated from `#/components/schemas/blogPost/featuredImage`.
+            public var featuredImage: Swift.String?
+            /// Featured Media for the Blog Posts.  Values in this field come from the primary key of the Media table
+            ///
+            /// - Remark: Generated from `#/components/schemas/blogPost/featuredMediaId`.
+            public var featuredMediaId: Swift.Int?
+            /// Id for the Blog Posts.
+            ///
+            /// - Remark: Generated from `#/components/schemas/blogPost/id`.
+            public var id: Swift.Int?
+            /// Is Featured for the Blog Posts.  Required when inserting.
+            ///
+            /// - Remark: Generated from `#/components/schemas/blogPost/isFeatured`.
+            public var isFeatured: Swift.Bool?
+            /// Is Published for the Blog Posts.  Required when inserting.
+            ///
+            /// - Remark: Generated from `#/components/schemas/blogPost/isPublished`.
+            public var isPublished: Swift.Bool?
+            /// Link Description for the Blog Posts.
+            ///
+            /// - Remark: Generated from `#/components/schemas/blogPost/linkDescription`.
+            public var linkDescription: Swift.String?
+            /// Link Image URL for the Blog Posts.
+            ///
+            /// - Remark: Generated from `#/components/schemas/blogPost/linkImageUrl`.
+            public var linkImageUrl: Swift.String?
+            /// Link Title for the Blog Posts.
+            ///
+            /// - Remark: Generated from `#/components/schemas/blogPost/linkTitle`.
+            public var linkTitle: Swift.String?
+            /// Link URL for the Blog Posts.
+            ///
+            /// - Remark: Generated from `#/components/schemas/blogPost/linkUrl`.
+            public var linkUrl: Swift.String?
+            /// Location for the Blog Posts.
+            ///
+            /// - Remark: Generated from `#/components/schemas/blogPost/locationLabel`.
+            public var locationLabel: Swift.String?
+            /// Meta Description for the Blog Posts.
+            ///
+            /// - Remark: Generated from `#/components/schemas/blogPost/metaDescription`.
+            public var metaDescription: Swift.String?
+            /// Meta Keywords for the Blog Posts.
+            ///
+            /// - Remark: Generated from `#/components/schemas/blogPost/metaKeywords`.
+            public var metaKeywords: Swift.String?
+            /// Meta Title for the Blog Posts.
+            ///
+            /// - Remark: Generated from `#/components/schemas/blogPost/metaTitle`.
+            public var metaTitle: Swift.String?
+            /// Modify Date for the Blog Posts.
+            ///
+            /// - Remark: Generated from `#/components/schemas/blogPost/modifyDate`.
+            public var modifyDate: Foundation.Date?
+            /// Name for the Blog Posts.  Required when inserting.
+            ///
+            /// - Remark: Generated from `#/components/schemas/blogPost/name`.
+            public var name: Swift.String?
+            /// Absolute URL of the record's page (or, for media, its public file); null when it has none or is not public.
+            ///
+            /// - Remark: Generated from `#/components/schemas/blogPost/siteUrl`.
+            public var siteUrl: Swift.String?
+            /// Publish Date for the Blog Posts.
+            ///
+            /// - Remark: Generated from `#/components/schemas/blogPost/publishDate`.
+            public var publishDate: Foundation.Date?
+            /// Read Time for the Blog Posts.  Required when inserting.
+            ///
+            /// - Remark: Generated from `#/components/schemas/blogPost/readTime`.
+            public var readTime: Swift.Int?
+            /// Scheduled Publish At for the Blog Posts.
+            ///
+            /// - Remark: Generated from `#/components/schemas/blogPost/scheduledPublishAt`.
+            public var scheduledPublishAt: Foundation.Date?
+            /// Short Name for the Blog Posts.  Required when inserting.
+            ///
+            /// - Remark: Generated from `#/components/schemas/blogPost/shortName`.
+            public var shortName: Swift.String?
+            /// Site-relative path of the record's page on the website (from the CMS page URL patterns); null when it has none or is not public.
+            ///
+            /// - Remark: Generated from `#/components/schemas/blogPost/sitePath`.
+            public var sitePath: Swift.String?
+            /// Slug for the Blog Posts.  Required when inserting.
+            ///
+            /// - Remark: Generated from `#/components/schemas/blogPost/slug`.
+            public var slug: Swift.String?
+            /// Title for the Blog Posts.  Required when inserting.
+            ///
+            /// - Remark: Generated from `#/components/schemas/blogPost/title`.
+            public var title: Swift.String?
+            /// View Count for the Blog Posts.  Required when inserting.
+            ///
+            /// - Remark: Generated from `#/components/schemas/blogPost/viewCount`.
+            public var viewCount: Swift.Int?
+            /// - Remark: Generated from `#/components/schemas/blogPost/tags`.
+            public var tags: [Components.Schemas.BlogPostTagInt]?
+            /// - Remark: Generated from `#/components/schemas/blogPost/media`.
+            public var media: [Components.Schemas.BlogPostMedia]?
+            /// Creates a new `BlogPost`.
+            ///
+            /// - Parameters:
+            ///   - authorId: Author for the Blog Posts.  Required when inserting.  Values in this field come from the primary key of the Authors table
+            ///   - blogId: Blog for the Blog Posts.  Required when inserting.  Values in this field come from the primary key of the Blogs table
+            ///   - content: Content for the Blog Posts.  Required when inserting.
+            ///   - createDate: Create Date for the Blog Posts.
+            ///   - description: Description for the Blog Posts.
+            ///   - excerpt: Excerpt for the Blog Posts.
+            ///   - featuredImage: Featured Image URL for the Blog Posts.
+            ///   - featuredMediaId: Featured Media for the Blog Posts.  Values in this field come from the primary key of the Media table
+            ///   - id: Id for the Blog Posts.
+            ///   - isFeatured: Is Featured for the Blog Posts.  Required when inserting.
+            ///   - isPublished: Is Published for the Blog Posts.  Required when inserting.
+            ///   - linkDescription: Link Description for the Blog Posts.
+            ///   - linkImageUrl: Link Image URL for the Blog Posts.
+            ///   - linkTitle: Link Title for the Blog Posts.
+            ///   - linkUrl: Link URL for the Blog Posts.
+            ///   - locationLabel: Location for the Blog Posts.
+            ///   - metaDescription: Meta Description for the Blog Posts.
+            ///   - metaKeywords: Meta Keywords for the Blog Posts.
+            ///   - metaTitle: Meta Title for the Blog Posts.
+            ///   - modifyDate: Modify Date for the Blog Posts.
+            ///   - name: Name for the Blog Posts.  Required when inserting.
+            ///   - siteUrl: Absolute URL of the record's page (or, for media, its public file); null when it has none or is not public.
+            ///   - publishDate: Publish Date for the Blog Posts.
+            ///   - readTime: Read Time for the Blog Posts.  Required when inserting.
+            ///   - scheduledPublishAt: Scheduled Publish At for the Blog Posts.
+            ///   - shortName: Short Name for the Blog Posts.  Required when inserting.
+            ///   - sitePath: Site-relative path of the record's page on the website (from the CMS page URL patterns); null when it has none or is not public.
+            ///   - slug: Slug for the Blog Posts.  Required when inserting.
+            ///   - title: Title for the Blog Posts.  Required when inserting.
+            ///   - viewCount: View Count for the Blog Posts.  Required when inserting.
             ///   - tags:
             ///   - media:
             public init(
                 authorId: Swift.Int? = nil,
                 blogId: Swift.Int? = nil,
                 content: Swift.String? = nil,
+                createDate: Foundation.Date? = nil,
                 description: Swift.String? = nil,
                 excerpt: Swift.String? = nil,
                 featuredImage: Swift.String? = nil,
                 featuredMediaId: Swift.Int? = nil,
                 id: Swift.Int? = nil,
                 isFeatured: Swift.Bool? = nil,
+                isPublished: Swift.Bool? = nil,
                 linkDescription: Swift.String? = nil,
                 linkImageUrl: Swift.String? = nil,
                 linkTitle: Swift.String? = nil,
@@ -1338,22 +1359,29 @@ extension Components {
                 metaTitle: Swift.String? = nil,
                 modifyDate: Foundation.Date? = nil,
                 name: Swift.String? = nil,
+                siteUrl: Swift.String? = nil,
                 publishDate: Foundation.Date? = nil,
                 readTime: Swift.Int? = nil,
+                scheduledPublishAt: Foundation.Date? = nil,
+                shortName: Swift.String? = nil,
+                sitePath: Swift.String? = nil,
                 slug: Swift.String? = nil,
                 title: Swift.String? = nil,
-                tags: [Components.Schemas.PostTagLink]? = nil,
-                media: [Components.Schemas.PostMedia]? = nil
+                viewCount: Swift.Int? = nil,
+                tags: [Components.Schemas.BlogPostTagInt]? = nil,
+                media: [Components.Schemas.BlogPostMedia]? = nil
             ) {
                 self.authorId = authorId
                 self.blogId = blogId
                 self.content = content
+                self.createDate = createDate
                 self.description = description
                 self.excerpt = excerpt
                 self.featuredImage = featuredImage
                 self.featuredMediaId = featuredMediaId
                 self.id = id
                 self.isFeatured = isFeatured
+                self.isPublished = isPublished
                 self.linkDescription = linkDescription
                 self.linkImageUrl = linkImageUrl
                 self.linkTitle = linkTitle
@@ -1364,10 +1392,15 @@ extension Components {
                 self.metaTitle = metaTitle
                 self.modifyDate = modifyDate
                 self.name = name
+                self.siteUrl = siteUrl
                 self.publishDate = publishDate
                 self.readTime = readTime
+                self.scheduledPublishAt = scheduledPublishAt
+                self.shortName = shortName
+                self.sitePath = sitePath
                 self.slug = slug
                 self.title = title
+                self.viewCount = viewCount
                 self.tags = tags
                 self.media = media
             }
@@ -1375,12 +1408,14 @@ extension Components {
                 case authorId
                 case blogId
                 case content
+                case createDate
                 case description
                 case excerpt
                 case featuredImage
                 case featuredMediaId
                 case id
                 case isFeatured
+                case isPublished
                 case linkDescription
                 case linkImageUrl
                 case linkTitle
@@ -1391,19 +1426,176 @@ extension Components {
                 case metaTitle
                 case modifyDate
                 case name
+                case siteUrl
                 case publishDate
                 case readTime
+                case scheduledPublishAt
+                case shortName
+                case sitePath
                 case slug
                 case title
+                case viewCount
                 case tags
                 case media
             }
         }
-        /// - Remark: Generated from `#/components/schemas/postSearchResult`.
-        public struct PostSearchResult: Codable, Hashable, Sendable {
-            /// - Remark: Generated from `#/components/schemas/postSearchResult/value1`.
+        /// - Remark: Generated from `#/components/schemas/blogPostSearchResult`.
+        public struct BlogPostSearchResult: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/blogPostSearchResult/value1`.
             public var value1: Components.Schemas.BaseSearchResultFields
-            /// Creates a new `PostSearchResult`.
+            /// Creates a new `BlogPostSearchResult`.
+            ///
+            /// - Parameters:
+            ///   - value1:
+            public init(value1: Components.Schemas.BaseSearchResultFields) {
+                self.value1 = value1
+            }
+            public init(from decoder: any Swift.Decoder) throws {
+                self.value1 = try .init(from: decoder)
+            }
+            public func encode(to encoder: any Swift.Encoder) throws {
+                try self.value1.encode(to: encoder)
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/blogPostTagInt`.
+        public struct BlogPostTagInt: Codable, Hashable, Sendable {
+            /// Blog Post for the Blog Tag Links.  Required when inserting.  Values in this field come from the primary key of the Blog Posts table
+            ///
+            /// - Remark: Generated from `#/components/schemas/blogPostTagInt/blogPostId`.
+            public var blogPostId: Swift.Int?
+            /// Blog Tag for the Blog Tag Links.  Required when inserting.  Values in this field come from the primary key of the Blog Tags table
+            ///
+            /// - Remark: Generated from `#/components/schemas/blogPostTagInt/blogTagId`.
+            public var blogTagId: Swift.Int?
+            /// Create Date for the Blog Tag Links.
+            ///
+            /// - Remark: Generated from `#/components/schemas/blogPostTagInt/createDate`.
+            public var createDate: Foundation.Date?
+            /// Id for the Blog Tag Links.
+            ///
+            /// - Remark: Generated from `#/components/schemas/blogPostTagInt/id`.
+            public var id: Swift.Int?
+            /// Modify Date for the Blog Tag Links.
+            ///
+            /// - Remark: Generated from `#/components/schemas/blogPostTagInt/modifyDate`.
+            public var modifyDate: Foundation.Date?
+            /// Creates a new `BlogPostTagInt`.
+            ///
+            /// - Parameters:
+            ///   - blogPostId: Blog Post for the Blog Tag Links.  Required when inserting.  Values in this field come from the primary key of the Blog Posts table
+            ///   - blogTagId: Blog Tag for the Blog Tag Links.  Required when inserting.  Values in this field come from the primary key of the Blog Tags table
+            ///   - createDate: Create Date for the Blog Tag Links.
+            ///   - id: Id for the Blog Tag Links.
+            ///   - modifyDate: Modify Date for the Blog Tag Links.
+            public init(
+                blogPostId: Swift.Int? = nil,
+                blogTagId: Swift.Int? = nil,
+                createDate: Foundation.Date? = nil,
+                id: Swift.Int? = nil,
+                modifyDate: Foundation.Date? = nil
+            ) {
+                self.blogPostId = blogPostId
+                self.blogTagId = blogTagId
+                self.createDate = createDate
+                self.id = id
+                self.modifyDate = modifyDate
+            }
+            public enum CodingKeys: String, CodingKey {
+                case blogPostId
+                case blogTagId
+                case createDate
+                case id
+                case modifyDate
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/blogTag`.
+        public struct BlogTag: Codable, Hashable, Sendable {
+            /// Blog for the Blog Tags.  Required when inserting.  Values in this field come from the primary key of the Blogs table
+            ///
+            /// - Remark: Generated from `#/components/schemas/blogTag/blogId`.
+            public var blogId: Swift.Int?
+            /// Create Date for the Blog Tags.
+            ///
+            /// - Remark: Generated from `#/components/schemas/blogTag/createDate`.
+            public var createDate: Foundation.Date?
+            /// Description for the Blog Tags.
+            ///
+            /// - Remark: Generated from `#/components/schemas/blogTag/description`.
+            public var description: Swift.String?
+            /// Id for the Blog Tags.
+            ///
+            /// - Remark: Generated from `#/components/schemas/blogTag/id`.
+            public var id: Swift.Int?
+            /// Modify Date for the Blog Tags.
+            ///
+            /// - Remark: Generated from `#/components/schemas/blogTag/modifyDate`.
+            public var modifyDate: Foundation.Date?
+            /// Name for the Blog Tags.  Required when inserting.
+            ///
+            /// - Remark: Generated from `#/components/schemas/blogTag/name`.
+            public var name: Swift.String?
+            /// Absolute URL of the record's page (or, for media, its public file); null when it has none or is not public.
+            ///
+            /// - Remark: Generated from `#/components/schemas/blogTag/siteUrl`.
+            public var siteUrl: Swift.String?
+            /// Site-relative path of the record's page on the website (from the CMS page URL patterns); null when it has none or is not public.
+            ///
+            /// - Remark: Generated from `#/components/schemas/blogTag/sitePath`.
+            public var sitePath: Swift.String?
+            /// Slug for the Blog Tags.  Required when inserting.
+            ///
+            /// - Remark: Generated from `#/components/schemas/blogTag/slug`.
+            public var slug: Swift.String?
+            /// Creates a new `BlogTag`.
+            ///
+            /// - Parameters:
+            ///   - blogId: Blog for the Blog Tags.  Required when inserting.  Values in this field come from the primary key of the Blogs table
+            ///   - createDate: Create Date for the Blog Tags.
+            ///   - description: Description for the Blog Tags.
+            ///   - id: Id for the Blog Tags.
+            ///   - modifyDate: Modify Date for the Blog Tags.
+            ///   - name: Name for the Blog Tags.  Required when inserting.
+            ///   - siteUrl: Absolute URL of the record's page (or, for media, its public file); null when it has none or is not public.
+            ///   - sitePath: Site-relative path of the record's page on the website (from the CMS page URL patterns); null when it has none or is not public.
+            ///   - slug: Slug for the Blog Tags.  Required when inserting.
+            public init(
+                blogId: Swift.Int? = nil,
+                createDate: Foundation.Date? = nil,
+                description: Swift.String? = nil,
+                id: Swift.Int? = nil,
+                modifyDate: Foundation.Date? = nil,
+                name: Swift.String? = nil,
+                siteUrl: Swift.String? = nil,
+                sitePath: Swift.String? = nil,
+                slug: Swift.String? = nil
+            ) {
+                self.blogId = blogId
+                self.createDate = createDate
+                self.description = description
+                self.id = id
+                self.modifyDate = modifyDate
+                self.name = name
+                self.siteUrl = siteUrl
+                self.sitePath = sitePath
+                self.slug = slug
+            }
+            public enum CodingKeys: String, CodingKey {
+                case blogId
+                case createDate
+                case description
+                case id
+                case modifyDate
+                case name
+                case siteUrl
+                case sitePath
+                case slug
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/blogTagSearchResult`.
+        public struct BlogTagSearchResult: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/blogTagSearchResult/value1`.
+            public var value1: Components.Schemas.BaseSearchResultFields
+            /// Creates a new `BlogTagSearchResult`.
             ///
             /// - Parameters:
             ///   - value1:
@@ -1419,6 +1611,14 @@ extension Components {
         }
         /// - Remark: Generated from `#/components/schemas/blog`.
         public struct Blog: Codable, Hashable, Sendable {
+            /// Blog Type for the Blogs.  Required when inserting.  Values in this field come from the primary key of the Blog Types table
+            ///
+            /// - Remark: Generated from `#/components/schemas/blog/blogTypeId`.
+            public var blogTypeId: Swift.Int?
+            /// Create Date for the Blogs.
+            ///
+            /// - Remark: Generated from `#/components/schemas/blog/createDate`.
+            public var createDate: Foundation.Date?
             /// Description for the Blogs.
             ///
             /// - Remark: Generated from `#/components/schemas/blog/description`.
@@ -1443,31 +1643,50 @@ extension Components {
             ///
             /// - Remark: Generated from `#/components/schemas/blog/modifyDate`.
             public var modifyDate: Foundation.Date?
-            /// Name for the Blogs.
+            /// Name for the Blogs.  Required when inserting.
             ///
             /// - Remark: Generated from `#/components/schemas/blog/name`.
             public var name: Swift.String?
-            /// Short Name for the Blogs.
+            /// Absolute URL of the record's page (or, for media, its public file); null when it has none or is not public.
+            ///
+            /// - Remark: Generated from `#/components/schemas/blog/siteUrl`.
+            public var siteUrl: Swift.String?
+            /// Short Name for the Blogs.  Required when inserting.
             ///
             /// - Remark: Generated from `#/components/schemas/blog/shortName`.
             public var shortName: Swift.String?
-            /// Slug for the Blogs.
+            /// Site for the Blogs.  Required when inserting.  Values in this field come from the primary key of the Sites table
+            ///
+            /// - Remark: Generated from `#/components/schemas/blog/siteId`.
+            public var siteId: Swift.Int?
+            /// Site-relative path of the record's page on the website (from the CMS page URL patterns); null when it has none or is not public.
+            ///
+            /// - Remark: Generated from `#/components/schemas/blog/sitePath`.
+            public var sitePath: Swift.String?
+            /// Slug for the Blogs.  Required when inserting.
             ///
             /// - Remark: Generated from `#/components/schemas/blog/slug`.
             public var slug: Swift.String?
             /// Creates a new `Blog`.
             ///
             /// - Parameters:
+            ///   - blogTypeId: Blog Type for the Blogs.  Required when inserting.  Values in this field come from the primary key of the Blog Types table
+            ///   - createDate: Create Date for the Blogs.
             ///   - description: Description for the Blogs.
             ///   - id: Id for the Blogs.
             ///   - metaDescription: Meta Description for the Blogs.
             ///   - metaKeywords: Meta Keywords for the Blogs.
             ///   - metaTitle: Meta Title for the Blogs.
             ///   - modifyDate: Modify Date for the Blogs.
-            ///   - name: Name for the Blogs.
-            ///   - shortName: Short Name for the Blogs.
-            ///   - slug: Slug for the Blogs.
+            ///   - name: Name for the Blogs.  Required when inserting.
+            ///   - siteUrl: Absolute URL of the record's page (or, for media, its public file); null when it has none or is not public.
+            ///   - shortName: Short Name for the Blogs.  Required when inserting.
+            ///   - siteId: Site for the Blogs.  Required when inserting.  Values in this field come from the primary key of the Sites table
+            ///   - sitePath: Site-relative path of the record's page on the website (from the CMS page URL patterns); null when it has none or is not public.
+            ///   - slug: Slug for the Blogs.  Required when inserting.
             public init(
+                blogTypeId: Swift.Int? = nil,
+                createDate: Foundation.Date? = nil,
                 description: Swift.String? = nil,
                 id: Swift.Int? = nil,
                 metaDescription: Swift.String? = nil,
@@ -1475,9 +1694,14 @@ extension Components {
                 metaTitle: Swift.String? = nil,
                 modifyDate: Foundation.Date? = nil,
                 name: Swift.String? = nil,
+                siteUrl: Swift.String? = nil,
                 shortName: Swift.String? = nil,
+                siteId: Swift.Int? = nil,
+                sitePath: Swift.String? = nil,
                 slug: Swift.String? = nil
             ) {
+                self.blogTypeId = blogTypeId
+                self.createDate = createDate
                 self.description = description
                 self.id = id
                 self.metaDescription = metaDescription
@@ -1485,10 +1709,15 @@ extension Components {
                 self.metaTitle = metaTitle
                 self.modifyDate = modifyDate
                 self.name = name
+                self.siteUrl = siteUrl
                 self.shortName = shortName
+                self.siteId = siteId
+                self.sitePath = sitePath
                 self.slug = slug
             }
             public enum CodingKeys: String, CodingKey {
+                case blogTypeId
+                case createDate
                 case description
                 case id
                 case metaDescription
@@ -1496,7 +1725,10 @@ extension Components {
                 case metaTitle
                 case modifyDate
                 case name
+                case siteUrl
                 case shortName
+                case siteId
+                case sitePath
                 case slug
             }
         }
@@ -1518,62 +1750,321 @@ extension Components {
                 try self.value1.encode(to: encoder)
             }
         }
-        /// - Remark: Generated from `#/components/schemas/tag`.
-        public struct Tag: Codable, Hashable, Sendable {
-            /// Blog for the Tags.  Values in this field come from the primary key of the Blogs table
+        /// - Remark: Generated from `#/components/schemas/media`.
+        public struct Media: Codable, Hashable, Sendable {
+            /// Alt text for the Media.
             ///
-            /// - Remark: Generated from `#/components/schemas/tag/blogId`.
-            public var blogId: Swift.Int?
-            /// Description for the Tags.
+            /// - Remark: Generated from `#/components/schemas/media/altText`.
+            public var altText: Swift.String?
+            /// Caption for the Media.
             ///
-            /// - Remark: Generated from `#/components/schemas/tag/description`.
+            /// - Remark: Generated from `#/components/schemas/media/caption`.
+            public var caption: Swift.String?
+            /// Checksum for the Media.  Returned only to callers whose session may see it (field security lock).
+            ///
+            /// - Remark: Generated from `#/components/schemas/media/checksum`.
+            public var checksum: Swift.String?
+            /// Create Date for the Media.
+            ///
+            /// - Remark: Generated from `#/components/schemas/media/createDate`.
+            public var createDate: Foundation.Date?
+            /// Credit for the Media.
+            ///
+            /// - Remark: Generated from `#/components/schemas/media/credit`.
+            public var credit: Swift.String?
+            /// Description for the Media.
+            ///
+            /// - Remark: Generated from `#/components/schemas/media/description`.
             public var description: Swift.String?
-            /// Id for the Tags.
+            /// Duration for the Media.
             ///
-            /// - Remark: Generated from `#/components/schemas/tag/id`.
+            /// - Remark: Generated from `#/components/schemas/media/duration`.
+            public var duration: Swift.Int?
+            /// File Extension for the Media.
+            ///
+            /// - Remark: Generated from `#/components/schemas/media/fileExtension`.
+            public var fileExtension: Swift.String?
+            /// File Name for the Media.
+            ///
+            /// - Remark: Generated from `#/components/schemas/media/fileName`.
+            public var fileName: Swift.String?
+            /// File Size for the Media.
+            ///
+            /// - Remark: Generated from `#/components/schemas/media/fileSize`.
+            public var fileSize: Swift.Int?
+            /// Gallery Url for the Media.
+            ///
+            /// - Remark: Generated from `#/components/schemas/media/galleryUrl`.
+            public var galleryUrl: Swift.String?
+            /// Height for the Media.
+            ///
+            /// - Remark: Generated from `#/components/schemas/media/height`.
+            public var height: Swift.Int?
+            /// Id for the Media.
+            ///
+            /// - Remark: Generated from `#/components/schemas/media/id`.
             public var id: Swift.Int?
-            /// Name for the Tags.
+            /// Is Active for the Media.  Required when inserting.
             ///
-            /// - Remark: Generated from `#/components/schemas/tag/name`.
+            /// - Remark: Generated from `#/components/schemas/media/isActive`.
+            public var isActive: Swift.Bool?
+            /// License for the Media.
+            ///
+            /// - Remark: Generated from `#/components/schemas/media/license`.
+            public var license: Swift.String?
+            /// Media Type for the Media.  Required when inserting.  Values in this field come from the primary key of the Media Types table
+            ///
+            /// - Remark: Generated from `#/components/schemas/media/mediaTypeId`.
+            public var mediaTypeId: Swift.Int?
+            /// Mime Type for the Media.
+            ///
+            /// - Remark: Generated from `#/components/schemas/media/mimeType`.
+            public var mimeType: Swift.String?
+            /// Modify Date for the Media.
+            ///
+            /// - Remark: Generated from `#/components/schemas/media/modifyDate`.
+            public var modifyDate: Foundation.Date?
+            /// Name for the Media.  Required when inserting.
+            ///
+            /// - Remark: Generated from `#/components/schemas/media/name`.
             public var name: Swift.String?
-            /// Slug for the Tags.
+            /// Absolute URL of the record's page (or, for media, its public file); null when it has none or is not public.
             ///
-            /// - Remark: Generated from `#/components/schemas/tag/slug`.
+            /// - Remark: Generated from `#/components/schemas/media/siteUrl`.
+            public var siteUrl: Swift.String?
+            /// Public Url for the Media.
+            ///
+            /// - Remark: Generated from `#/components/schemas/media/publicUrl`.
+            public var publicUrl: Swift.String?
+            /// Site for the Media.  Required when inserting.  Values in this field come from the primary key of the Sites table
+            ///
+            /// - Remark: Generated from `#/components/schemas/media/siteId`.
+            public var siteId: Swift.Int?
+            /// Site-relative path of the record's page on the website (from the CMS page URL patterns); null when it has none or is not public.
+            ///
+            /// - Remark: Generated from `#/components/schemas/media/sitePath`.
+            public var sitePath: Swift.String?
+            /// Slideshow Url for the Media.
+            ///
+            /// - Remark: Generated from `#/components/schemas/media/slideshowUrl`.
+            public var slideshowUrl: Swift.String?
+            /// Slug for the Media.
+            ///
+            /// - Remark: Generated from `#/components/schemas/media/slug`.
             public var slug: Swift.String?
-            /// Creates a new `Tag`.
+            /// Storage Key for the Media.  Returned only to callers whose session may see it (field security lock).
+            ///
+            /// - Remark: Generated from `#/components/schemas/media/storageKey`.
+            public var storageKey: Swift.String?
+            /// Thumbnail Url for the Media.
+            ///
+            /// - Remark: Generated from `#/components/schemas/media/thumbnailUrl`.
+            public var thumbnailUrl: Swift.String?
+            /// Width for the Media.
+            ///
+            /// - Remark: Generated from `#/components/schemas/media/width`.
+            public var width: Swift.Int?
+            /// Creates a new `Media`.
             ///
             /// - Parameters:
-            ///   - blogId: Blog for the Tags.  Values in this field come from the primary key of the Blogs table
-            ///   - description: Description for the Tags.
-            ///   - id: Id for the Tags.
-            ///   - name: Name for the Tags.
-            ///   - slug: Slug for the Tags.
+            ///   - altText: Alt text for the Media.
+            ///   - caption: Caption for the Media.
+            ///   - checksum: Checksum for the Media.  Returned only to callers whose session may see it (field security lock).
+            ///   - createDate: Create Date for the Media.
+            ///   - credit: Credit for the Media.
+            ///   - description: Description for the Media.
+            ///   - duration: Duration for the Media.
+            ///   - fileExtension: File Extension for the Media.
+            ///   - fileName: File Name for the Media.
+            ///   - fileSize: File Size for the Media.
+            ///   - galleryUrl: Gallery Url for the Media.
+            ///   - height: Height for the Media.
+            ///   - id: Id for the Media.
+            ///   - isActive: Is Active for the Media.  Required when inserting.
+            ///   - license: License for the Media.
+            ///   - mediaTypeId: Media Type for the Media.  Required when inserting.  Values in this field come from the primary key of the Media Types table
+            ///   - mimeType: Mime Type for the Media.
+            ///   - modifyDate: Modify Date for the Media.
+            ///   - name: Name for the Media.  Required when inserting.
+            ///   - siteUrl: Absolute URL of the record's page (or, for media, its public file); null when it has none or is not public.
+            ///   - publicUrl: Public Url for the Media.
+            ///   - siteId: Site for the Media.  Required when inserting.  Values in this field come from the primary key of the Sites table
+            ///   - sitePath: Site-relative path of the record's page on the website (from the CMS page URL patterns); null when it has none or is not public.
+            ///   - slideshowUrl: Slideshow Url for the Media.
+            ///   - slug: Slug for the Media.
+            ///   - storageKey: Storage Key for the Media.  Returned only to callers whose session may see it (field security lock).
+            ///   - thumbnailUrl: Thumbnail Url for the Media.
+            ///   - width: Width for the Media.
             public init(
-                blogId: Swift.Int? = nil,
+                altText: Swift.String? = nil,
+                caption: Swift.String? = nil,
+                checksum: Swift.String? = nil,
+                createDate: Foundation.Date? = nil,
+                credit: Swift.String? = nil,
                 description: Swift.String? = nil,
+                duration: Swift.Int? = nil,
+                fileExtension: Swift.String? = nil,
+                fileName: Swift.String? = nil,
+                fileSize: Swift.Int? = nil,
+                galleryUrl: Swift.String? = nil,
+                height: Swift.Int? = nil,
                 id: Swift.Int? = nil,
+                isActive: Swift.Bool? = nil,
+                license: Swift.String? = nil,
+                mediaTypeId: Swift.Int? = nil,
+                mimeType: Swift.String? = nil,
+                modifyDate: Foundation.Date? = nil,
                 name: Swift.String? = nil,
-                slug: Swift.String? = nil
+                siteUrl: Swift.String? = nil,
+                publicUrl: Swift.String? = nil,
+                siteId: Swift.Int? = nil,
+                sitePath: Swift.String? = nil,
+                slideshowUrl: Swift.String? = nil,
+                slug: Swift.String? = nil,
+                storageKey: Swift.String? = nil,
+                thumbnailUrl: Swift.String? = nil,
+                width: Swift.Int? = nil
             ) {
-                self.blogId = blogId
+                self.altText = altText
+                self.caption = caption
+                self.checksum = checksum
+                self.createDate = createDate
+                self.credit = credit
                 self.description = description
+                self.duration = duration
+                self.fileExtension = fileExtension
+                self.fileName = fileName
+                self.fileSize = fileSize
+                self.galleryUrl = galleryUrl
+                self.height = height
                 self.id = id
+                self.isActive = isActive
+                self.license = license
+                self.mediaTypeId = mediaTypeId
+                self.mimeType = mimeType
+                self.modifyDate = modifyDate
                 self.name = name
+                self.siteUrl = siteUrl
+                self.publicUrl = publicUrl
+                self.siteId = siteId
+                self.sitePath = sitePath
+                self.slideshowUrl = slideshowUrl
                 self.slug = slug
+                self.storageKey = storageKey
+                self.thumbnailUrl = thumbnailUrl
+                self.width = width
             }
             public enum CodingKeys: String, CodingKey {
-                case blogId
+                case altText
+                case caption
+                case checksum
+                case createDate
+                case credit
                 case description
+                case duration
+                case fileExtension
+                case fileName
+                case fileSize
+                case galleryUrl
+                case height
                 case id
+                case isActive
+                case license
+                case mediaTypeId
+                case mimeType
+                case modifyDate
                 case name
+                case siteUrl
+                case publicUrl
+                case siteId
+                case sitePath
+                case slideshowUrl
                 case slug
+                case storageKey
+                case thumbnailUrl
+                case width
             }
         }
-        /// - Remark: Generated from `#/components/schemas/tagSearchResult`.
-        public struct TagSearchResult: Codable, Hashable, Sendable {
-            /// - Remark: Generated from `#/components/schemas/tagSearchResult/value1`.
+        /// - Remark: Generated from `#/components/schemas/site`.
+        public struct Site: Codable, Hashable, Sendable {
+            /// Create Date for the Sites.
+            ///
+            /// - Remark: Generated from `#/components/schemas/site/createDate`.
+            public var createDate: Foundation.Date?
+            /// Description for the Sites.
+            ///
+            /// - Remark: Generated from `#/components/schemas/site/description`.
+            public var description: Swift.String?
+            /// Id for the Sites.
+            ///
+            /// - Remark: Generated from `#/components/schemas/site/id`.
+            public var id: Swift.Int?
+            /// Modify Date for the Sites.
+            ///
+            /// - Remark: Generated from `#/components/schemas/site/modifyDate`.
+            public var modifyDate: Foundation.Date?
+            /// Name for the Sites.  Required when inserting.
+            ///
+            /// - Remark: Generated from `#/components/schemas/site/name`.
+            public var name: Swift.String?
+            /// Absolute URL of the record's page (or, for media, its public file); null when it has none or is not public.
+            ///
+            /// - Remark: Generated from `#/components/schemas/site/siteUrl`.
+            public var siteUrl: Swift.String?
+            /// Short Name for the Sites.  Required when inserting.
+            ///
+            /// - Remark: Generated from `#/components/schemas/site/shortName`.
+            public var shortName: Swift.String?
+            /// Site-relative path of the record's page on the website (from the CMS page URL patterns); null when it has none or is not public.
+            ///
+            /// - Remark: Generated from `#/components/schemas/site/sitePath`.
+            public var sitePath: Swift.String?
+            /// Creates a new `Site`.
+            ///
+            /// - Parameters:
+            ///   - createDate: Create Date for the Sites.
+            ///   - description: Description for the Sites.
+            ///   - id: Id for the Sites.
+            ///   - modifyDate: Modify Date for the Sites.
+            ///   - name: Name for the Sites.  Required when inserting.
+            ///   - siteUrl: Absolute URL of the record's page (or, for media, its public file); null when it has none or is not public.
+            ///   - shortName: Short Name for the Sites.  Required when inserting.
+            ///   - sitePath: Site-relative path of the record's page on the website (from the CMS page URL patterns); null when it has none or is not public.
+            public init(
+                createDate: Foundation.Date? = nil,
+                description: Swift.String? = nil,
+                id: Swift.Int? = nil,
+                modifyDate: Foundation.Date? = nil,
+                name: Swift.String? = nil,
+                siteUrl: Swift.String? = nil,
+                shortName: Swift.String? = nil,
+                sitePath: Swift.String? = nil
+            ) {
+                self.createDate = createDate
+                self.description = description
+                self.id = id
+                self.modifyDate = modifyDate
+                self.name = name
+                self.siteUrl = siteUrl
+                self.shortName = shortName
+                self.sitePath = sitePath
+            }
+            public enum CodingKeys: String, CodingKey {
+                case createDate
+                case description
+                case id
+                case modifyDate
+                case name
+                case siteUrl
+                case shortName
+                case sitePath
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/siteSearchResult`.
+        public struct SiteSearchResult: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/siteSearchResult/value1`.
             public var value1: Components.Schemas.BaseSearchResultFields
-            /// Creates a new `TagSearchResult`.
+            /// Creates a new `SiteSearchResult`.
             ///
             /// - Parameters:
             ///   - value1:
@@ -1587,1192 +2078,13 @@ extension Components {
                 try self.value1.encode(to: encoder)
             }
         }
-        /// A tag applied to a post (resolve `tagId` with /tag).
-        ///
-        /// - Remark: Generated from `#/components/schemas/postTagLink`.
-        public struct PostTagLink: Codable, Hashable, Sendable {
-            /// Blog Tag for the Blog Post Tags.  Values in this field come from the primary key of the Tags table
-            ///
-            /// - Remark: Generated from `#/components/schemas/postTagLink/tagId`.
-            public var tagId: Swift.Int?
-            /// Creates a new `PostTagLink`.
-            ///
-            /// - Parameters:
-            ///   - tagId: Blog Tag for the Blog Post Tags.  Values in this field come from the primary key of the Tags table
-            public init(tagId: Swift.Int? = nil) {
-                self.tagId = tagId
-            }
-            public enum CodingKeys: String, CodingKey {
-                case tagId
-            }
-        }
-        /// A photo attached to a post, in display order.
-        ///
-        /// - Remark: Generated from `#/components/schemas/postMedia`.
-        public struct PostMedia: Codable, Hashable, Sendable {
-            /// Alt Text for the Blog Post Media.
-            ///
-            /// - Remark: Generated from `#/components/schemas/postMedia/altText`.
-            public var altText: Swift.String?
-            /// Caption for the Blog Post Media.
-            ///
-            /// - Remark: Generated from `#/components/schemas/postMedia/caption`.
-            public var caption: Swift.String?
-            /// Height for the Blog Post Media.
-            ///
-            /// - Remark: Generated from `#/components/schemas/postMedia/height`.
-            public var height: Swift.Int?
-            /// Media for the Blog Post Media.  Values in this field come from the primary key of the Media table
-            ///
-            /// - Remark: Generated from `#/components/schemas/postMedia/mediaId`.
-            public var mediaId: Swift.Int?
-            /// Sort Order for the Blog Post Media.
-            ///
-            /// - Remark: Generated from `#/components/schemas/postMedia/sortOrder`.
-            public var sortOrder: Swift.Int?
-            /// Thumbnail Url for the Blog Post Media.
-            ///
-            /// - Remark: Generated from `#/components/schemas/postMedia/thumbnailUrl`.
-            public var thumbnailUrl: Swift.String?
-            /// Url for the Blog Post Media.
-            ///
-            /// - Remark: Generated from `#/components/schemas/postMedia/url`.
-            public var url: Swift.String?
-            /// Width for the Blog Post Media.
-            ///
-            /// - Remark: Generated from `#/components/schemas/postMedia/width`.
-            public var width: Swift.Int?
-            /// Creates a new `PostMedia`.
-            ///
-            /// - Parameters:
-            ///   - altText: Alt Text for the Blog Post Media.
-            ///   - caption: Caption for the Blog Post Media.
-            ///   - height: Height for the Blog Post Media.
-            ///   - mediaId: Media for the Blog Post Media.  Values in this field come from the primary key of the Media table
-            ///   - sortOrder: Sort Order for the Blog Post Media.
-            ///   - thumbnailUrl: Thumbnail Url for the Blog Post Media.
-            ///   - url: Url for the Blog Post Media.
-            ///   - width: Width for the Blog Post Media.
-            public init(
-                altText: Swift.String? = nil,
-                caption: Swift.String? = nil,
-                height: Swift.Int? = nil,
-                mediaId: Swift.Int? = nil,
-                sortOrder: Swift.Int? = nil,
-                thumbnailUrl: Swift.String? = nil,
-                url: Swift.String? = nil,
-                width: Swift.Int? = nil
-            ) {
-                self.altText = altText
-                self.caption = caption
-                self.height = height
-                self.mediaId = mediaId
-                self.sortOrder = sortOrder
-                self.thumbnailUrl = thumbnailUrl
-                self.url = url
-                self.width = width
-            }
-            public enum CodingKeys: String, CodingKey {
-                case altText
-                case caption
-                case height
-                case mediaId
-                case sortOrder
-                case thumbnailUrl
-                case url
-                case width
-            }
-        }
-        /// - Remark: Generated from `#/components/schemas/Error`.
-        public struct _Error: Codable, Hashable, Sendable {
-            /// - Remark: Generated from `#/components/schemas/Error/error`.
-            public var error: Components.Schemas.ErrorBody
-            /// Creates a new `_Error`.
-            ///
-            /// - Parameters:
-            ///   - error:
-            public init(error: Components.Schemas.ErrorBody) {
-                self.error = error
-            }
-            public enum CodingKeys: String, CodingKey {
-                case error
-            }
-        }
-        /// - Remark: Generated from `#/components/schemas/ErrorBody`.
-        public struct ErrorBody: Codable, Hashable, Sendable {
-            /// Machine-readable code, e.g. validation_failed
-            ///
-            /// - Remark: Generated from `#/components/schemas/ErrorBody/code`.
-            public var code: Swift.String
-            /// - Remark: Generated from `#/components/schemas/ErrorBody/message`.
-            public var message: Swift.String
-            /// - Remark: Generated from `#/components/schemas/ErrorBody/status`.
-            public var status: Swift.Int
-            /// - Remark: Generated from `#/components/schemas/ErrorBody/details`.
-            public var details: [Components.Schemas.ErrorDetail]?
-            /// Creates a new `ErrorBody`.
-            ///
-            /// - Parameters:
-            ///   - code: Machine-readable code, e.g. validation_failed
-            ///   - message:
-            ///   - status:
-            ///   - details:
-            public init(
-                code: Swift.String,
-                message: Swift.String,
-                status: Swift.Int,
-                details: [Components.Schemas.ErrorDetail]? = nil
-            ) {
-                self.code = code
-                self.message = message
-                self.status = status
-                self.details = details
-            }
-            public enum CodingKeys: String, CodingKey {
-                case code
-                case message
-                case status
-                case details
-            }
-        }
-        /// - Remark: Generated from `#/components/schemas/ErrorDetail`.
-        public struct ErrorDetail: Codable, Hashable, Sendable {
-            /// - Remark: Generated from `#/components/schemas/ErrorDetail/field`.
-            public var field: Swift.String
-            /// - Remark: Generated from `#/components/schemas/ErrorDetail/issue`.
-            public var issue: Swift.String
-            /// Creates a new `ErrorDetail`.
-            ///
-            /// - Parameters:
-            ///   - field:
-            ///   - issue:
-            public init(
-                field: Swift.String,
-                issue: Swift.String
-            ) {
-                self.field = field
-                self.issue = issue
-            }
-            public enum CodingKeys: String, CodingKey {
-                case field
-                case issue
-            }
-        }
-        /// - Remark: Generated from `#/components/schemas/Versions`.
-        public struct Versions: Codable, Hashable, Sendable {
-            /// - Remark: Generated from `#/components/schemas/Versions/currentVersion`.
-            public var currentVersion: Swift.String
-            /// - Remark: Generated from `#/components/schemas/Versions/supportedVersions`.
-            public var supportedVersions: [Swift.String]
-            /// - Remark: Generated from `#/components/schemas/Versions/versions`.
-            public var versions: [Components.Schemas.VersionInfo]
-            /// Creates a new `Versions`.
-            ///
-            /// - Parameters:
-            ///   - currentVersion:
-            ///   - supportedVersions:
-            ///   - versions:
-            public init(
-                currentVersion: Swift.String,
-                supportedVersions: [Swift.String],
-                versions: [Components.Schemas.VersionInfo]
-            ) {
-                self.currentVersion = currentVersion
-                self.supportedVersions = supportedVersions
-                self.versions = versions
-            }
-            public enum CodingKeys: String, CodingKey {
-                case currentVersion
-                case supportedVersions
-                case versions
-            }
-        }
-        /// - Remark: Generated from `#/components/schemas/VersionInfo`.
-        public struct VersionInfo: Codable, Hashable, Sendable {
-            /// - Remark: Generated from `#/components/schemas/VersionInfo/version`.
-            public var version: Swift.String
-            /// - Remark: Generated from `#/components/schemas/VersionInfo/semver`.
-            public var semver: Swift.String
-            /// - Remark: Generated from `#/components/schemas/VersionInfo/status`.
-            @frozen public enum StatusPayload: String, Codable, Hashable, Sendable, CaseIterable {
-                case current = "current"
-                case deprecated = "deprecated"
-            }
-            /// - Remark: Generated from `#/components/schemas/VersionInfo/status`.
-            public var status: Components.Schemas.VersionInfo.StatusPayload
-            /// - Remark: Generated from `#/components/schemas/VersionInfo/released`.
-            public var released: Swift.String?
-            /// - Remark: Generated from `#/components/schemas/VersionInfo/docsUrl`.
-            public var docsUrl: Swift.String
-            /// - Remark: Generated from `#/components/schemas/VersionInfo/openapiUrl`.
-            public var openapiUrl: Swift.String
-            /// - Remark: Generated from `#/components/schemas/VersionInfo/changelog`.
-            public var changelog: [Components.Schemas.ReleaseNote]?
-            /// Creates a new `VersionInfo`.
-            ///
-            /// - Parameters:
-            ///   - version:
-            ///   - semver:
-            ///   - status:
-            ///   - released:
-            ///   - docsUrl:
-            ///   - openapiUrl:
-            ///   - changelog:
-            public init(
-                version: Swift.String,
-                semver: Swift.String,
-                status: Components.Schemas.VersionInfo.StatusPayload,
-                released: Swift.String? = nil,
-                docsUrl: Swift.String,
-                openapiUrl: Swift.String,
-                changelog: [Components.Schemas.ReleaseNote]? = nil
-            ) {
-                self.version = version
-                self.semver = semver
-                self.status = status
-                self.released = released
-                self.docsUrl = docsUrl
-                self.openapiUrl = openapiUrl
-                self.changelog = changelog
-            }
-            public enum CodingKeys: String, CodingKey {
-                case version
-                case semver
-                case status
-                case released
-                case docsUrl
-                case openapiUrl
-                case changelog
-            }
-        }
-        /// - Remark: Generated from `#/components/schemas/ReleaseNote`.
-        public struct ReleaseNote: Codable, Hashable, Sendable {
-            /// - Remark: Generated from `#/components/schemas/ReleaseNote/version`.
-            public var version: Swift.String
-            /// - Remark: Generated from `#/components/schemas/ReleaseNote/date`.
-            public var date: Swift.String
-            /// - Remark: Generated from `#/components/schemas/ReleaseNote/changes`.
-            public var changes: [Swift.String]
-            /// Creates a new `ReleaseNote`.
-            ///
-            /// - Parameters:
-            ///   - version:
-            ///   - date:
-            ///   - changes:
-            public init(
-                version: Swift.String,
-                date: Swift.String,
-                changes: [Swift.String]
-            ) {
-                self.version = version
-                self.date = date
-                self.changes = changes
-            }
-            public enum CodingKeys: String, CodingKey {
-                case version
-                case date
-                case changes
-            }
-        }
-        /// - Remark: Generated from `#/components/schemas/Me`.
-        public struct Me: Codable, Hashable, Sendable {
-            /// - Remark: Generated from `#/components/schemas/Me/email`.
-            public var email: Swift.String
-            /// - Remark: Generated from `#/components/schemas/Me/name`.
-            public var name: Swift.String?
-            /// - Remark: Generated from `#/components/schemas/Me/groups`.
-            public var groups: [Swift.String]
-            /// - Remark: Generated from `#/components/schemas/Me/author`.
-            public var author: Components.Schemas.AuthorRef?
-            /// - Remark: Generated from `#/components/schemas/Me/canPost`.
-            public var canPost: Swift.Bool
-            /// - Remark: Generated from `#/components/schemas/Me/blogs`.
-            public var blogs: [Components.Schemas.BlogRef]
-            /// - Remark: Generated from `#/components/schemas/Me/defaultBlog`.
-            public var defaultBlog: Swift.String
-            /// - Remark: Generated from `#/components/schemas/Me/limits`.
-            public var limits: Components.Schemas.AuthoringLimits
-            /// Creates a new `Me`.
-            ///
-            /// - Parameters:
-            ///   - email:
-            ///   - name:
-            ///   - groups:
-            ///   - author:
-            ///   - canPost:
-            ///   - blogs:
-            ///   - defaultBlog:
-            ///   - limits:
-            public init(
-                email: Swift.String,
-                name: Swift.String? = nil,
-                groups: [Swift.String],
-                author: Components.Schemas.AuthorRef? = nil,
-                canPost: Swift.Bool,
-                blogs: [Components.Schemas.BlogRef],
-                defaultBlog: Swift.String,
-                limits: Components.Schemas.AuthoringLimits
-            ) {
-                self.email = email
-                self.name = name
-                self.groups = groups
-                self.author = author
-                self.canPost = canPost
-                self.blogs = blogs
-                self.defaultBlog = defaultBlog
-                self.limits = limits
-            }
-            public enum CodingKeys: String, CodingKey {
-                case email
-                case name
-                case groups
-                case author
-                case canPost
-                case blogs
-                case defaultBlog
-                case limits
-            }
-        }
-        /// - Remark: Generated from `#/components/schemas/AuthorRef`.
-        public struct AuthorRef: Codable, Hashable, Sendable {
-            /// - Remark: Generated from `#/components/schemas/AuthorRef/id`.
-            public var id: Swift.Int64
-            /// - Remark: Generated from `#/components/schemas/AuthorRef/name`.
-            public var name: Swift.String
-            /// - Remark: Generated from `#/components/schemas/AuthorRef/slug`.
-            public var slug: Swift.String
-            /// Creates a new `AuthorRef`.
-            ///
-            /// - Parameters:
-            ///   - id:
-            ///   - name:
-            ///   - slug:
-            public init(
-                id: Swift.Int64,
-                name: Swift.String,
-                slug: Swift.String
-            ) {
-                self.id = id
-                self.name = name
-                self.slug = slug
-            }
-            public enum CodingKeys: String, CodingKey {
-                case id
-                case name
-                case slug
-            }
-        }
-        /// - Remark: Generated from `#/components/schemas/BlogRef`.
-        public struct BlogRef: Codable, Hashable, Sendable {
-            /// - Remark: Generated from `#/components/schemas/BlogRef/id`.
-            public var id: Swift.Int64
-            /// - Remark: Generated from `#/components/schemas/BlogRef/slug`.
-            public var slug: Swift.String
-            /// - Remark: Generated from `#/components/schemas/BlogRef/name`.
-            public var name: Swift.String
-            /// - Remark: Generated from `#/components/schemas/BlogRef/isDefault`.
-            public var isDefault: Swift.Bool
-            /// Creates a new `BlogRef`.
-            ///
-            /// - Parameters:
-            ///   - id:
-            ///   - slug:
-            ///   - name:
-            ///   - isDefault:
-            public init(
-                id: Swift.Int64,
-                slug: Swift.String,
-                name: Swift.String,
-                isDefault: Swift.Bool
-            ) {
-                self.id = id
-                self.slug = slug
-                self.name = name
-                self.isDefault = isDefault
-            }
-            public enum CodingKeys: String, CodingKey {
-                case id
-                case slug
-                case name
-                case isDefault
-            }
-        }
-        /// - Remark: Generated from `#/components/schemas/AuthoringLimits`.
-        public struct AuthoringLimits: Codable, Hashable, Sendable {
-            /// - Remark: Generated from `#/components/schemas/AuthoringLimits/maxBodyLength`.
-            public var maxBodyLength: Swift.Int
-            /// - Remark: Generated from `#/components/schemas/AuthoringLimits/maxTitleLength`.
-            public var maxTitleLength: Swift.Int
-            /// - Remark: Generated from `#/components/schemas/AuthoringLimits/maxTags`.
-            public var maxTags: Swift.Int
-            /// - Remark: Generated from `#/components/schemas/AuthoringLimits/maxPhotosPerPost`.
-            public var maxPhotosPerPost: Swift.Int
-            /// - Remark: Generated from `#/components/schemas/AuthoringLimits/maxPhotoBytes`.
-            public var maxPhotoBytes: Swift.Int64
-            /// - Remark: Generated from `#/components/schemas/AuthoringLimits/photoContentTypes`.
-            public var photoContentTypes: [Swift.String]
-            /// Creates a new `AuthoringLimits`.
-            ///
-            /// - Parameters:
-            ///   - maxBodyLength:
-            ///   - maxTitleLength:
-            ///   - maxTags:
-            ///   - maxPhotosPerPost:
-            ///   - maxPhotoBytes:
-            ///   - photoContentTypes:
-            public init(
-                maxBodyLength: Swift.Int,
-                maxTitleLength: Swift.Int,
-                maxTags: Swift.Int,
-                maxPhotosPerPost: Swift.Int,
-                maxPhotoBytes: Swift.Int64,
-                photoContentTypes: [Swift.String]
-            ) {
-                self.maxBodyLength = maxBodyLength
-                self.maxTitleLength = maxTitleLength
-                self.maxTags = maxTags
-                self.maxPhotosPerPost = maxPhotosPerPost
-                self.maxPhotoBytes = maxPhotoBytes
-                self.photoContentTypes = photoContentTypes
-            }
-            public enum CodingKeys: String, CodingKey {
-                case maxBodyLength
-                case maxTitleLength
-                case maxTags
-                case maxPhotosPerPost
-                case maxPhotoBytes
-                case photoContentTypes
-            }
-        }
-        /// - Remark: Generated from `#/components/schemas/PostStatus`.
-        @frozen public enum PostStatus: String, Codable, Hashable, Sendable, CaseIterable {
-            case draft = "draft"
-            case scheduled = "scheduled"
-            case published = "published"
-        }
-        /// - Remark: Generated from `#/components/schemas/AuthoringPost`.
-        public struct AuthoringPost: Codable, Hashable, Sendable {
-            /// - Remark: Generated from `#/components/schemas/AuthoringPost/id`.
-            public var id: Swift.Int64
-            /// - Remark: Generated from `#/components/schemas/AuthoringPost/blogId`.
-            public var blogId: Swift.Int64
-            /// Blog slug
-            ///
-            /// - Remark: Generated from `#/components/schemas/AuthoringPost/blog`.
-            public var blog: Swift.String
-            /// - Remark: Generated from `#/components/schemas/AuthoringPost/status`.
-            public var status: Components.Schemas.PostStatus
-            /// - Remark: Generated from `#/components/schemas/AuthoringPost/title`.
-            public var title: Swift.String
-            /// Markdown
-            ///
-            /// - Remark: Generated from `#/components/schemas/AuthoringPost/body`.
-            public var body: Swift.String
-            /// - Remark: Generated from `#/components/schemas/AuthoringPost/slug`.
-            public var slug: Swift.String
-            /// Public URL once published
-            ///
-            /// - Remark: Generated from `#/components/schemas/AuthoringPost/url`.
-            public var url: Swift.String?
-            /// Scheduled publish time
-            ///
-            /// - Remark: Generated from `#/components/schemas/AuthoringPost/publishAt`.
-            public var publishAt: Foundation.Date?
-            /// - Remark: Generated from `#/components/schemas/AuthoringPost/publishedAt`.
-            public var publishedAt: Foundation.Date?
-            /// - Remark: Generated from `#/components/schemas/AuthoringPost/tags`.
-            public var tags: [Swift.String]
-            /// - Remark: Generated from `#/components/schemas/AuthoringPost/locationLabel`.
-            public var locationLabel: Swift.String?
-            /// - Remark: Generated from `#/components/schemas/AuthoringPost/link`.
-            public var link: Components.Schemas.PostLink?
-            /// - Remark: Generated from `#/components/schemas/AuthoringPost/media`.
-            public var media: [Components.Schemas.PostPhoto]
-            /// - Remark: Generated from `#/components/schemas/AuthoringPost/createdAt`.
-            public var createdAt: Foundation.Date?
-            /// - Remark: Generated from `#/components/schemas/AuthoringPost/updatedAt`.
-            public var updatedAt: Foundation.Date?
-            /// Same value as the ETag (without quotes)
-            ///
-            /// - Remark: Generated from `#/components/schemas/AuthoringPost/version`.
-            public var version: Swift.String
-            /// Creates a new `AuthoringPost`.
-            ///
-            /// - Parameters:
-            ///   - id:
-            ///   - blogId:
-            ///   - blog: Blog slug
-            ///   - status:
-            ///   - title:
-            ///   - body: Markdown
-            ///   - slug:
-            ///   - url: Public URL once published
-            ///   - publishAt: Scheduled publish time
-            ///   - publishedAt:
-            ///   - tags:
-            ///   - locationLabel:
-            ///   - link:
-            ///   - media:
-            ///   - createdAt:
-            ///   - updatedAt:
-            ///   - version: Same value as the ETag (without quotes)
-            public init(
-                id: Swift.Int64,
-                blogId: Swift.Int64,
-                blog: Swift.String,
-                status: Components.Schemas.PostStatus,
-                title: Swift.String,
-                body: Swift.String,
-                slug: Swift.String,
-                url: Swift.String? = nil,
-                publishAt: Foundation.Date? = nil,
-                publishedAt: Foundation.Date? = nil,
-                tags: [Swift.String],
-                locationLabel: Swift.String? = nil,
-                link: Components.Schemas.PostLink? = nil,
-                media: [Components.Schemas.PostPhoto],
-                createdAt: Foundation.Date? = nil,
-                updatedAt: Foundation.Date? = nil,
-                version: Swift.String
-            ) {
-                self.id = id
-                self.blogId = blogId
-                self.blog = blog
-                self.status = status
-                self.title = title
-                self.body = body
-                self.slug = slug
-                self.url = url
-                self.publishAt = publishAt
-                self.publishedAt = publishedAt
-                self.tags = tags
-                self.locationLabel = locationLabel
-                self.link = link
-                self.media = media
-                self.createdAt = createdAt
-                self.updatedAt = updatedAt
-                self.version = version
-            }
-            public enum CodingKeys: String, CodingKey {
-                case id
-                case blogId
-                case blog
-                case status
-                case title
-                case body
-                case slug
-                case url
-                case publishAt
-                case publishedAt
-                case tags
-                case locationLabel
-                case link
-                case media
-                case createdAt
-                case updatedAt
-                case version
-            }
-        }
-        /// - Remark: Generated from `#/components/schemas/PostLink`.
-        public struct PostLink: Codable, Hashable, Sendable {
-            /// - Remark: Generated from `#/components/schemas/PostLink/url`.
-            public var url: Swift.String
-            /// - Remark: Generated from `#/components/schemas/PostLink/title`.
-            public var title: Swift.String?
-            /// - Remark: Generated from `#/components/schemas/PostLink/description`.
-            public var description: Swift.String?
-            /// - Remark: Generated from `#/components/schemas/PostLink/imageUrl`.
-            public var imageUrl: Swift.String?
-            /// Creates a new `PostLink`.
-            ///
-            /// - Parameters:
-            ///   - url:
-            ///   - title:
-            ///   - description:
-            ///   - imageUrl:
-            public init(
-                url: Swift.String,
-                title: Swift.String? = nil,
-                description: Swift.String? = nil,
-                imageUrl: Swift.String? = nil
-            ) {
-                self.url = url
-                self.title = title
-                self.description = description
-                self.imageUrl = imageUrl
-            }
-            public enum CodingKeys: String, CodingKey {
-                case url
-                case title
-                case description
-                case imageUrl
-            }
-        }
-        /// - Remark: Generated from `#/components/schemas/PostPhoto`.
-        public struct PostPhoto: Codable, Hashable, Sendable {
-            /// - Remark: Generated from `#/components/schemas/PostPhoto/mediaId`.
-            public var mediaId: Swift.Int64
-            /// - Remark: Generated from `#/components/schemas/PostPhoto/url`.
-            public var url: Swift.String
-            /// - Remark: Generated from `#/components/schemas/PostPhoto/thumbnailUrl`.
-            public var thumbnailUrl: Swift.String?
-            /// - Remark: Generated from `#/components/schemas/PostPhoto/width`.
-            public var width: Swift.Int?
-            /// - Remark: Generated from `#/components/schemas/PostPhoto/height`.
-            public var height: Swift.Int?
-            /// - Remark: Generated from `#/components/schemas/PostPhoto/altText`.
-            public var altText: Swift.String?
-            /// - Remark: Generated from `#/components/schemas/PostPhoto/caption`.
-            public var caption: Swift.String?
-            /// Creates a new `PostPhoto`.
-            ///
-            /// - Parameters:
-            ///   - mediaId:
-            ///   - url:
-            ///   - thumbnailUrl:
-            ///   - width:
-            ///   - height:
-            ///   - altText:
-            ///   - caption:
-            public init(
-                mediaId: Swift.Int64,
-                url: Swift.String,
-                thumbnailUrl: Swift.String? = nil,
-                width: Swift.Int? = nil,
-                height: Swift.Int? = nil,
-                altText: Swift.String? = nil,
-                caption: Swift.String? = nil
-            ) {
-                self.mediaId = mediaId
-                self.url = url
-                self.thumbnailUrl = thumbnailUrl
-                self.width = width
-                self.height = height
-                self.altText = altText
-                self.caption = caption
-            }
-            public enum CodingKeys: String, CodingKey {
-                case mediaId
-                case url
-                case thumbnailUrl
-                case width
-                case height
-                case altText
-                case caption
-            }
-        }
-        /// - Remark: Generated from `#/components/schemas/PostPage`.
-        public struct PostPage: Codable, Hashable, Sendable {
-            /// - Remark: Generated from `#/components/schemas/PostPage/items`.
-            public var items: [Components.Schemas.AuthoringPost]
-            /// - Remark: Generated from `#/components/schemas/PostPage/nextCursor`.
-            public var nextCursor: Swift.String?
-            /// Creates a new `PostPage`.
-            ///
-            /// - Parameters:
-            ///   - items:
-            ///   - nextCursor:
-            public init(
-                items: [Components.Schemas.AuthoringPost],
-                nextCursor: Swift.String? = nil
-            ) {
-                self.items = items
-                self.nextCursor = nextCursor
-            }
-            public enum CodingKeys: String, CodingKey {
-                case items
-                case nextCursor
-            }
-        }
-        /// - Remark: Generated from `#/components/schemas/MediaAttachment`.
-        public struct MediaAttachment: Codable, Hashable, Sendable {
-            /// - Remark: Generated from `#/components/schemas/MediaAttachment/mediaId`.
-            public var mediaId: Swift.Int64
-            /// - Remark: Generated from `#/components/schemas/MediaAttachment/altText`.
-            public var altText: Swift.String?
-            /// - Remark: Generated from `#/components/schemas/MediaAttachment/caption`.
-            public var caption: Swift.String?
-            /// Creates a new `MediaAttachment`.
-            ///
-            /// - Parameters:
-            ///   - mediaId:
-            ///   - altText:
-            ///   - caption:
-            public init(
-                mediaId: Swift.Int64,
-                altText: Swift.String? = nil,
-                caption: Swift.String? = nil
-            ) {
-                self.mediaId = mediaId
-                self.altText = altText
-                self.caption = caption
-            }
-            public enum CodingKeys: String, CodingKey {
-                case mediaId
-                case altText
-                case caption
-            }
-        }
-        /// - Remark: Generated from `#/components/schemas/PostCreate`.
-        public struct PostCreate: Codable, Hashable, Sendable {
-            /// Blog slug (default quick-bits)
-            ///
-            /// - Remark: Generated from `#/components/schemas/PostCreate/blog`.
-            public var blog: Swift.String?
-            /// Optional; derived from the first line of the body when omitted
-            ///
-            /// - Remark: Generated from `#/components/schemas/PostCreate/title`.
-            public var title: Swift.String?
-            /// Markdown
-            ///
-            /// - Remark: Generated from `#/components/schemas/PostCreate/body`.
-            public var body: Swift.String
-            /// - Remark: Generated from `#/components/schemas/PostCreate/status`.
-            public var status: Components.Schemas.PostStatus?
-            /// Required when status is scheduled
-            ///
-            /// - Remark: Generated from `#/components/schemas/PostCreate/publishAt`.
-            public var publishAt: Foundation.Date?
-            /// - Remark: Generated from `#/components/schemas/PostCreate/tags`.
-            public var tags: [Swift.String]?
-            /// - Remark: Generated from `#/components/schemas/PostCreate/locationLabel`.
-            public var locationLabel: Swift.String?
-            /// Link to preview server-side
-            ///
-            /// - Remark: Generated from `#/components/schemas/PostCreate/linkUrl`.
-            public var linkUrl: Swift.String?
-            /// - Remark: Generated from `#/components/schemas/PostCreate/media`.
-            public var media: [Components.Schemas.MediaAttachment]?
-            /// Creates a new `PostCreate`.
-            ///
-            /// - Parameters:
-            ///   - blog: Blog slug (default quick-bits)
-            ///   - title: Optional; derived from the first line of the body when omitted
-            ///   - body: Markdown
-            ///   - status:
-            ///   - publishAt: Required when status is scheduled
-            ///   - tags:
-            ///   - locationLabel:
-            ///   - linkUrl: Link to preview server-side
-            ///   - media:
-            public init(
-                blog: Swift.String? = nil,
-                title: Swift.String? = nil,
-                body: Swift.String,
-                status: Components.Schemas.PostStatus? = nil,
-                publishAt: Foundation.Date? = nil,
-                tags: [Swift.String]? = nil,
-                locationLabel: Swift.String? = nil,
-                linkUrl: Swift.String? = nil,
-                media: [Components.Schemas.MediaAttachment]? = nil
-            ) {
-                self.blog = blog
-                self.title = title
-                self.body = body
-                self.status = status
-                self.publishAt = publishAt
-                self.tags = tags
-                self.locationLabel = locationLabel
-                self.linkUrl = linkUrl
-                self.media = media
-            }
-            public enum CodingKeys: String, CodingKey {
-                case blog
-                case title
-                case body
-                case status
-                case publishAt
-                case tags
-                case locationLabel
-                case linkUrl
-                case media
-            }
-        }
-        /// - Remark: Generated from `#/components/schemas/PostUpdate`.
-        public struct PostUpdate: Codable, Hashable, Sendable {
-            /// - Remark: Generated from `#/components/schemas/PostUpdate/blog`.
-            public var blog: Swift.String?
-            /// - Remark: Generated from `#/components/schemas/PostUpdate/title`.
-            public var title: Swift.String?
-            /// - Remark: Generated from `#/components/schemas/PostUpdate/body`.
-            public var body: Swift.String?
-            /// - Remark: Generated from `#/components/schemas/PostUpdate/status`.
-            public var status: Components.Schemas.PostStatus?
-            /// - Remark: Generated from `#/components/schemas/PostUpdate/publishAt`.
-            public var publishAt: Foundation.Date?
-            /// - Remark: Generated from `#/components/schemas/PostUpdate/tags`.
-            public var tags: [Swift.String]?
-            /// - Remark: Generated from `#/components/schemas/PostUpdate/locationLabel`.
-            public var locationLabel: Swift.String?
-            /// - Remark: Generated from `#/components/schemas/PostUpdate/linkUrl`.
-            public var linkUrl: Swift.String?
-            /// - Remark: Generated from `#/components/schemas/PostUpdate/media`.
-            public var media: [Components.Schemas.MediaAttachment]?
-            /// Creates a new `PostUpdate`.
-            ///
-            /// - Parameters:
-            ///   - blog:
-            ///   - title:
-            ///   - body:
-            ///   - status:
-            ///   - publishAt:
-            ///   - tags:
-            ///   - locationLabel:
-            ///   - linkUrl:
-            ///   - media:
-            public init(
-                blog: Swift.String? = nil,
-                title: Swift.String? = nil,
-                body: Swift.String? = nil,
-                status: Components.Schemas.PostStatus? = nil,
-                publishAt: Foundation.Date? = nil,
-                tags: [Swift.String]? = nil,
-                locationLabel: Swift.String? = nil,
-                linkUrl: Swift.String? = nil,
-                media: [Components.Schemas.MediaAttachment]? = nil
-            ) {
-                self.blog = blog
-                self.title = title
-                self.body = body
-                self.status = status
-                self.publishAt = publishAt
-                self.tags = tags
-                self.locationLabel = locationLabel
-                self.linkUrl = linkUrl
-                self.media = media
-            }
-            public enum CodingKeys: String, CodingKey {
-                case blog
-                case title
-                case body
-                case status
-                case publishAt
-                case tags
-                case locationLabel
-                case linkUrl
-                case media
-            }
-        }
-        /// - Remark: Generated from `#/components/schemas/UploadCreate`.
-        public struct UploadCreate: Codable, Hashable, Sendable {
-            /// - Remark: Generated from `#/components/schemas/UploadCreate/fileName`.
-            public var fileName: Swift.String
-            /// - Remark: Generated from `#/components/schemas/UploadCreate/contentType`.
-            @frozen public enum ContentTypePayload: String, Codable, Hashable, Sendable, CaseIterable {
-                case imageJpeg = "image/jpeg"
-                case imagePng = "image/png"
-                case imageHeic = "image/heic"
-                case imageHeif = "image/heif"
-            }
-            /// - Remark: Generated from `#/components/schemas/UploadCreate/contentType`.
-            public var contentType: Components.Schemas.UploadCreate.ContentTypePayload
-            /// - Remark: Generated from `#/components/schemas/UploadCreate/byteSize`.
-            public var byteSize: Swift.Int64
-            /// Creates a new `UploadCreate`.
-            ///
-            /// - Parameters:
-            ///   - fileName:
-            ///   - contentType:
-            ///   - byteSize:
-            public init(
-                fileName: Swift.String,
-                contentType: Components.Schemas.UploadCreate.ContentTypePayload,
-                byteSize: Swift.Int64
-            ) {
-                self.fileName = fileName
-                self.contentType = contentType
-                self.byteSize = byteSize
-            }
-            public enum CodingKeys: String, CodingKey {
-                case fileName
-                case contentType
-                case byteSize
-            }
-        }
-        /// - Remark: Generated from `#/components/schemas/UploadTicket`.
-        public struct UploadTicket: Codable, Hashable, Sendable {
-            /// - Remark: Generated from `#/components/schemas/UploadTicket/uploadId`.
-            public var uploadId: Swift.String
-            /// Presigned URL; PUT the raw file bytes here
-            ///
-            /// - Remark: Generated from `#/components/schemas/UploadTicket/uploadUrl`.
-            public var uploadUrl: Swift.String
-            /// - Remark: Generated from `#/components/schemas/UploadTicket/method`.
-            @frozen public enum MethodPayload: String, Codable, Hashable, Sendable, CaseIterable {
-                case put = "PUT"
-            }
-            /// - Remark: Generated from `#/components/schemas/UploadTicket/method`.
-            public var method: Components.Schemas.UploadTicket.MethodPayload
-            /// Headers to send with the PUT (Content-Type)
-            ///
-            /// - Remark: Generated from `#/components/schemas/UploadTicket/headers`.
-            public struct HeadersPayload: Codable, Hashable, Sendable {
-                /// A container of undocumented properties.
-                public var additionalProperties: [String: Swift.String]
-                /// Creates a new `HeadersPayload`.
-                ///
-                /// - Parameters:
-                ///   - additionalProperties: A container of undocumented properties.
-                public init(additionalProperties: [String: Swift.String] = .init()) {
-                    self.additionalProperties = additionalProperties
-                }
-                public init(from decoder: any Swift.Decoder) throws {
-                    additionalProperties = try decoder.decodeAdditionalProperties(knownKeys: [])
-                }
-                public func encode(to encoder: any Swift.Encoder) throws {
-                    try encoder.encodeAdditionalProperties(additionalProperties)
-                }
-            }
-            /// Headers to send with the PUT (Content-Type)
-            ///
-            /// - Remark: Generated from `#/components/schemas/UploadTicket/headers`.
-            public var headers: Components.Schemas.UploadTicket.HeadersPayload
-            /// - Remark: Generated from `#/components/schemas/UploadTicket/expiresAt`.
-            public var expiresAt: Foundation.Date
-            /// - Remark: Generated from `#/components/schemas/UploadTicket/maxBytes`.
-            public var maxBytes: Swift.Int64
-            /// - Remark: Generated from `#/components/schemas/UploadTicket/completeUrl`.
-            public var completeUrl: Swift.String
-            /// Creates a new `UploadTicket`.
-            ///
-            /// - Parameters:
-            ///   - uploadId:
-            ///   - uploadUrl: Presigned URL; PUT the raw file bytes here
-            ///   - method:
-            ///   - headers: Headers to send with the PUT (Content-Type)
-            ///   - expiresAt:
-            ///   - maxBytes:
-            ///   - completeUrl:
-            public init(
-                uploadId: Swift.String,
-                uploadUrl: Swift.String,
-                method: Components.Schemas.UploadTicket.MethodPayload,
-                headers: Components.Schemas.UploadTicket.HeadersPayload,
-                expiresAt: Foundation.Date,
-                maxBytes: Swift.Int64,
-                completeUrl: Swift.String
-            ) {
-                self.uploadId = uploadId
-                self.uploadUrl = uploadUrl
-                self.method = method
-                self.headers = headers
-                self.expiresAt = expiresAt
-                self.maxBytes = maxBytes
-                self.completeUrl = completeUrl
-            }
-            public enum CodingKeys: String, CodingKey {
-                case uploadId
-                case uploadUrl
-                case method
-                case headers
-                case expiresAt
-                case maxBytes
-                case completeUrl
-            }
-        }
-        /// - Remark: Generated from `#/components/schemas/UploadComplete`.
-        public struct UploadComplete: Codable, Hashable, Sendable {
-            /// - Remark: Generated from `#/components/schemas/UploadComplete/altText`.
-            public var altText: Swift.String?
-            /// - Remark: Generated from `#/components/schemas/UploadComplete/caption`.
-            public var caption: Swift.String?
-            /// Keep EXIF including GPS (published publicly!)
-            ///
-            /// - Remark: Generated from `#/components/schemas/UploadComplete/keepLocation`.
-            public var keepLocation: Swift.Bool?
-            /// Creates a new `UploadComplete`.
-            ///
-            /// - Parameters:
-            ///   - altText:
-            ///   - caption:
-            ///   - keepLocation: Keep EXIF including GPS (published publicly!)
-            public init(
-                altText: Swift.String? = nil,
-                caption: Swift.String? = nil,
-                keepLocation: Swift.Bool? = nil
-            ) {
-                self.altText = altText
-                self.caption = caption
-                self.keepLocation = keepLocation
-            }
-            public enum CodingKeys: String, CodingKey {
-                case altText
-                case caption
-                case keepLocation
-            }
-        }
-        /// - Remark: Generated from `#/components/schemas/MediaItem`.
-        public struct MediaItem: Codable, Hashable, Sendable {
-            /// - Remark: Generated from `#/components/schemas/MediaItem/mediaId`.
-            public var mediaId: Swift.Int64
-            /// - Remark: Generated from `#/components/schemas/MediaItem/url`.
-            public var url: Swift.String
-            /// - Remark: Generated from `#/components/schemas/MediaItem/thumbnailUrl`.
-            public var thumbnailUrl: Swift.String?
-            /// - Remark: Generated from `#/components/schemas/MediaItem/width`.
-            public var width: Swift.Int?
-            /// - Remark: Generated from `#/components/schemas/MediaItem/height`.
-            public var height: Swift.Int?
-            /// - Remark: Generated from `#/components/schemas/MediaItem/mimeType`.
-            public var mimeType: Swift.String
-            /// - Remark: Generated from `#/components/schemas/MediaItem/altText`.
-            public var altText: Swift.String?
-            /// - Remark: Generated from `#/components/schemas/MediaItem/caption`.
-            public var caption: Swift.String?
-            /// - Remark: Generated from `#/components/schemas/MediaItem/locationRemoved`.
-            public var locationRemoved: Swift.Bool
-            /// Creates a new `MediaItem`.
-            ///
-            /// - Parameters:
-            ///   - mediaId:
-            ///   - url:
-            ///   - thumbnailUrl:
-            ///   - width:
-            ///   - height:
-            ///   - mimeType:
-            ///   - altText:
-            ///   - caption:
-            ///   - locationRemoved:
-            public init(
-                mediaId: Swift.Int64,
-                url: Swift.String,
-                thumbnailUrl: Swift.String? = nil,
-                width: Swift.Int? = nil,
-                height: Swift.Int? = nil,
-                mimeType: Swift.String,
-                altText: Swift.String? = nil,
-                caption: Swift.String? = nil,
-                locationRemoved: Swift.Bool
-            ) {
-                self.mediaId = mediaId
-                self.url = url
-                self.thumbnailUrl = thumbnailUrl
-                self.width = width
-                self.height = height
-                self.mimeType = mimeType
-                self.altText = altText
-                self.caption = caption
-                self.locationRemoved = locationRemoved
-            }
-            public enum CodingKeys: String, CodingKey {
-                case mediaId
-                case url
-                case thumbnailUrl
-                case width
-                case height
-                case mimeType
-                case altText
-                case caption
-                case locationRemoved
-            }
-        }
-        /// - Remark: Generated from `#/components/schemas/TagList`.
-        public struct TagList: Codable, Hashable, Sendable {
-            /// - Remark: Generated from `#/components/schemas/TagList/items`.
-            public var items: [Components.Schemas.AuthoringTag]
-            /// Creates a new `TagList`.
-            ///
-            /// - Parameters:
-            ///   - items:
-            public init(items: [Components.Schemas.AuthoringTag]) {
-                self.items = items
-            }
-            public enum CodingKeys: String, CodingKey {
-                case items
-            }
-        }
-        /// - Remark: Generated from `#/components/schemas/AuthoringTag`.
-        public struct AuthoringTag: Codable, Hashable, Sendable {
-            /// - Remark: Generated from `#/components/schemas/AuthoringTag/id`.
-            public var id: Swift.Int64
-            /// - Remark: Generated from `#/components/schemas/AuthoringTag/name`.
-            public var name: Swift.String
-            /// - Remark: Generated from `#/components/schemas/AuthoringTag/slug`.
-            public var slug: Swift.String
-            /// - Remark: Generated from `#/components/schemas/AuthoringTag/blogId`.
-            public var blogId: Swift.Int64
-            /// Creates a new `AuthoringTag`.
-            ///
-            /// - Parameters:
-            ///   - id:
-            ///   - name:
-            ///   - slug:
-            ///   - blogId:
-            public init(
-                id: Swift.Int64,
-                name: Swift.String,
-                slug: Swift.String,
-                blogId: Swift.Int64
-            ) {
-                self.id = id
-                self.name = name
-                self.slug = slug
-                self.blogId = blogId
-            }
-            public enum CodingKeys: String, CodingKey {
-                case id
-                case name
-                case slug
-                case blogId
-            }
-        }
-        /// - Remark: Generated from `#/components/schemas/LinkPreviewRequest`.
-        public struct LinkPreviewRequest: Codable, Hashable, Sendable {
-            /// - Remark: Generated from `#/components/schemas/LinkPreviewRequest/url`.
-            public var url: Swift.String
-            /// Creates a new `LinkPreviewRequest`.
-            ///
-            /// - Parameters:
-            ///   - url:
-            public init(url: Swift.String) {
-                self.url = url
-            }
-            public enum CodingKeys: String, CodingKey {
-                case url
-            }
-        }
-        /// - Remark: Generated from `#/components/schemas/LinkPreview`.
-        public struct LinkPreview: Codable, Hashable, Sendable {
-            /// - Remark: Generated from `#/components/schemas/LinkPreview/url`.
-            public var url: Swift.String
-            /// - Remark: Generated from `#/components/schemas/LinkPreview/title`.
-            public var title: Swift.String?
-            /// - Remark: Generated from `#/components/schemas/LinkPreview/description`.
-            public var description: Swift.String?
-            /// - Remark: Generated from `#/components/schemas/LinkPreview/imageUrl`.
-            public var imageUrl: Swift.String?
-            /// Creates a new `LinkPreview`.
-            ///
-            /// - Parameters:
-            ///   - url:
-            ///   - title:
-            ///   - description:
-            ///   - imageUrl:
-            public init(
-                url: Swift.String,
-                title: Swift.String? = nil,
-                description: Swift.String? = nil,
-                imageUrl: Swift.String? = nil
-            ) {
-                self.url = url
-                self.title = title
-                self.description = description
-                self.imageUrl = imageUrl
-            }
-            public enum CodingKeys: String, CodingKey {
-                case url
-                case title
-                case description
-                case imageUrl
-            }
-        }
     }
 }
 
 // Merged from Types+Operations.swift
 /// API operations, with input and output types, generated from `#/paths` in the OpenAPI document.
 public enum Operations {
-    /// Search for Blog Post records by query string
+    /// Search for Authors records by query string
     ///
     /// Execute a query on this table, using query criteria as specified in query string parameters.
     ///
@@ -2798,130 +2110,94 @@ public enum Operations {
     ///   * Not Like: `myField=!LIKE value` (using standard SQL % and _ wildcards)
     ///
     ///
-    /// - Remark: HTTP `GET /v1/post/query`.
-    /// - Remark: Generated from `#/paths//v1/post/query/get(queryPost)`.
-    public enum QueryPost {
-        public static let id: Swift.String = "queryPost"
+    /// - Remark: HTTP `GET /v2/author/query`.
+    /// - Remark: Generated from `#/paths//v2/author/query/get(queryAuthor)`.
+    public enum QueryAuthor {
+        public static let id: Swift.String = "queryAuthor"
         public struct Input: Sendable, Hashable {
-            /// - Remark: Generated from `#/paths/v1/post/query/GET/query`.
+            /// - Remark: Generated from `#/paths/v2/author/query/GET/query`.
             public struct Query: Sendable, Hashable {
                 /// Which page of results to return.  Starts at 1.
                 ///
-                /// - Remark: Generated from `#/paths/v1/post/query/GET/query/pageNo`.
+                /// - Remark: Generated from `#/paths/v2/author/query/GET/query/pageNo`.
                 public var pageNo: Swift.Int?
                 /// Max number of records to include in a page.  Defaults to 50.  Must be between 1 and 1000.
                 ///
-                /// - Remark: Generated from `#/paths/v1/post/query/GET/query/pageSize`.
+                /// - Remark: Generated from `#/paths/v2/author/query/GET/query/pageSize`.
                 public var pageSize: Swift.Int?
                 /// Whether or not to include the count (total matching records) in the result. Default is true.
                 ///
-                /// - Remark: Generated from `#/paths/v1/post/query/GET/query/includeCount`.
+                /// - Remark: Generated from `#/paths/v2/author/query/GET/query/includeCount`.
                 public var includeCount: Swift.Bool?
                 /// How the results of the query should be sorted. SQL-style, comma-separated list of field names, each optionally followed by ASC or DESC (defaults to ASC).
                 ///
-                /// - Remark: Generated from `#/paths/v1/post/query/GET/query/orderBy`.
+                /// - Remark: Generated from `#/paths/v2/author/query/GET/query/orderBy`.
                 public var orderBy: Swift.String?
-                /// - Remark: Generated from `#/paths/v1/post/query/GET/query/booleanOperator`.
+                /// - Remark: Generated from `#/paths/v2/author/query/GET/query/booleanOperator`.
                 @frozen public enum BooleanOperatorPayload: String, Codable, Hashable, Sendable, CaseIterable {
                     case and = "AND"
                     case or = "OR"
                 }
                 /// Whether to combine query field as an AND or an OR.  Default is AND.
                 ///
-                /// - Remark: Generated from `#/paths/v1/post/query/GET/query/booleanOperator`.
-                public var booleanOperator: Operations.QueryPost.Input.Query.BooleanOperatorPayload?
-                /// Query on the Author field.  Can prefix value with an operator, else defaults to = (equals).
+                /// - Remark: Generated from `#/paths/v2/author/query/GET/query/booleanOperator`.
+                public var booleanOperator: Operations.QueryAuthor.Input.Query.BooleanOperatorPayload?
+                /// Query on the Create Date field.  Can prefix value with an operator, else defaults to = (equals).
                 ///
-                /// - Remark: Generated from `#/paths/v1/post/query/GET/query/authorId`.
-                public var authorId: [Swift.String]?
-                /// Query on the Blog field.  Can prefix value with an operator, else defaults to = (equals).
-                ///
-                /// - Remark: Generated from `#/paths/v1/post/query/GET/query/blogId`.
-                public var blogId: [Swift.String]?
-                /// Query on the Content field.  Can prefix value with an operator, else defaults to = (equals).
-                ///
-                /// - Remark: Generated from `#/paths/v1/post/query/GET/query/content`.
-                public var content: [Swift.String]?
+                /// - Remark: Generated from `#/paths/v2/author/query/GET/query/createDate`.
+                public var createDate: [Swift.String]?
                 /// Query on the Description field.  Can prefix value with an operator, else defaults to = (equals).
                 ///
-                /// - Remark: Generated from `#/paths/v1/post/query/GET/query/description`.
+                /// - Remark: Generated from `#/paths/v2/author/query/GET/query/description`.
                 public var description: [Swift.String]?
-                /// Query on the Excerpt field.  Can prefix value with an operator, else defaults to = (equals).
+                /// Query on the Display Order field.  Can prefix value with an operator, else defaults to = (equals).
                 ///
-                /// - Remark: Generated from `#/paths/v1/post/query/GET/query/excerpt`.
-                public var excerpt: [Swift.String]?
-                /// Query on the Featured Image URL field.  Can prefix value with an operator, else defaults to = (equals).
+                /// - Remark: Generated from `#/paths/v2/author/query/GET/query/displayOrder`.
+                public var displayOrder: [Swift.String]?
+                /// Query on the Email field.  Can prefix value with an operator, else defaults to = (equals).
                 ///
-                /// - Remark: Generated from `#/paths/v1/post/query/GET/query/featuredImage`.
-                public var featuredImage: [Swift.String]?
-                /// Query on the Featured Media field.  Can prefix value with an operator, else defaults to = (equals).
-                ///
-                /// - Remark: Generated from `#/paths/v1/post/query/GET/query/featuredMediaId`.
-                public var featuredMediaId: [Swift.String]?
+                /// - Remark: Generated from `#/paths/v2/author/query/GET/query/email`.
+                public var email: [Swift.String]?
                 /// Query on the Id field.  Can prefix value with an operator, else defaults to = (equals).
                 ///
-                /// - Remark: Generated from `#/paths/v1/post/query/GET/query/id`.
+                /// - Remark: Generated from `#/paths/v2/author/query/GET/query/id`.
                 public var id: [Swift.String]?
-                /// Query on the Is Featured field.  Can prefix value with an operator, else defaults to = (equals).
+                /// Query on the Is Active field.  Can prefix value with an operator, else defaults to = (equals).
                 ///
-                /// - Remark: Generated from `#/paths/v1/post/query/GET/query/isFeatured`.
-                public var isFeatured: [Swift.String]?
-                /// Query on the Link Description field.  Can prefix value with an operator, else defaults to = (equals).
-                ///
-                /// - Remark: Generated from `#/paths/v1/post/query/GET/query/linkDescription`.
-                public var linkDescription: [Swift.String]?
-                /// Query on the Link Image URL field.  Can prefix value with an operator, else defaults to = (equals).
-                ///
-                /// - Remark: Generated from `#/paths/v1/post/query/GET/query/linkImageUrl`.
-                public var linkImageUrl: [Swift.String]?
-                /// Query on the Link Title field.  Can prefix value with an operator, else defaults to = (equals).
-                ///
-                /// - Remark: Generated from `#/paths/v1/post/query/GET/query/linkTitle`.
-                public var linkTitle: [Swift.String]?
-                /// Query on the Link URL field.  Can prefix value with an operator, else defaults to = (equals).
-                ///
-                /// - Remark: Generated from `#/paths/v1/post/query/GET/query/linkUrl`.
-                public var linkUrl: [Swift.String]?
-                /// Query on the Location field.  Can prefix value with an operator, else defaults to = (equals).
-                ///
-                /// - Remark: Generated from `#/paths/v1/post/query/GET/query/locationLabel`.
-                public var locationLabel: [Swift.String]?
-                /// Query on the Meta Description field.  Can prefix value with an operator, else defaults to = (equals).
-                ///
-                /// - Remark: Generated from `#/paths/v1/post/query/GET/query/metaDescription`.
-                public var metaDescription: [Swift.String]?
-                /// Query on the Meta Keywords field.  Can prefix value with an operator, else defaults to = (equals).
-                ///
-                /// - Remark: Generated from `#/paths/v1/post/query/GET/query/metaKeywords`.
-                public var metaKeywords: [Swift.String]?
-                /// Query on the Meta Title field.  Can prefix value with an operator, else defaults to = (equals).
-                ///
-                /// - Remark: Generated from `#/paths/v1/post/query/GET/query/metaTitle`.
-                public var metaTitle: [Swift.String]?
+                /// - Remark: Generated from `#/paths/v2/author/query/GET/query/isActive`.
+                public var isActive: [Swift.String]?
                 /// Query on the Modify Date field.  Can prefix value with an operator, else defaults to = (equals).
                 ///
-                /// - Remark: Generated from `#/paths/v1/post/query/GET/query/modifyDate`.
+                /// - Remark: Generated from `#/paths/v2/author/query/GET/query/modifyDate`.
                 public var modifyDate: [Swift.String]?
                 /// Query on the Name field.  Can prefix value with an operator, else defaults to = (equals).
                 ///
-                /// - Remark: Generated from `#/paths/v1/post/query/GET/query/name`.
+                /// - Remark: Generated from `#/paths/v2/author/query/GET/query/name`.
                 public var name: [Swift.String]?
-                /// Query on the Publish Date field.  Can prefix value with an operator, else defaults to = (equals).
+                /// Query on the Profile Image Url field.  Can prefix value with an operator, else defaults to = (equals).
                 ///
-                /// - Remark: Generated from `#/paths/v1/post/query/GET/query/publishDate`.
-                public var publishDate: [Swift.String]?
-                /// Query on the Read Time field.  Can prefix value with an operator, else defaults to = (equals).
+                /// - Remark: Generated from `#/paths/v2/author/query/GET/query/profileImageUrl`.
+                public var profileImageUrl: [Swift.String]?
+                /// Query on the Profile Media field.  Can prefix value with an operator, else defaults to = (equals).
                 ///
-                /// - Remark: Generated from `#/paths/v1/post/query/GET/query/readTime`.
-                public var readTime: [Swift.String]?
+                /// - Remark: Generated from `#/paths/v2/author/query/GET/query/profileMediaId`.
+                public var profileMediaId: [Swift.String]?
+                /// Query on the Short Name field.  Can prefix value with an operator, else defaults to = (equals).
+                ///
+                /// - Remark: Generated from `#/paths/v2/author/query/GET/query/shortName`.
+                public var shortName: [Swift.String]?
                 /// Query on the Slug field.  Can prefix value with an operator, else defaults to = (equals).
                 ///
-                /// - Remark: Generated from `#/paths/v1/post/query/GET/query/slug`.
+                /// - Remark: Generated from `#/paths/v2/author/query/GET/query/slug`.
                 public var slug: [Swift.String]?
-                /// Query on the Title field.  Can prefix value with an operator, else defaults to = (equals).
+                /// Query on the Social Links field.  Can prefix value with an operator, else defaults to = (equals).
                 ///
-                /// - Remark: Generated from `#/paths/v1/post/query/GET/query/title`.
-                public var title: [Swift.String]?
+                /// - Remark: Generated from `#/paths/v2/author/query/GET/query/socialLinks`.
+                public var socialLinks: [Swift.String]?
+                /// Query on the Website field.  Can prefix value with an operator, else defaults to = (equals).
+                ///
+                /// - Remark: Generated from `#/paths/v2/author/query/GET/query/website`.
+                public var website: [Swift.String]?
                 /// Creates a new `Query`.
                 ///
                 /// - Parameters:
@@ -2930,110 +2206,83 @@ public enum Operations {
                 ///   - includeCount: Whether or not to include the count (total matching records) in the result. Default is true.
                 ///   - orderBy: How the results of the query should be sorted. SQL-style, comma-separated list of field names, each optionally followed by ASC or DESC (defaults to ASC).
                 ///   - booleanOperator: Whether to combine query field as an AND or an OR.  Default is AND.
-                ///   - authorId: Query on the Author field.  Can prefix value with an operator, else defaults to = (equals).
-                ///   - blogId: Query on the Blog field.  Can prefix value with an operator, else defaults to = (equals).
-                ///   - content: Query on the Content field.  Can prefix value with an operator, else defaults to = (equals).
+                ///   - createDate: Query on the Create Date field.  Can prefix value with an operator, else defaults to = (equals).
                 ///   - description: Query on the Description field.  Can prefix value with an operator, else defaults to = (equals).
-                ///   - excerpt: Query on the Excerpt field.  Can prefix value with an operator, else defaults to = (equals).
-                ///   - featuredImage: Query on the Featured Image URL field.  Can prefix value with an operator, else defaults to = (equals).
-                ///   - featuredMediaId: Query on the Featured Media field.  Can prefix value with an operator, else defaults to = (equals).
+                ///   - displayOrder: Query on the Display Order field.  Can prefix value with an operator, else defaults to = (equals).
+                ///   - email: Query on the Email field.  Can prefix value with an operator, else defaults to = (equals).
                 ///   - id: Query on the Id field.  Can prefix value with an operator, else defaults to = (equals).
-                ///   - isFeatured: Query on the Is Featured field.  Can prefix value with an operator, else defaults to = (equals).
-                ///   - linkDescription: Query on the Link Description field.  Can prefix value with an operator, else defaults to = (equals).
-                ///   - linkImageUrl: Query on the Link Image URL field.  Can prefix value with an operator, else defaults to = (equals).
-                ///   - linkTitle: Query on the Link Title field.  Can prefix value with an operator, else defaults to = (equals).
-                ///   - linkUrl: Query on the Link URL field.  Can prefix value with an operator, else defaults to = (equals).
-                ///   - locationLabel: Query on the Location field.  Can prefix value with an operator, else defaults to = (equals).
-                ///   - metaDescription: Query on the Meta Description field.  Can prefix value with an operator, else defaults to = (equals).
-                ///   - metaKeywords: Query on the Meta Keywords field.  Can prefix value with an operator, else defaults to = (equals).
-                ///   - metaTitle: Query on the Meta Title field.  Can prefix value with an operator, else defaults to = (equals).
+                ///   - isActive: Query on the Is Active field.  Can prefix value with an operator, else defaults to = (equals).
                 ///   - modifyDate: Query on the Modify Date field.  Can prefix value with an operator, else defaults to = (equals).
                 ///   - name: Query on the Name field.  Can prefix value with an operator, else defaults to = (equals).
-                ///   - publishDate: Query on the Publish Date field.  Can prefix value with an operator, else defaults to = (equals).
-                ///   - readTime: Query on the Read Time field.  Can prefix value with an operator, else defaults to = (equals).
+                ///   - profileImageUrl: Query on the Profile Image Url field.  Can prefix value with an operator, else defaults to = (equals).
+                ///   - profileMediaId: Query on the Profile Media field.  Can prefix value with an operator, else defaults to = (equals).
+                ///   - shortName: Query on the Short Name field.  Can prefix value with an operator, else defaults to = (equals).
                 ///   - slug: Query on the Slug field.  Can prefix value with an operator, else defaults to = (equals).
-                ///   - title: Query on the Title field.  Can prefix value with an operator, else defaults to = (equals).
+                ///   - socialLinks: Query on the Social Links field.  Can prefix value with an operator, else defaults to = (equals).
+                ///   - website: Query on the Website field.  Can prefix value with an operator, else defaults to = (equals).
                 public init(
                     pageNo: Swift.Int? = nil,
                     pageSize: Swift.Int? = nil,
                     includeCount: Swift.Bool? = nil,
                     orderBy: Swift.String? = nil,
-                    booleanOperator: Operations.QueryPost.Input.Query.BooleanOperatorPayload? = nil,
-                    authorId: [Swift.String]? = nil,
-                    blogId: [Swift.String]? = nil,
-                    content: [Swift.String]? = nil,
+                    booleanOperator: Operations.QueryAuthor.Input.Query.BooleanOperatorPayload? = nil,
+                    createDate: [Swift.String]? = nil,
                     description: [Swift.String]? = nil,
-                    excerpt: [Swift.String]? = nil,
-                    featuredImage: [Swift.String]? = nil,
-                    featuredMediaId: [Swift.String]? = nil,
+                    displayOrder: [Swift.String]? = nil,
+                    email: [Swift.String]? = nil,
                     id: [Swift.String]? = nil,
-                    isFeatured: [Swift.String]? = nil,
-                    linkDescription: [Swift.String]? = nil,
-                    linkImageUrl: [Swift.String]? = nil,
-                    linkTitle: [Swift.String]? = nil,
-                    linkUrl: [Swift.String]? = nil,
-                    locationLabel: [Swift.String]? = nil,
-                    metaDescription: [Swift.String]? = nil,
-                    metaKeywords: [Swift.String]? = nil,
-                    metaTitle: [Swift.String]? = nil,
+                    isActive: [Swift.String]? = nil,
                     modifyDate: [Swift.String]? = nil,
                     name: [Swift.String]? = nil,
-                    publishDate: [Swift.String]? = nil,
-                    readTime: [Swift.String]? = nil,
+                    profileImageUrl: [Swift.String]? = nil,
+                    profileMediaId: [Swift.String]? = nil,
+                    shortName: [Swift.String]? = nil,
                     slug: [Swift.String]? = nil,
-                    title: [Swift.String]? = nil
+                    socialLinks: [Swift.String]? = nil,
+                    website: [Swift.String]? = nil
                 ) {
                     self.pageNo = pageNo
                     self.pageSize = pageSize
                     self.includeCount = includeCount
                     self.orderBy = orderBy
                     self.booleanOperator = booleanOperator
-                    self.authorId = authorId
-                    self.blogId = blogId
-                    self.content = content
+                    self.createDate = createDate
                     self.description = description
-                    self.excerpt = excerpt
-                    self.featuredImage = featuredImage
-                    self.featuredMediaId = featuredMediaId
+                    self.displayOrder = displayOrder
+                    self.email = email
                     self.id = id
-                    self.isFeatured = isFeatured
-                    self.linkDescription = linkDescription
-                    self.linkImageUrl = linkImageUrl
-                    self.linkTitle = linkTitle
-                    self.linkUrl = linkUrl
-                    self.locationLabel = locationLabel
-                    self.metaDescription = metaDescription
-                    self.metaKeywords = metaKeywords
-                    self.metaTitle = metaTitle
+                    self.isActive = isActive
                     self.modifyDate = modifyDate
                     self.name = name
-                    self.publishDate = publishDate
-                    self.readTime = readTime
+                    self.profileImageUrl = profileImageUrl
+                    self.profileMediaId = profileMediaId
+                    self.shortName = shortName
                     self.slug = slug
-                    self.title = title
+                    self.socialLinks = socialLinks
+                    self.website = website
                 }
             }
-            public var query: Operations.QueryPost.Input.Query
-            /// - Remark: Generated from `#/paths/v1/post/query/GET/header`.
+            public var query: Operations.QueryAuthor.Input.Query
+            /// - Remark: Generated from `#/paths/v2/author/query/GET/header`.
             public struct Headers: Sendable, Hashable {
-                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.QueryPost.AcceptableContentType>]
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.QueryAuthor.AcceptableContentType>]
                 /// Creates a new `Headers`.
                 ///
                 /// - Parameters:
                 ///   - accept:
-                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.QueryPost.AcceptableContentType>] = .defaultValues()) {
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.QueryAuthor.AcceptableContentType>] = .defaultValues()) {
                     self.accept = accept
                 }
             }
-            public var headers: Operations.QueryPost.Input.Headers
+            public var headers: Operations.QueryAuthor.Input.Headers
             /// Creates a new `Input`.
             ///
             /// - Parameters:
             ///   - query:
             ///   - headers:
             public init(
-                query: Operations.QueryPost.Input.Query = .init(),
-                headers: Operations.QueryPost.Input.Headers = .init()
+                query: Operations.QueryAuthor.Input.Query = .init(),
+                headers: Operations.QueryAuthor.Input.Headers = .init()
             ) {
                 self.query = query
                 self.headers = headers
@@ -3042,7 +2291,7 @@ public enum Operations {
         @frozen public enum Output: Sendable, Hashable {
             /// Bad Request.  Some portion of the request's content was not acceptable to the server.  See error message in body for details.
             ///
-            /// - Remark: Generated from `#/paths//v1/post/query/get(queryPost)/responses/400`.
+            /// - Remark: Generated from `#/paths//v2/author/query/get(queryAuthor)/responses/400`.
             ///
             /// HTTP response code: `400 badRequest`.
             case badRequest(Components.Responses.Error400)
@@ -3065,7 +2314,7 @@ public enum Operations {
             }
             /// Unauthorized.  The required authentication credentials were missing or invalid.
             ///
-            /// - Remark: Generated from `#/paths//v1/post/query/get(queryPost)/responses/401`.
+            /// - Remark: Generated from `#/paths//v2/author/query/get(queryAuthor)/responses/401`.
             ///
             /// HTTP response code: `401 unauthorized`.
             case unauthorized(Components.Responses.Error401)
@@ -3088,7 +2337,7 @@ public enum Operations {
             }
             /// Forbidden.  You do not have permission to access the requested resource.
             ///
-            /// - Remark: Generated from `#/paths//v1/post/query/get(queryPost)/responses/403`.
+            /// - Remark: Generated from `#/paths//v2/author/query/get(queryAuthor)/responses/403`.
             ///
             /// HTTP response code: `403 forbidden`.
             case forbidden(Components.Responses.Error403)
@@ -3111,7 +2360,7 @@ public enum Operations {
             }
             /// Internal Server Error.  An error occurred in the server while processing the request.
             ///
-            /// - Remark: Generated from `#/paths//v1/post/query/get(queryPost)/responses/500`.
+            /// - Remark: Generated from `#/paths//v2/author/query/get(queryAuthor)/responses/500`.
             ///
             /// HTTP response code: `500 internalServerError`.
             case internalServerError(Components.Responses.Error500)
@@ -3133,15 +2382,15 @@ public enum Operations {
                 }
             }
             public struct Ok: Sendable, Hashable {
-                /// - Remark: Generated from `#/paths/v1/post/query/GET/responses/200/content`.
+                /// - Remark: Generated from `#/paths/v2/author/query/GET/responses/200/content`.
                 @frozen public enum Body: Sendable, Hashable {
-                    /// - Remark: Generated from `#/paths/v1/post/query/GET/responses/200/content/application\/json`.
-                    case json(Components.Schemas.PostSearchResult)
+                    /// - Remark: Generated from `#/paths/v2/author/query/GET/responses/200/content/application\/json`.
+                    case json(Components.Schemas.AuthorSearchResult)
                     /// The associated value of the enum case if `self` is `.json`.
                     ///
                     /// - Throws: An error if `self` is not `.json`.
                     /// - SeeAlso: `.json`.
-                    public var json: Components.Schemas.PostSearchResult {
+                    public var json: Components.Schemas.AuthorSearchResult {
                         get throws {
                             switch self {
                             case let .json(body):
@@ -3151,26 +2400,26 @@ public enum Operations {
                     }
                 }
                 /// Received HTTP response body
-                public var body: Operations.QueryPost.Output.Ok.Body
+                public var body: Operations.QueryAuthor.Output.Ok.Body
                 /// Creates a new `Ok`.
                 ///
                 /// - Parameters:
                 ///   - body: Received HTTP response body
-                public init(body: Operations.QueryPost.Output.Ok.Body) {
+                public init(body: Operations.QueryAuthor.Output.Ok.Body) {
                     self.body = body
                 }
             }
-            /// Successfully searched the Blog Post table (though may have found 0 records).
+            /// Successfully searched the Authors table (though may have found 0 records).
             ///
-            /// - Remark: Generated from `#/paths//v1/post/query/get(queryPost)/responses/200`.
+            /// - Remark: Generated from `#/paths//v2/author/query/get(queryAuthor)/responses/200`.
             ///
             /// HTTP response code: `200 ok`.
-            case ok(Operations.QueryPost.Output.Ok)
+            case ok(Operations.QueryAuthor.Output.Ok)
             /// The associated value of the enum case if `self` is `.ok`.
             ///
             /// - Throws: An error if `self` is not `.ok`.
             /// - SeeAlso: `.ok`.
-            public var ok: Operations.QueryPost.Output.Ok {
+            public var ok: Operations.QueryAuthor.Output.Ok {
                 get throws {
                     switch self {
                     case let .ok(response):
@@ -3185,7 +2434,7 @@ public enum Operations {
             }
             /// Too Many Requests.  Your application has issued too many API requests in too short of a time frame.
             ///
-            /// - Remark: Generated from `#/paths//v1/post/query/get(queryPost)/responses/429`.
+            /// - Remark: Generated from `#/paths//v2/author/query/get(queryAuthor)/responses/429`.
             ///
             /// HTTP response code: `429 tooManyRequests`.
             case tooManyRequests(Components.Responses.Error429)
@@ -3237,51 +2486,51 @@ public enum Operations {
             }
         }
     }
-    /// Get one Blog Post by Id
+    /// Get one Authors by Id
     ///
     /// Get one record from this table, by specifying its primary key as a path parameter.
     ///
     ///
-    /// - Remark: HTTP `GET /v1/post/{id}`.
-    /// - Remark: Generated from `#/paths//v1/post/{id}/get(getPost)`.
-    public enum GetPost {
-        public static let id: Swift.String = "getPost"
+    /// - Remark: HTTP `GET /v2/author/{id}`.
+    /// - Remark: Generated from `#/paths//v2/author/{id}/get(getAuthor)`.
+    public enum GetAuthor {
+        public static let id: Swift.String = "getAuthor"
         public struct Input: Sendable, Hashable {
-            /// - Remark: Generated from `#/paths/v1/post/{id}/GET/path`.
+            /// - Remark: Generated from `#/paths/v2/author/{id}/GET/path`.
             public struct Path: Sendable, Hashable {
-                /// Id of the Blog Post to get.
+                /// Id of the Authors to get.
                 ///
-                /// - Remark: Generated from `#/paths/v1/post/{id}/GET/path/id`.
+                /// - Remark: Generated from `#/paths/v2/author/{id}/GET/path/id`.
                 public var id: Swift.Int
                 /// Creates a new `Path`.
                 ///
                 /// - Parameters:
-                ///   - id: Id of the Blog Post to get.
+                ///   - id: Id of the Authors to get.
                 public init(id: Swift.Int) {
                     self.id = id
                 }
             }
-            public var path: Operations.GetPost.Input.Path
-            /// - Remark: Generated from `#/paths/v1/post/{id}/GET/header`.
+            public var path: Operations.GetAuthor.Input.Path
+            /// - Remark: Generated from `#/paths/v2/author/{id}/GET/header`.
             public struct Headers: Sendable, Hashable {
-                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.GetPost.AcceptableContentType>]
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.GetAuthor.AcceptableContentType>]
                 /// Creates a new `Headers`.
                 ///
                 /// - Parameters:
                 ///   - accept:
-                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.GetPost.AcceptableContentType>] = .defaultValues()) {
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.GetAuthor.AcceptableContentType>] = .defaultValues()) {
                     self.accept = accept
                 }
             }
-            public var headers: Operations.GetPost.Input.Headers
+            public var headers: Operations.GetAuthor.Input.Headers
             /// Creates a new `Input`.
             ///
             /// - Parameters:
             ///   - path:
             ///   - headers:
             public init(
-                path: Operations.GetPost.Input.Path,
-                headers: Operations.GetPost.Input.Headers = .init()
+                path: Operations.GetAuthor.Input.Path,
+                headers: Operations.GetAuthor.Input.Headers = .init()
             ) {
                 self.path = path
                 self.headers = headers
@@ -3290,7 +2539,7 @@ public enum Operations {
         @frozen public enum Output: Sendable, Hashable {
             /// Bad Request.  Some portion of the request's content was not acceptable to the server.  See error message in body for details.
             ///
-            /// - Remark: Generated from `#/paths//v1/post/{id}/get(getPost)/responses/400`.
+            /// - Remark: Generated from `#/paths//v2/author/{id}/get(getAuthor)/responses/400`.
             ///
             /// HTTP response code: `400 badRequest`.
             case badRequest(Components.Responses.Error400)
@@ -3313,7 +2562,7 @@ public enum Operations {
             }
             /// Unauthorized.  The required authentication credentials were missing or invalid.
             ///
-            /// - Remark: Generated from `#/paths//v1/post/{id}/get(getPost)/responses/401`.
+            /// - Remark: Generated from `#/paths//v2/author/{id}/get(getAuthor)/responses/401`.
             ///
             /// HTTP response code: `401 unauthorized`.
             case unauthorized(Components.Responses.Error401)
@@ -3336,7 +2585,7 @@ public enum Operations {
             }
             /// Forbidden.  You do not have permission to access the requested resource.
             ///
-            /// - Remark: Generated from `#/paths//v1/post/{id}/get(getPost)/responses/403`.
+            /// - Remark: Generated from `#/paths//v2/author/{id}/get(getAuthor)/responses/403`.
             ///
             /// HTTP response code: `403 forbidden`.
             case forbidden(Components.Responses.Error403)
@@ -3359,7 +2608,7 @@ public enum Operations {
             }
             /// Internal Server Error.  An error occurred in the server while processing the request.
             ///
-            /// - Remark: Generated from `#/paths//v1/post/{id}/get(getPost)/responses/500`.
+            /// - Remark: Generated from `#/paths//v2/author/{id}/get(getAuthor)/responses/500`.
             ///
             /// HTTP response code: `500 internalServerError`.
             case internalServerError(Components.Responses.Error500)
@@ -3381,15 +2630,30 @@ public enum Operations {
                 }
             }
             public struct NotFound: Sendable, Hashable {
-                /// - Remark: Generated from `#/paths/v1/post/{id}/GET/responses/404/content`.
+                /// - Remark: Generated from `#/paths/v2/author/{id}/GET/responses/404/content`.
                 @frozen public enum Body: Sendable, Hashable {
-                    /// - Remark: Generated from `#/paths/v1/post/{id}/GET/responses/404/content/application\/json`.
-                    case json(Components.Schemas._Error)
+                    /// - Remark: Generated from `#/paths/v2/author/{id}/GET/responses/404/content/json`.
+                    public struct JsonPayload: Codable, Hashable, Sendable {
+                        /// - Remark: Generated from `#/paths/v2/author/{id}/GET/responses/404/content/json/error`.
+                        public var error: Swift.String?
+                        /// Creates a new `JsonPayload`.
+                        ///
+                        /// - Parameters:
+                        ///   - error:
+                        public init(error: Swift.String? = nil) {
+                            self.error = error
+                        }
+                        public enum CodingKeys: String, CodingKey {
+                            case error
+                        }
+                    }
+                    /// - Remark: Generated from `#/paths/v2/author/{id}/GET/responses/404/content/application\/json`.
+                    case json(Operations.GetAuthor.Output.NotFound.Body.JsonPayload)
                     /// The associated value of the enum case if `self` is `.json`.
                     ///
                     /// - Throws: An error if `self` is not `.json`.
                     /// - SeeAlso: `.json`.
-                    public var json: Components.Schemas._Error {
+                    public var json: Operations.GetAuthor.Output.NotFound.Body.JsonPayload {
                         get throws {
                             switch self {
                             case let .json(body):
@@ -3399,26 +2663,26 @@ public enum Operations {
                     }
                 }
                 /// Received HTTP response body
-                public var body: Operations.GetPost.Output.NotFound.Body
+                public var body: Operations.GetAuthor.Output.NotFound.Body
                 /// Creates a new `NotFound`.
                 ///
                 /// - Parameters:
                 ///   - body: Received HTTP response body
-                public init(body: Operations.GetPost.Output.NotFound.Body) {
+                public init(body: Operations.GetAuthor.Output.NotFound.Body) {
                     self.body = body
                 }
             }
-            /// The requested Blog Post record was not found.
+            /// The requested Authors record was not found.
             ///
-            /// - Remark: Generated from `#/paths//v1/post/{id}/get(getPost)/responses/404`.
+            /// - Remark: Generated from `#/paths//v2/author/{id}/get(getAuthor)/responses/404`.
             ///
             /// HTTP response code: `404 notFound`.
-            case notFound(Operations.GetPost.Output.NotFound)
+            case notFound(Operations.GetAuthor.Output.NotFound)
             /// The associated value of the enum case if `self` is `.notFound`.
             ///
             /// - Throws: An error if `self` is not `.notFound`.
             /// - SeeAlso: `.notFound`.
-            public var notFound: Operations.GetPost.Output.NotFound {
+            public var notFound: Operations.GetAuthor.Output.NotFound {
                 get throws {
                     switch self {
                     case let .notFound(response):
@@ -3432,15 +2696,15 @@ public enum Operations {
                 }
             }
             public struct Ok: Sendable, Hashable {
-                /// - Remark: Generated from `#/paths/v1/post/{id}/GET/responses/200/content`.
+                /// - Remark: Generated from `#/paths/v2/author/{id}/GET/responses/200/content`.
                 @frozen public enum Body: Sendable, Hashable {
-                    /// - Remark: Generated from `#/paths/v1/post/{id}/GET/responses/200/content/application\/json`.
-                    case json(Components.Schemas.Post)
+                    /// - Remark: Generated from `#/paths/v2/author/{id}/GET/responses/200/content/application\/json`.
+                    case json(Components.Schemas.Author)
                     /// The associated value of the enum case if `self` is `.json`.
                     ///
                     /// - Throws: An error if `self` is not `.json`.
                     /// - SeeAlso: `.json`.
-                    public var json: Components.Schemas.Post {
+                    public var json: Components.Schemas.Author {
                         get throws {
                             switch self {
                             case let .json(body):
@@ -3450,26 +2714,26 @@ public enum Operations {
                     }
                 }
                 /// Received HTTP response body
-                public var body: Operations.GetPost.Output.Ok.Body
+                public var body: Operations.GetAuthor.Output.Ok.Body
                 /// Creates a new `Ok`.
                 ///
                 /// - Parameters:
                 ///   - body: Received HTTP response body
-                public init(body: Operations.GetPost.Output.Ok.Body) {
+                public init(body: Operations.GetAuthor.Output.Ok.Body) {
                     self.body = body
                 }
             }
-            /// Successfully got the requested Blog Post
+            /// Successfully got the requested Authors
             ///
-            /// - Remark: Generated from `#/paths//v1/post/{id}/get(getPost)/responses/200`.
+            /// - Remark: Generated from `#/paths//v2/author/{id}/get(getAuthor)/responses/200`.
             ///
             /// HTTP response code: `200 ok`.
-            case ok(Operations.GetPost.Output.Ok)
+            case ok(Operations.GetAuthor.Output.Ok)
             /// The associated value of the enum case if `self` is `.ok`.
             ///
             /// - Throws: An error if `self` is not `.ok`.
             /// - SeeAlso: `.ok`.
-            public var ok: Operations.GetPost.Output.Ok {
+            public var ok: Operations.GetAuthor.Output.Ok {
                 get throws {
                     switch self {
                     case let .ok(response):
@@ -3484,7 +2748,2308 @@ public enum Operations {
             }
             /// Too Many Requests.  Your application has issued too many API requests in too short of a time frame.
             ///
-            /// - Remark: Generated from `#/paths//v1/post/{id}/get(getPost)/responses/429`.
+            /// - Remark: Generated from `#/paths//v2/author/{id}/get(getAuthor)/responses/429`.
+            ///
+            /// HTTP response code: `429 tooManyRequests`.
+            case tooManyRequests(Components.Responses.Error429)
+            /// The associated value of the enum case if `self` is `.tooManyRequests`.
+            ///
+            /// - Throws: An error if `self` is not `.tooManyRequests`.
+            /// - SeeAlso: `.tooManyRequests`.
+            public var tooManyRequests: Components.Responses.Error429 {
+                get throws {
+                    switch self {
+                    case let .tooManyRequests(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "tooManyRequests",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Undocumented response.
+            ///
+            /// A response with a code that is not documented in the OpenAPI document.
+            case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json
+                ]
+            }
+        }
+    }
+    /// Search for Blog Posts records by query string
+    ///
+    /// Execute a query on this table, using query criteria as specified in query string parameters.
+    ///
+    /// * Pagination is managed via the `pageNo` & `pageSize` query string parameters.  pageNo starts at 1.  pageSize defaults to 50.
+    /// * By default, the response includes the total count of records that match the query criteria.  The count can be omitted by specifying `includeCount=false`
+    /// * By default, results are sorted by the table's primary key, descending.  This can be changed by specifying the `orderBy` query string parameter, following SQL ORDER BY syntax (e.g., `fieldName1 ASC, fieldName2 DESC`)
+    /// * By default, all given query criteria are combined using logical AND.  This can be changed by specifying the query string parameter `booleanOperator=OR`.
+    /// * Each field on the table can be used as a query criteria.  Each query criteria field can be specified on the query string any number of times.
+    /// * By default, all criteria use the equals operator (e.g., `myField=value` means records will be returned where myField equals value).  Alternative operators can be used as follows:
+    ///   * Equals: `myField=value`
+    ///   * Not Equals: `myField=!value`
+    ///   * Less Than: `myField=&lt;value`
+    ///   * Greater Than: `myField=&gt;value`
+    ///   * Less Than or Equals: `myField=&lt;=value`
+    ///   * Greater Than or Equals: `myField=&gt;=value`
+    ///   * Empty (or null): `myField=EMPTY`
+    ///   * Not Empty: `myField=!EMPTY`
+    ///   * Between: `myField=BETWEEN value1,value2` (two values must be given, separated by commas)
+    ///   * Not Between: `myField=!BETWEEN value1,value2` (two values must be given, separated by commas)
+    ///   * In: `myField=IN value1,value2,...,valueN` (one or more values must be given, separated by commas)
+    ///   * Not In: `myField=!IN value1,value2,...,valueN` (one or more values must be given, separated by commas)
+    ///   * Like: `myField=LIKE value` (using standard SQL % and _ wildcards)
+    ///   * Not Like: `myField=!LIKE value` (using standard SQL % and _ wildcards)
+    ///
+    ///
+    /// - Remark: HTTP `GET /v2/blogPost/query`.
+    /// - Remark: Generated from `#/paths//v2/blogPost/query/get(queryBlogPost)`.
+    public enum QueryBlogPost {
+        public static let id: Swift.String = "queryBlogPost"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v2/blogPost/query/GET/query`.
+            public struct Query: Sendable, Hashable {
+                /// Which page of results to return.  Starts at 1.
+                ///
+                /// - Remark: Generated from `#/paths/v2/blogPost/query/GET/query/pageNo`.
+                public var pageNo: Swift.Int?
+                /// Max number of records to include in a page.  Defaults to 50.  Must be between 1 and 1000.
+                ///
+                /// - Remark: Generated from `#/paths/v2/blogPost/query/GET/query/pageSize`.
+                public var pageSize: Swift.Int?
+                /// Whether or not to include the count (total matching records) in the result. Default is true.
+                ///
+                /// - Remark: Generated from `#/paths/v2/blogPost/query/GET/query/includeCount`.
+                public var includeCount: Swift.Bool?
+                /// How the results of the query should be sorted. SQL-style, comma-separated list of field names, each optionally followed by ASC or DESC (defaults to ASC).
+                ///
+                /// - Remark: Generated from `#/paths/v2/blogPost/query/GET/query/orderBy`.
+                public var orderBy: Swift.String?
+                /// - Remark: Generated from `#/paths/v2/blogPost/query/GET/query/booleanOperator`.
+                @frozen public enum BooleanOperatorPayload: String, Codable, Hashable, Sendable, CaseIterable {
+                    case and = "AND"
+                    case or = "OR"
+                }
+                /// Whether to combine query field as an AND or an OR.  Default is AND.
+                ///
+                /// - Remark: Generated from `#/paths/v2/blogPost/query/GET/query/booleanOperator`.
+                public var booleanOperator: Operations.QueryBlogPost.Input.Query.BooleanOperatorPayload?
+                /// Query on the Author field.  Can prefix value with an operator, else defaults to = (equals).
+                ///
+                /// - Remark: Generated from `#/paths/v2/blogPost/query/GET/query/authorId`.
+                public var authorId: [Swift.String]?
+                /// Query on the Blog field.  Can prefix value with an operator, else defaults to = (equals).
+                ///
+                /// - Remark: Generated from `#/paths/v2/blogPost/query/GET/query/blogId`.
+                public var blogId: [Swift.String]?
+                /// Query on the Content field.  Can prefix value with an operator, else defaults to = (equals).
+                ///
+                /// - Remark: Generated from `#/paths/v2/blogPost/query/GET/query/content`.
+                public var content: [Swift.String]?
+                /// Query on the Create Date field.  Can prefix value with an operator, else defaults to = (equals).
+                ///
+                /// - Remark: Generated from `#/paths/v2/blogPost/query/GET/query/createDate`.
+                public var createDate: [Swift.String]?
+                /// Query on the Description field.  Can prefix value with an operator, else defaults to = (equals).
+                ///
+                /// - Remark: Generated from `#/paths/v2/blogPost/query/GET/query/description`.
+                public var description: [Swift.String]?
+                /// Query on the Excerpt field.  Can prefix value with an operator, else defaults to = (equals).
+                ///
+                /// - Remark: Generated from `#/paths/v2/blogPost/query/GET/query/excerpt`.
+                public var excerpt: [Swift.String]?
+                /// Query on the Featured Image URL field.  Can prefix value with an operator, else defaults to = (equals).
+                ///
+                /// - Remark: Generated from `#/paths/v2/blogPost/query/GET/query/featuredImage`.
+                public var featuredImage: [Swift.String]?
+                /// Query on the Featured Media field.  Can prefix value with an operator, else defaults to = (equals).
+                ///
+                /// - Remark: Generated from `#/paths/v2/blogPost/query/GET/query/featuredMediaId`.
+                public var featuredMediaId: [Swift.String]?
+                /// Query on the Id field.  Can prefix value with an operator, else defaults to = (equals).
+                ///
+                /// - Remark: Generated from `#/paths/v2/blogPost/query/GET/query/id`.
+                public var id: [Swift.String]?
+                /// Query on the Is Featured field.  Can prefix value with an operator, else defaults to = (equals).
+                ///
+                /// - Remark: Generated from `#/paths/v2/blogPost/query/GET/query/isFeatured`.
+                public var isFeatured: [Swift.String]?
+                /// Query on the Is Published field.  Can prefix value with an operator, else defaults to = (equals).
+                ///
+                /// - Remark: Generated from `#/paths/v2/blogPost/query/GET/query/isPublished`.
+                public var isPublished: [Swift.String]?
+                /// Query on the Link Description field.  Can prefix value with an operator, else defaults to = (equals).
+                ///
+                /// - Remark: Generated from `#/paths/v2/blogPost/query/GET/query/linkDescription`.
+                public var linkDescription: [Swift.String]?
+                /// Query on the Link Image URL field.  Can prefix value with an operator, else defaults to = (equals).
+                ///
+                /// - Remark: Generated from `#/paths/v2/blogPost/query/GET/query/linkImageUrl`.
+                public var linkImageUrl: [Swift.String]?
+                /// Query on the Link Title field.  Can prefix value with an operator, else defaults to = (equals).
+                ///
+                /// - Remark: Generated from `#/paths/v2/blogPost/query/GET/query/linkTitle`.
+                public var linkTitle: [Swift.String]?
+                /// Query on the Link URL field.  Can prefix value with an operator, else defaults to = (equals).
+                ///
+                /// - Remark: Generated from `#/paths/v2/blogPost/query/GET/query/linkUrl`.
+                public var linkUrl: [Swift.String]?
+                /// Query on the Location field.  Can prefix value with an operator, else defaults to = (equals).
+                ///
+                /// - Remark: Generated from `#/paths/v2/blogPost/query/GET/query/locationLabel`.
+                public var locationLabel: [Swift.String]?
+                /// Query on the Meta Description field.  Can prefix value with an operator, else defaults to = (equals).
+                ///
+                /// - Remark: Generated from `#/paths/v2/blogPost/query/GET/query/metaDescription`.
+                public var metaDescription: [Swift.String]?
+                /// Query on the Meta Keywords field.  Can prefix value with an operator, else defaults to = (equals).
+                ///
+                /// - Remark: Generated from `#/paths/v2/blogPost/query/GET/query/metaKeywords`.
+                public var metaKeywords: [Swift.String]?
+                /// Query on the Meta Title field.  Can prefix value with an operator, else defaults to = (equals).
+                ///
+                /// - Remark: Generated from `#/paths/v2/blogPost/query/GET/query/metaTitle`.
+                public var metaTitle: [Swift.String]?
+                /// Query on the Modify Date field.  Can prefix value with an operator, else defaults to = (equals).
+                ///
+                /// - Remark: Generated from `#/paths/v2/blogPost/query/GET/query/modifyDate`.
+                public var modifyDate: [Swift.String]?
+                /// Query on the Name field.  Can prefix value with an operator, else defaults to = (equals).
+                ///
+                /// - Remark: Generated from `#/paths/v2/blogPost/query/GET/query/name`.
+                public var name: [Swift.String]?
+                /// Query on the Publish Date field.  Can prefix value with an operator, else defaults to = (equals).
+                ///
+                /// - Remark: Generated from `#/paths/v2/blogPost/query/GET/query/publishDate`.
+                public var publishDate: [Swift.String]?
+                /// Query on the Read Time field.  Can prefix value with an operator, else defaults to = (equals).
+                ///
+                /// - Remark: Generated from `#/paths/v2/blogPost/query/GET/query/readTime`.
+                public var readTime: [Swift.String]?
+                /// Query on the Scheduled Publish At field.  Can prefix value with an operator, else defaults to = (equals).
+                ///
+                /// - Remark: Generated from `#/paths/v2/blogPost/query/GET/query/scheduledPublishAt`.
+                public var scheduledPublishAt: [Swift.String]?
+                /// Query on the Short Name field.  Can prefix value with an operator, else defaults to = (equals).
+                ///
+                /// - Remark: Generated from `#/paths/v2/blogPost/query/GET/query/shortName`.
+                public var shortName: [Swift.String]?
+                /// Query on the Slug field.  Can prefix value with an operator, else defaults to = (equals).
+                ///
+                /// - Remark: Generated from `#/paths/v2/blogPost/query/GET/query/slug`.
+                public var slug: [Swift.String]?
+                /// Query on the Title field.  Can prefix value with an operator, else defaults to = (equals).
+                ///
+                /// - Remark: Generated from `#/paths/v2/blogPost/query/GET/query/title`.
+                public var title: [Swift.String]?
+                /// Query on the View Count field.  Can prefix value with an operator, else defaults to = (equals).
+                ///
+                /// - Remark: Generated from `#/paths/v2/blogPost/query/GET/query/viewCount`.
+                public var viewCount: [Swift.String]?
+                /// Creates a new `Query`.
+                ///
+                /// - Parameters:
+                ///   - pageNo: Which page of results to return.  Starts at 1.
+                ///   - pageSize: Max number of records to include in a page.  Defaults to 50.  Must be between 1 and 1000.
+                ///   - includeCount: Whether or not to include the count (total matching records) in the result. Default is true.
+                ///   - orderBy: How the results of the query should be sorted. SQL-style, comma-separated list of field names, each optionally followed by ASC or DESC (defaults to ASC).
+                ///   - booleanOperator: Whether to combine query field as an AND or an OR.  Default is AND.
+                ///   - authorId: Query on the Author field.  Can prefix value with an operator, else defaults to = (equals).
+                ///   - blogId: Query on the Blog field.  Can prefix value with an operator, else defaults to = (equals).
+                ///   - content: Query on the Content field.  Can prefix value with an operator, else defaults to = (equals).
+                ///   - createDate: Query on the Create Date field.  Can prefix value with an operator, else defaults to = (equals).
+                ///   - description: Query on the Description field.  Can prefix value with an operator, else defaults to = (equals).
+                ///   - excerpt: Query on the Excerpt field.  Can prefix value with an operator, else defaults to = (equals).
+                ///   - featuredImage: Query on the Featured Image URL field.  Can prefix value with an operator, else defaults to = (equals).
+                ///   - featuredMediaId: Query on the Featured Media field.  Can prefix value with an operator, else defaults to = (equals).
+                ///   - id: Query on the Id field.  Can prefix value with an operator, else defaults to = (equals).
+                ///   - isFeatured: Query on the Is Featured field.  Can prefix value with an operator, else defaults to = (equals).
+                ///   - isPublished: Query on the Is Published field.  Can prefix value with an operator, else defaults to = (equals).
+                ///   - linkDescription: Query on the Link Description field.  Can prefix value with an operator, else defaults to = (equals).
+                ///   - linkImageUrl: Query on the Link Image URL field.  Can prefix value with an operator, else defaults to = (equals).
+                ///   - linkTitle: Query on the Link Title field.  Can prefix value with an operator, else defaults to = (equals).
+                ///   - linkUrl: Query on the Link URL field.  Can prefix value with an operator, else defaults to = (equals).
+                ///   - locationLabel: Query on the Location field.  Can prefix value with an operator, else defaults to = (equals).
+                ///   - metaDescription: Query on the Meta Description field.  Can prefix value with an operator, else defaults to = (equals).
+                ///   - metaKeywords: Query on the Meta Keywords field.  Can prefix value with an operator, else defaults to = (equals).
+                ///   - metaTitle: Query on the Meta Title field.  Can prefix value with an operator, else defaults to = (equals).
+                ///   - modifyDate: Query on the Modify Date field.  Can prefix value with an operator, else defaults to = (equals).
+                ///   - name: Query on the Name field.  Can prefix value with an operator, else defaults to = (equals).
+                ///   - publishDate: Query on the Publish Date field.  Can prefix value with an operator, else defaults to = (equals).
+                ///   - readTime: Query on the Read Time field.  Can prefix value with an operator, else defaults to = (equals).
+                ///   - scheduledPublishAt: Query on the Scheduled Publish At field.  Can prefix value with an operator, else defaults to = (equals).
+                ///   - shortName: Query on the Short Name field.  Can prefix value with an operator, else defaults to = (equals).
+                ///   - slug: Query on the Slug field.  Can prefix value with an operator, else defaults to = (equals).
+                ///   - title: Query on the Title field.  Can prefix value with an operator, else defaults to = (equals).
+                ///   - viewCount: Query on the View Count field.  Can prefix value with an operator, else defaults to = (equals).
+                public init(
+                    pageNo: Swift.Int? = nil,
+                    pageSize: Swift.Int? = nil,
+                    includeCount: Swift.Bool? = nil,
+                    orderBy: Swift.String? = nil,
+                    booleanOperator: Operations.QueryBlogPost.Input.Query.BooleanOperatorPayload? = nil,
+                    authorId: [Swift.String]? = nil,
+                    blogId: [Swift.String]? = nil,
+                    content: [Swift.String]? = nil,
+                    createDate: [Swift.String]? = nil,
+                    description: [Swift.String]? = nil,
+                    excerpt: [Swift.String]? = nil,
+                    featuredImage: [Swift.String]? = nil,
+                    featuredMediaId: [Swift.String]? = nil,
+                    id: [Swift.String]? = nil,
+                    isFeatured: [Swift.String]? = nil,
+                    isPublished: [Swift.String]? = nil,
+                    linkDescription: [Swift.String]? = nil,
+                    linkImageUrl: [Swift.String]? = nil,
+                    linkTitle: [Swift.String]? = nil,
+                    linkUrl: [Swift.String]? = nil,
+                    locationLabel: [Swift.String]? = nil,
+                    metaDescription: [Swift.String]? = nil,
+                    metaKeywords: [Swift.String]? = nil,
+                    metaTitle: [Swift.String]? = nil,
+                    modifyDate: [Swift.String]? = nil,
+                    name: [Swift.String]? = nil,
+                    publishDate: [Swift.String]? = nil,
+                    readTime: [Swift.String]? = nil,
+                    scheduledPublishAt: [Swift.String]? = nil,
+                    shortName: [Swift.String]? = nil,
+                    slug: [Swift.String]? = nil,
+                    title: [Swift.String]? = nil,
+                    viewCount: [Swift.String]? = nil
+                ) {
+                    self.pageNo = pageNo
+                    self.pageSize = pageSize
+                    self.includeCount = includeCount
+                    self.orderBy = orderBy
+                    self.booleanOperator = booleanOperator
+                    self.authorId = authorId
+                    self.blogId = blogId
+                    self.content = content
+                    self.createDate = createDate
+                    self.description = description
+                    self.excerpt = excerpt
+                    self.featuredImage = featuredImage
+                    self.featuredMediaId = featuredMediaId
+                    self.id = id
+                    self.isFeatured = isFeatured
+                    self.isPublished = isPublished
+                    self.linkDescription = linkDescription
+                    self.linkImageUrl = linkImageUrl
+                    self.linkTitle = linkTitle
+                    self.linkUrl = linkUrl
+                    self.locationLabel = locationLabel
+                    self.metaDescription = metaDescription
+                    self.metaKeywords = metaKeywords
+                    self.metaTitle = metaTitle
+                    self.modifyDate = modifyDate
+                    self.name = name
+                    self.publishDate = publishDate
+                    self.readTime = readTime
+                    self.scheduledPublishAt = scheduledPublishAt
+                    self.shortName = shortName
+                    self.slug = slug
+                    self.title = title
+                    self.viewCount = viewCount
+                }
+            }
+            public var query: Operations.QueryBlogPost.Input.Query
+            /// - Remark: Generated from `#/paths/v2/blogPost/query/GET/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.QueryBlogPost.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.QueryBlogPost.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.QueryBlogPost.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - query:
+            ///   - headers:
+            public init(
+                query: Operations.QueryBlogPost.Input.Query = .init(),
+                headers: Operations.QueryBlogPost.Input.Headers = .init()
+            ) {
+                self.query = query
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            /// Bad Request.  Some portion of the request's content was not acceptable to the server.  See error message in body for details.
+            ///
+            /// - Remark: Generated from `#/paths//v2/blogPost/query/get(queryBlogPost)/responses/400`.
+            ///
+            /// HTTP response code: `400 badRequest`.
+            case badRequest(Components.Responses.Error400)
+            /// The associated value of the enum case if `self` is `.badRequest`.
+            ///
+            /// - Throws: An error if `self` is not `.badRequest`.
+            /// - SeeAlso: `.badRequest`.
+            public var badRequest: Components.Responses.Error400 {
+                get throws {
+                    switch self {
+                    case let .badRequest(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "badRequest",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Unauthorized.  The required authentication credentials were missing or invalid.
+            ///
+            /// - Remark: Generated from `#/paths//v2/blogPost/query/get(queryBlogPost)/responses/401`.
+            ///
+            /// HTTP response code: `401 unauthorized`.
+            case unauthorized(Components.Responses.Error401)
+            /// The associated value of the enum case if `self` is `.unauthorized`.
+            ///
+            /// - Throws: An error if `self` is not `.unauthorized`.
+            /// - SeeAlso: `.unauthorized`.
+            public var unauthorized: Components.Responses.Error401 {
+                get throws {
+                    switch self {
+                    case let .unauthorized(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "unauthorized",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Forbidden.  You do not have permission to access the requested resource.
+            ///
+            /// - Remark: Generated from `#/paths//v2/blogPost/query/get(queryBlogPost)/responses/403`.
+            ///
+            /// HTTP response code: `403 forbidden`.
+            case forbidden(Components.Responses.Error403)
+            /// The associated value of the enum case if `self` is `.forbidden`.
+            ///
+            /// - Throws: An error if `self` is not `.forbidden`.
+            /// - SeeAlso: `.forbidden`.
+            public var forbidden: Components.Responses.Error403 {
+                get throws {
+                    switch self {
+                    case let .forbidden(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "forbidden",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Internal Server Error.  An error occurred in the server while processing the request.
+            ///
+            /// - Remark: Generated from `#/paths//v2/blogPost/query/get(queryBlogPost)/responses/500`.
+            ///
+            /// HTTP response code: `500 internalServerError`.
+            case internalServerError(Components.Responses.Error500)
+            /// The associated value of the enum case if `self` is `.internalServerError`.
+            ///
+            /// - Throws: An error if `self` is not `.internalServerError`.
+            /// - SeeAlso: `.internalServerError`.
+            public var internalServerError: Components.Responses.Error500 {
+                get throws {
+                    switch self {
+                    case let .internalServerError(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "internalServerError",
+                            response: self
+                        )
+                    }
+                }
+            }
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v2/blogPost/query/GET/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v2/blogPost/query/GET/responses/200/content/application\/json`.
+                    case json(Components.Schemas.BlogPostSearchResult)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas.BlogPostSearchResult {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.QueryBlogPost.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.QueryBlogPost.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Successfully searched the Blog Posts table (though may have found 0 records).
+            ///
+            /// - Remark: Generated from `#/paths//v2/blogPost/query/get(queryBlogPost)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.QueryBlogPost.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.QueryBlogPost.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Too Many Requests.  Your application has issued too many API requests in too short of a time frame.
+            ///
+            /// - Remark: Generated from `#/paths//v2/blogPost/query/get(queryBlogPost)/responses/429`.
+            ///
+            /// HTTP response code: `429 tooManyRequests`.
+            case tooManyRequests(Components.Responses.Error429)
+            /// The associated value of the enum case if `self` is `.tooManyRequests`.
+            ///
+            /// - Throws: An error if `self` is not `.tooManyRequests`.
+            /// - SeeAlso: `.tooManyRequests`.
+            public var tooManyRequests: Components.Responses.Error429 {
+                get throws {
+                    switch self {
+                    case let .tooManyRequests(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "tooManyRequests",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Undocumented response.
+            ///
+            /// A response with a code that is not documented in the OpenAPI document.
+            case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json
+                ]
+            }
+        }
+    }
+    /// Get one Blog Posts by Id
+    ///
+    /// Get one record from this table, by specifying its primary key as a path parameter.
+    ///
+    ///
+    /// - Remark: HTTP `GET /v2/blogPost/{id}`.
+    /// - Remark: Generated from `#/paths//v2/blogPost/{id}/get(getBlogPost)`.
+    public enum GetBlogPost {
+        public static let id: Swift.String = "getBlogPost"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v2/blogPost/{id}/GET/path`.
+            public struct Path: Sendable, Hashable {
+                /// Id of the Blog Posts to get.
+                ///
+                /// - Remark: Generated from `#/paths/v2/blogPost/{id}/GET/path/id`.
+                public var id: Swift.Int
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - id: Id of the Blog Posts to get.
+                public init(id: Swift.Int) {
+                    self.id = id
+                }
+            }
+            public var path: Operations.GetBlogPost.Input.Path
+            /// - Remark: Generated from `#/paths/v2/blogPost/{id}/GET/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.GetBlogPost.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.GetBlogPost.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.GetBlogPost.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            public init(
+                path: Operations.GetBlogPost.Input.Path,
+                headers: Operations.GetBlogPost.Input.Headers = .init()
+            ) {
+                self.path = path
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            /// Bad Request.  Some portion of the request's content was not acceptable to the server.  See error message in body for details.
+            ///
+            /// - Remark: Generated from `#/paths//v2/blogPost/{id}/get(getBlogPost)/responses/400`.
+            ///
+            /// HTTP response code: `400 badRequest`.
+            case badRequest(Components.Responses.Error400)
+            /// The associated value of the enum case if `self` is `.badRequest`.
+            ///
+            /// - Throws: An error if `self` is not `.badRequest`.
+            /// - SeeAlso: `.badRequest`.
+            public var badRequest: Components.Responses.Error400 {
+                get throws {
+                    switch self {
+                    case let .badRequest(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "badRequest",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Unauthorized.  The required authentication credentials were missing or invalid.
+            ///
+            /// - Remark: Generated from `#/paths//v2/blogPost/{id}/get(getBlogPost)/responses/401`.
+            ///
+            /// HTTP response code: `401 unauthorized`.
+            case unauthorized(Components.Responses.Error401)
+            /// The associated value of the enum case if `self` is `.unauthorized`.
+            ///
+            /// - Throws: An error if `self` is not `.unauthorized`.
+            /// - SeeAlso: `.unauthorized`.
+            public var unauthorized: Components.Responses.Error401 {
+                get throws {
+                    switch self {
+                    case let .unauthorized(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "unauthorized",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Forbidden.  You do not have permission to access the requested resource.
+            ///
+            /// - Remark: Generated from `#/paths//v2/blogPost/{id}/get(getBlogPost)/responses/403`.
+            ///
+            /// HTTP response code: `403 forbidden`.
+            case forbidden(Components.Responses.Error403)
+            /// The associated value of the enum case if `self` is `.forbidden`.
+            ///
+            /// - Throws: An error if `self` is not `.forbidden`.
+            /// - SeeAlso: `.forbidden`.
+            public var forbidden: Components.Responses.Error403 {
+                get throws {
+                    switch self {
+                    case let .forbidden(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "forbidden",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Internal Server Error.  An error occurred in the server while processing the request.
+            ///
+            /// - Remark: Generated from `#/paths//v2/blogPost/{id}/get(getBlogPost)/responses/500`.
+            ///
+            /// HTTP response code: `500 internalServerError`.
+            case internalServerError(Components.Responses.Error500)
+            /// The associated value of the enum case if `self` is `.internalServerError`.
+            ///
+            /// - Throws: An error if `self` is not `.internalServerError`.
+            /// - SeeAlso: `.internalServerError`.
+            public var internalServerError: Components.Responses.Error500 {
+                get throws {
+                    switch self {
+                    case let .internalServerError(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "internalServerError",
+                            response: self
+                        )
+                    }
+                }
+            }
+            public struct NotFound: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v2/blogPost/{id}/GET/responses/404/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v2/blogPost/{id}/GET/responses/404/content/json`.
+                    public struct JsonPayload: Codable, Hashable, Sendable {
+                        /// - Remark: Generated from `#/paths/v2/blogPost/{id}/GET/responses/404/content/json/error`.
+                        public var error: Swift.String?
+                        /// Creates a new `JsonPayload`.
+                        ///
+                        /// - Parameters:
+                        ///   - error:
+                        public init(error: Swift.String? = nil) {
+                            self.error = error
+                        }
+                        public enum CodingKeys: String, CodingKey {
+                            case error
+                        }
+                    }
+                    /// - Remark: Generated from `#/paths/v2/blogPost/{id}/GET/responses/404/content/application\/json`.
+                    case json(Operations.GetBlogPost.Output.NotFound.Body.JsonPayload)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Operations.GetBlogPost.Output.NotFound.Body.JsonPayload {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.GetBlogPost.Output.NotFound.Body
+                /// Creates a new `NotFound`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.GetBlogPost.Output.NotFound.Body) {
+                    self.body = body
+                }
+            }
+            /// The requested Blog Posts record was not found.
+            ///
+            /// - Remark: Generated from `#/paths//v2/blogPost/{id}/get(getBlogPost)/responses/404`.
+            ///
+            /// HTTP response code: `404 notFound`.
+            case notFound(Operations.GetBlogPost.Output.NotFound)
+            /// The associated value of the enum case if `self` is `.notFound`.
+            ///
+            /// - Throws: An error if `self` is not `.notFound`.
+            /// - SeeAlso: `.notFound`.
+            public var notFound: Operations.GetBlogPost.Output.NotFound {
+                get throws {
+                    switch self {
+                    case let .notFound(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "notFound",
+                            response: self
+                        )
+                    }
+                }
+            }
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v2/blogPost/{id}/GET/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v2/blogPost/{id}/GET/responses/200/content/application\/json`.
+                    case json(Components.Schemas.BlogPost)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas.BlogPost {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.GetBlogPost.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.GetBlogPost.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Successfully got the requested Blog Posts
+            ///
+            /// - Remark: Generated from `#/paths//v2/blogPost/{id}/get(getBlogPost)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.GetBlogPost.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.GetBlogPost.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Too Many Requests.  Your application has issued too many API requests in too short of a time frame.
+            ///
+            /// - Remark: Generated from `#/paths//v2/blogPost/{id}/get(getBlogPost)/responses/429`.
+            ///
+            /// HTTP response code: `429 tooManyRequests`.
+            case tooManyRequests(Components.Responses.Error429)
+            /// The associated value of the enum case if `self` is `.tooManyRequests`.
+            ///
+            /// - Throws: An error if `self` is not `.tooManyRequests`.
+            /// - SeeAlso: `.tooManyRequests`.
+            public var tooManyRequests: Components.Responses.Error429 {
+                get throws {
+                    switch self {
+                    case let .tooManyRequests(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "tooManyRequests",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Undocumented response.
+            ///
+            /// A response with a code that is not documented in the OpenAPI document.
+            case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json
+                ]
+            }
+        }
+    }
+    /// Update one Blog Posts
+    ///
+    /// Update one record in this table, by specifying its primary key as a path parameter, and by supplying values to be updated in the request body.
+    ///
+    /// * Only the fields provided in the request body will be updated.
+    /// * To remove a value from a field, supply the key for the field, with a null value.
+    /// * The request body does not need to contain all fields from the table.  Rather, only the fields to be updated should be supplied.
+    /// * Any unrecognized field names in the body will cause a 400 error.
+    /// * Any read-only (non-editable) fields provided in the body will be silently ignored.
+    /// * Note that if the request body includes the primary key, it will be ignored.  Only the primary key value path parameter will be used.
+    ///
+    /// Upon success, a status code of 204 (`No Content`) is returned, with no response body.
+    ///
+    ///
+    /// - Remark: HTTP `PATCH /v2/blogPost/{id}`.
+    /// - Remark: Generated from `#/paths//v2/blogPost/{id}/patch(updateBlogPost)`.
+    public enum UpdateBlogPost {
+        public static let id: Swift.String = "updateBlogPost"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v2/blogPost/{id}/PATCH/path`.
+            public struct Path: Sendable, Hashable {
+                /// Id of the Blog Posts to update.
+                ///
+                /// - Remark: Generated from `#/paths/v2/blogPost/{id}/PATCH/path/id`.
+                public var id: Swift.Int
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - id: Id of the Blog Posts to update.
+                public init(id: Swift.Int) {
+                    self.id = id
+                }
+            }
+            public var path: Operations.UpdateBlogPost.Input.Path
+            /// - Remark: Generated from `#/paths/v2/blogPost/{id}/PATCH/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.UpdateBlogPost.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.UpdateBlogPost.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.UpdateBlogPost.Input.Headers
+            /// - Remark: Generated from `#/paths/v2/blogPost/{id}/PATCH/requestBody`.
+            @frozen public enum Body: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v2/blogPost/{id}/PATCH/requestBody/content/application\/json`.
+                case json(Components.Schemas.BlogPost)
+            }
+            public var body: Operations.UpdateBlogPost.Input.Body
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            ///   - body:
+            public init(
+                path: Operations.UpdateBlogPost.Input.Path,
+                headers: Operations.UpdateBlogPost.Input.Headers = .init(),
+                body: Operations.UpdateBlogPost.Input.Body
+            ) {
+                self.path = path
+                self.headers = headers
+                self.body = body
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            /// Bad Request.  Some portion of the request's content was not acceptable to the server.  See error message in body for details.
+            ///
+            /// - Remark: Generated from `#/paths//v2/blogPost/{id}/patch(updateBlogPost)/responses/400`.
+            ///
+            /// HTTP response code: `400 badRequest`.
+            case badRequest(Components.Responses.Error400)
+            /// The associated value of the enum case if `self` is `.badRequest`.
+            ///
+            /// - Throws: An error if `self` is not `.badRequest`.
+            /// - SeeAlso: `.badRequest`.
+            public var badRequest: Components.Responses.Error400 {
+                get throws {
+                    switch self {
+                    case let .badRequest(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "badRequest",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Unauthorized.  The required authentication credentials were missing or invalid.
+            ///
+            /// - Remark: Generated from `#/paths//v2/blogPost/{id}/patch(updateBlogPost)/responses/401`.
+            ///
+            /// HTTP response code: `401 unauthorized`.
+            case unauthorized(Components.Responses.Error401)
+            /// The associated value of the enum case if `self` is `.unauthorized`.
+            ///
+            /// - Throws: An error if `self` is not `.unauthorized`.
+            /// - SeeAlso: `.unauthorized`.
+            public var unauthorized: Components.Responses.Error401 {
+                get throws {
+                    switch self {
+                    case let .unauthorized(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "unauthorized",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Forbidden.  You do not have permission to access the requested resource.
+            ///
+            /// - Remark: Generated from `#/paths//v2/blogPost/{id}/patch(updateBlogPost)/responses/403`.
+            ///
+            /// HTTP response code: `403 forbidden`.
+            case forbidden(Components.Responses.Error403)
+            /// The associated value of the enum case if `self` is `.forbidden`.
+            ///
+            /// - Throws: An error if `self` is not `.forbidden`.
+            /// - SeeAlso: `.forbidden`.
+            public var forbidden: Components.Responses.Error403 {
+                get throws {
+                    switch self {
+                    case let .forbidden(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "forbidden",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Internal Server Error.  An error occurred in the server while processing the request.
+            ///
+            /// - Remark: Generated from `#/paths//v2/blogPost/{id}/patch(updateBlogPost)/responses/500`.
+            ///
+            /// HTTP response code: `500 internalServerError`.
+            case internalServerError(Components.Responses.Error500)
+            /// The associated value of the enum case if `self` is `.internalServerError`.
+            ///
+            /// - Throws: An error if `self` is not `.internalServerError`.
+            /// - SeeAlso: `.internalServerError`.
+            public var internalServerError: Components.Responses.Error500 {
+                get throws {
+                    switch self {
+                    case let .internalServerError(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "internalServerError",
+                            response: self
+                        )
+                    }
+                }
+            }
+            public struct NotFound: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v2/blogPost/{id}/PATCH/responses/404/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v2/blogPost/{id}/PATCH/responses/404/content/json`.
+                    public struct JsonPayload: Codable, Hashable, Sendable {
+                        /// - Remark: Generated from `#/paths/v2/blogPost/{id}/PATCH/responses/404/content/json/error`.
+                        public var error: Swift.String?
+                        /// Creates a new `JsonPayload`.
+                        ///
+                        /// - Parameters:
+                        ///   - error:
+                        public init(error: Swift.String? = nil) {
+                            self.error = error
+                        }
+                        public enum CodingKeys: String, CodingKey {
+                            case error
+                        }
+                    }
+                    /// - Remark: Generated from `#/paths/v2/blogPost/{id}/PATCH/responses/404/content/application\/json`.
+                    case json(Operations.UpdateBlogPost.Output.NotFound.Body.JsonPayload)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Operations.UpdateBlogPost.Output.NotFound.Body.JsonPayload {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.UpdateBlogPost.Output.NotFound.Body
+                /// Creates a new `NotFound`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.UpdateBlogPost.Output.NotFound.Body) {
+                    self.body = body
+                }
+            }
+            /// The requested Blog Posts record was not found.
+            ///
+            /// - Remark: Generated from `#/paths//v2/blogPost/{id}/patch(updateBlogPost)/responses/404`.
+            ///
+            /// HTTP response code: `404 notFound`.
+            case notFound(Operations.UpdateBlogPost.Output.NotFound)
+            /// The associated value of the enum case if `self` is `.notFound`.
+            ///
+            /// - Throws: An error if `self` is not `.notFound`.
+            /// - SeeAlso: `.notFound`.
+            public var notFound: Operations.UpdateBlogPost.Output.NotFound {
+                get throws {
+                    switch self {
+                    case let .notFound(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "notFound",
+                            response: self
+                        )
+                    }
+                }
+            }
+            public struct NoContent: Sendable, Hashable {
+                /// Creates a new `NoContent`.
+                public init() {}
+            }
+            /// Successfully updated the requested Blog Posts
+            ///
+            /// - Remark: Generated from `#/paths//v2/blogPost/{id}/patch(updateBlogPost)/responses/204`.
+            ///
+            /// HTTP response code: `204 noContent`.
+            case noContent(Operations.UpdateBlogPost.Output.NoContent)
+            /// Successfully updated the requested Blog Posts
+            ///
+            /// - Remark: Generated from `#/paths//v2/blogPost/{id}/patch(updateBlogPost)/responses/204`.
+            ///
+            /// HTTP response code: `204 noContent`.
+            public static var noContent: Self {
+                .noContent(.init())
+            }
+            /// The associated value of the enum case if `self` is `.noContent`.
+            ///
+            /// - Throws: An error if `self` is not `.noContent`.
+            /// - SeeAlso: `.noContent`.
+            public var noContent: Operations.UpdateBlogPost.Output.NoContent {
+                get throws {
+                    switch self {
+                    case let .noContent(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "noContent",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Too Many Requests.  Your application has issued too many API requests in too short of a time frame.
+            ///
+            /// - Remark: Generated from `#/paths//v2/blogPost/{id}/patch(updateBlogPost)/responses/429`.
+            ///
+            /// HTTP response code: `429 tooManyRequests`.
+            case tooManyRequests(Components.Responses.Error429)
+            /// The associated value of the enum case if `self` is `.tooManyRequests`.
+            ///
+            /// - Throws: An error if `self` is not `.tooManyRequests`.
+            /// - SeeAlso: `.tooManyRequests`.
+            public var tooManyRequests: Components.Responses.Error429 {
+                get throws {
+                    switch self {
+                    case let .tooManyRequests(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "tooManyRequests",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Undocumented response.
+            ///
+            /// A response with a code that is not documented in the OpenAPI document.
+            case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json
+                ]
+            }
+        }
+    }
+    /// Delete one Blog Posts
+    ///
+    /// Delete one record from this table, by specifying its primary key as a path parameter.
+    ///
+    /// Upon success, a status code of 204 (`No Content`) is returned, with no response body.
+    ///
+    ///
+    /// - Remark: HTTP `DELETE /v2/blogPost/{id}`.
+    /// - Remark: Generated from `#/paths//v2/blogPost/{id}/delete(deleteBlogPost)`.
+    public enum DeleteBlogPost {
+        public static let id: Swift.String = "deleteBlogPost"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v2/blogPost/{id}/DELETE/path`.
+            public struct Path: Sendable, Hashable {
+                /// Id of the Blog Posts to delete.
+                ///
+                /// - Remark: Generated from `#/paths/v2/blogPost/{id}/DELETE/path/id`.
+                public var id: Swift.Int
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - id: Id of the Blog Posts to delete.
+                public init(id: Swift.Int) {
+                    self.id = id
+                }
+            }
+            public var path: Operations.DeleteBlogPost.Input.Path
+            /// - Remark: Generated from `#/paths/v2/blogPost/{id}/DELETE/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.DeleteBlogPost.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.DeleteBlogPost.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.DeleteBlogPost.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            public init(
+                path: Operations.DeleteBlogPost.Input.Path,
+                headers: Operations.DeleteBlogPost.Input.Headers = .init()
+            ) {
+                self.path = path
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            /// Bad Request.  Some portion of the request's content was not acceptable to the server.  See error message in body for details.
+            ///
+            /// - Remark: Generated from `#/paths//v2/blogPost/{id}/delete(deleteBlogPost)/responses/400`.
+            ///
+            /// HTTP response code: `400 badRequest`.
+            case badRequest(Components.Responses.Error400)
+            /// The associated value of the enum case if `self` is `.badRequest`.
+            ///
+            /// - Throws: An error if `self` is not `.badRequest`.
+            /// - SeeAlso: `.badRequest`.
+            public var badRequest: Components.Responses.Error400 {
+                get throws {
+                    switch self {
+                    case let .badRequest(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "badRequest",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Unauthorized.  The required authentication credentials were missing or invalid.
+            ///
+            /// - Remark: Generated from `#/paths//v2/blogPost/{id}/delete(deleteBlogPost)/responses/401`.
+            ///
+            /// HTTP response code: `401 unauthorized`.
+            case unauthorized(Components.Responses.Error401)
+            /// The associated value of the enum case if `self` is `.unauthorized`.
+            ///
+            /// - Throws: An error if `self` is not `.unauthorized`.
+            /// - SeeAlso: `.unauthorized`.
+            public var unauthorized: Components.Responses.Error401 {
+                get throws {
+                    switch self {
+                    case let .unauthorized(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "unauthorized",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Forbidden.  You do not have permission to access the requested resource.
+            ///
+            /// - Remark: Generated from `#/paths//v2/blogPost/{id}/delete(deleteBlogPost)/responses/403`.
+            ///
+            /// HTTP response code: `403 forbidden`.
+            case forbidden(Components.Responses.Error403)
+            /// The associated value of the enum case if `self` is `.forbidden`.
+            ///
+            /// - Throws: An error if `self` is not `.forbidden`.
+            /// - SeeAlso: `.forbidden`.
+            public var forbidden: Components.Responses.Error403 {
+                get throws {
+                    switch self {
+                    case let .forbidden(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "forbidden",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Internal Server Error.  An error occurred in the server while processing the request.
+            ///
+            /// - Remark: Generated from `#/paths//v2/blogPost/{id}/delete(deleteBlogPost)/responses/500`.
+            ///
+            /// HTTP response code: `500 internalServerError`.
+            case internalServerError(Components.Responses.Error500)
+            /// The associated value of the enum case if `self` is `.internalServerError`.
+            ///
+            /// - Throws: An error if `self` is not `.internalServerError`.
+            /// - SeeAlso: `.internalServerError`.
+            public var internalServerError: Components.Responses.Error500 {
+                get throws {
+                    switch self {
+                    case let .internalServerError(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "internalServerError",
+                            response: self
+                        )
+                    }
+                }
+            }
+            public struct NotFound: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v2/blogPost/{id}/DELETE/responses/404/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v2/blogPost/{id}/DELETE/responses/404/content/json`.
+                    public struct JsonPayload: Codable, Hashable, Sendable {
+                        /// - Remark: Generated from `#/paths/v2/blogPost/{id}/DELETE/responses/404/content/json/error`.
+                        public var error: Swift.String?
+                        /// Creates a new `JsonPayload`.
+                        ///
+                        /// - Parameters:
+                        ///   - error:
+                        public init(error: Swift.String? = nil) {
+                            self.error = error
+                        }
+                        public enum CodingKeys: String, CodingKey {
+                            case error
+                        }
+                    }
+                    /// - Remark: Generated from `#/paths/v2/blogPost/{id}/DELETE/responses/404/content/application\/json`.
+                    case json(Operations.DeleteBlogPost.Output.NotFound.Body.JsonPayload)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Operations.DeleteBlogPost.Output.NotFound.Body.JsonPayload {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.DeleteBlogPost.Output.NotFound.Body
+                /// Creates a new `NotFound`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.DeleteBlogPost.Output.NotFound.Body) {
+                    self.body = body
+                }
+            }
+            /// The requested Blog Posts record was not found.
+            ///
+            /// - Remark: Generated from `#/paths//v2/blogPost/{id}/delete(deleteBlogPost)/responses/404`.
+            ///
+            /// HTTP response code: `404 notFound`.
+            case notFound(Operations.DeleteBlogPost.Output.NotFound)
+            /// The associated value of the enum case if `self` is `.notFound`.
+            ///
+            /// - Throws: An error if `self` is not `.notFound`.
+            /// - SeeAlso: `.notFound`.
+            public var notFound: Operations.DeleteBlogPost.Output.NotFound {
+                get throws {
+                    switch self {
+                    case let .notFound(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "notFound",
+                            response: self
+                        )
+                    }
+                }
+            }
+            public struct NoContent: Sendable, Hashable {
+                /// Creates a new `NoContent`.
+                public init() {}
+            }
+            /// Successfully deleted the requested Blog Posts
+            ///
+            /// - Remark: Generated from `#/paths//v2/blogPost/{id}/delete(deleteBlogPost)/responses/204`.
+            ///
+            /// HTTP response code: `204 noContent`.
+            case noContent(Operations.DeleteBlogPost.Output.NoContent)
+            /// Successfully deleted the requested Blog Posts
+            ///
+            /// - Remark: Generated from `#/paths//v2/blogPost/{id}/delete(deleteBlogPost)/responses/204`.
+            ///
+            /// HTTP response code: `204 noContent`.
+            public static var noContent: Self {
+                .noContent(.init())
+            }
+            /// The associated value of the enum case if `self` is `.noContent`.
+            ///
+            /// - Throws: An error if `self` is not `.noContent`.
+            /// - SeeAlso: `.noContent`.
+            public var noContent: Operations.DeleteBlogPost.Output.NoContent {
+                get throws {
+                    switch self {
+                    case let .noContent(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "noContent",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Too Many Requests.  Your application has issued too many API requests in too short of a time frame.
+            ///
+            /// - Remark: Generated from `#/paths//v2/blogPost/{id}/delete(deleteBlogPost)/responses/429`.
+            ///
+            /// HTTP response code: `429 tooManyRequests`.
+            case tooManyRequests(Components.Responses.Error429)
+            /// The associated value of the enum case if `self` is `.tooManyRequests`.
+            ///
+            /// - Throws: An error if `self` is not `.tooManyRequests`.
+            /// - SeeAlso: `.tooManyRequests`.
+            public var tooManyRequests: Components.Responses.Error429 {
+                get throws {
+                    switch self {
+                    case let .tooManyRequests(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "tooManyRequests",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Undocumented response.
+            ///
+            /// A response with a code that is not documented in the OpenAPI document.
+            case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json
+                ]
+            }
+        }
+    }
+    /// Create one Blog Posts
+    ///
+    /// Insert one record into this table by supplying the values to be inserted in the request body.
+    /// * The request body should not include a value for the table's primary key.  Rather, a value will be generated and returned in a successful response's body.
+    /// * Any unrecognized field names in the body will cause a 400 error.
+    /// * Any read-only (non-editable) fields provided in the body will be silently ignored.
+    ///
+    /// Upon success, a status code of 201 (`Created`) is returned, and the generated value for the primary key will be returned in the response body object.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v2/blogPost/`.
+    /// - Remark: Generated from `#/paths//v2/blogPost//post(createBlogPost)`.
+    public enum CreateBlogPost {
+        public static let id: Swift.String = "createBlogPost"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v2/blogPost/POST/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.CreateBlogPost.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.CreateBlogPost.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.CreateBlogPost.Input.Headers
+            /// - Remark: Generated from `#/paths/v2/blogPost/POST/requestBody`.
+            @frozen public enum Body: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v2/blogPost/POST/requestBody/content/application\/json`.
+                case json(Components.Schemas.BlogPost)
+            }
+            public var body: Operations.CreateBlogPost.Input.Body
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - headers:
+            ///   - body:
+            public init(
+                headers: Operations.CreateBlogPost.Input.Headers = .init(),
+                body: Operations.CreateBlogPost.Input.Body
+            ) {
+                self.headers = headers
+                self.body = body
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            /// Bad Request.  Some portion of the request's content was not acceptable to the server.  See error message in body for details.
+            ///
+            /// - Remark: Generated from `#/paths//v2/blogPost//post(createBlogPost)/responses/400`.
+            ///
+            /// HTTP response code: `400 badRequest`.
+            case badRequest(Components.Responses.Error400)
+            /// The associated value of the enum case if `self` is `.badRequest`.
+            ///
+            /// - Throws: An error if `self` is not `.badRequest`.
+            /// - SeeAlso: `.badRequest`.
+            public var badRequest: Components.Responses.Error400 {
+                get throws {
+                    switch self {
+                    case let .badRequest(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "badRequest",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Unauthorized.  The required authentication credentials were missing or invalid.
+            ///
+            /// - Remark: Generated from `#/paths//v2/blogPost//post(createBlogPost)/responses/401`.
+            ///
+            /// HTTP response code: `401 unauthorized`.
+            case unauthorized(Components.Responses.Error401)
+            /// The associated value of the enum case if `self` is `.unauthorized`.
+            ///
+            /// - Throws: An error if `self` is not `.unauthorized`.
+            /// - SeeAlso: `.unauthorized`.
+            public var unauthorized: Components.Responses.Error401 {
+                get throws {
+                    switch self {
+                    case let .unauthorized(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "unauthorized",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Forbidden.  You do not have permission to access the requested resource.
+            ///
+            /// - Remark: Generated from `#/paths//v2/blogPost//post(createBlogPost)/responses/403`.
+            ///
+            /// HTTP response code: `403 forbidden`.
+            case forbidden(Components.Responses.Error403)
+            /// The associated value of the enum case if `self` is `.forbidden`.
+            ///
+            /// - Throws: An error if `self` is not `.forbidden`.
+            /// - SeeAlso: `.forbidden`.
+            public var forbidden: Components.Responses.Error403 {
+                get throws {
+                    switch self {
+                    case let .forbidden(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "forbidden",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Internal Server Error.  An error occurred in the server while processing the request.
+            ///
+            /// - Remark: Generated from `#/paths//v2/blogPost//post(createBlogPost)/responses/500`.
+            ///
+            /// HTTP response code: `500 internalServerError`.
+            case internalServerError(Components.Responses.Error500)
+            /// The associated value of the enum case if `self` is `.internalServerError`.
+            ///
+            /// - Throws: An error if `self` is not `.internalServerError`.
+            /// - SeeAlso: `.internalServerError`.
+            public var internalServerError: Components.Responses.Error500 {
+                get throws {
+                    switch self {
+                    case let .internalServerError(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "internalServerError",
+                            response: self
+                        )
+                    }
+                }
+            }
+            public struct Created: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v2/blogPost/POST/responses/201/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v2/blogPost/POST/responses/201/content/json`.
+                    public struct JsonPayload: Codable, Hashable, Sendable {
+                        /// - Remark: Generated from `#/paths/v2/blogPost/POST/responses/201/content/json/id`.
+                        public var id: Swift.Int?
+                        /// Creates a new `JsonPayload`.
+                        ///
+                        /// - Parameters:
+                        ///   - id:
+                        public init(id: Swift.Int? = nil) {
+                            self.id = id
+                        }
+                        public enum CodingKeys: String, CodingKey {
+                            case id
+                        }
+                    }
+                    /// - Remark: Generated from `#/paths/v2/blogPost/POST/responses/201/content/application\/json`.
+                    case json(Operations.CreateBlogPost.Output.Created.Body.JsonPayload)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Operations.CreateBlogPost.Output.Created.Body.JsonPayload {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.CreateBlogPost.Output.Created.Body
+                /// Creates a new `Created`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.CreateBlogPost.Output.Created.Body) {
+                    self.body = body
+                }
+            }
+            /// Successfully created the requested Blog Posts
+            ///
+            /// - Remark: Generated from `#/paths//v2/blogPost//post(createBlogPost)/responses/201`.
+            ///
+            /// HTTP response code: `201 created`.
+            case created(Operations.CreateBlogPost.Output.Created)
+            /// The associated value of the enum case if `self` is `.created`.
+            ///
+            /// - Throws: An error if `self` is not `.created`.
+            /// - SeeAlso: `.created`.
+            public var created: Operations.CreateBlogPost.Output.Created {
+                get throws {
+                    switch self {
+                    case let .created(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "created",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Too Many Requests.  Your application has issued too many API requests in too short of a time frame.
+            ///
+            /// - Remark: Generated from `#/paths//v2/blogPost//post(createBlogPost)/responses/429`.
+            ///
+            /// HTTP response code: `429 tooManyRequests`.
+            case tooManyRequests(Components.Responses.Error429)
+            /// The associated value of the enum case if `self` is `.tooManyRequests`.
+            ///
+            /// - Throws: An error if `self` is not `.tooManyRequests`.
+            /// - SeeAlso: `.tooManyRequests`.
+            public var tooManyRequests: Components.Responses.Error429 {
+                get throws {
+                    switch self {
+                    case let .tooManyRequests(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "tooManyRequests",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Undocumented response.
+            ///
+            /// A response with a code that is not documented in the OpenAPI document.
+            case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json
+                ]
+            }
+        }
+    }
+    /// Search for Blog Tags records by query string
+    ///
+    /// Execute a query on this table, using query criteria as specified in query string parameters.
+    ///
+    /// * Pagination is managed via the `pageNo` & `pageSize` query string parameters.  pageNo starts at 1.  pageSize defaults to 50.
+    /// * By default, the response includes the total count of records that match the query criteria.  The count can be omitted by specifying `includeCount=false`
+    /// * By default, results are sorted by the table's primary key, descending.  This can be changed by specifying the `orderBy` query string parameter, following SQL ORDER BY syntax (e.g., `fieldName1 ASC, fieldName2 DESC`)
+    /// * By default, all given query criteria are combined using logical AND.  This can be changed by specifying the query string parameter `booleanOperator=OR`.
+    /// * Each field on the table can be used as a query criteria.  Each query criteria field can be specified on the query string any number of times.
+    /// * By default, all criteria use the equals operator (e.g., `myField=value` means records will be returned where myField equals value).  Alternative operators can be used as follows:
+    ///   * Equals: `myField=value`
+    ///   * Not Equals: `myField=!value`
+    ///   * Less Than: `myField=&lt;value`
+    ///   * Greater Than: `myField=&gt;value`
+    ///   * Less Than or Equals: `myField=&lt;=value`
+    ///   * Greater Than or Equals: `myField=&gt;=value`
+    ///   * Empty (or null): `myField=EMPTY`
+    ///   * Not Empty: `myField=!EMPTY`
+    ///   * Between: `myField=BETWEEN value1,value2` (two values must be given, separated by commas)
+    ///   * Not Between: `myField=!BETWEEN value1,value2` (two values must be given, separated by commas)
+    ///   * In: `myField=IN value1,value2,...,valueN` (one or more values must be given, separated by commas)
+    ///   * Not In: `myField=!IN value1,value2,...,valueN` (one or more values must be given, separated by commas)
+    ///   * Like: `myField=LIKE value` (using standard SQL % and _ wildcards)
+    ///   * Not Like: `myField=!LIKE value` (using standard SQL % and _ wildcards)
+    ///
+    ///
+    /// - Remark: HTTP `GET /v2/blogTag/query`.
+    /// - Remark: Generated from `#/paths//v2/blogTag/query/get(queryBlogTag)`.
+    public enum QueryBlogTag {
+        public static let id: Swift.String = "queryBlogTag"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v2/blogTag/query/GET/query`.
+            public struct Query: Sendable, Hashable {
+                /// Which page of results to return.  Starts at 1.
+                ///
+                /// - Remark: Generated from `#/paths/v2/blogTag/query/GET/query/pageNo`.
+                public var pageNo: Swift.Int?
+                /// Max number of records to include in a page.  Defaults to 50.  Must be between 1 and 1000.
+                ///
+                /// - Remark: Generated from `#/paths/v2/blogTag/query/GET/query/pageSize`.
+                public var pageSize: Swift.Int?
+                /// Whether or not to include the count (total matching records) in the result. Default is true.
+                ///
+                /// - Remark: Generated from `#/paths/v2/blogTag/query/GET/query/includeCount`.
+                public var includeCount: Swift.Bool?
+                /// How the results of the query should be sorted. SQL-style, comma-separated list of field names, each optionally followed by ASC or DESC (defaults to ASC).
+                ///
+                /// - Remark: Generated from `#/paths/v2/blogTag/query/GET/query/orderBy`.
+                public var orderBy: Swift.String?
+                /// - Remark: Generated from `#/paths/v2/blogTag/query/GET/query/booleanOperator`.
+                @frozen public enum BooleanOperatorPayload: String, Codable, Hashable, Sendable, CaseIterable {
+                    case and = "AND"
+                    case or = "OR"
+                }
+                /// Whether to combine query field as an AND or an OR.  Default is AND.
+                ///
+                /// - Remark: Generated from `#/paths/v2/blogTag/query/GET/query/booleanOperator`.
+                public var booleanOperator: Operations.QueryBlogTag.Input.Query.BooleanOperatorPayload?
+                /// Query on the Blog field.  Can prefix value with an operator, else defaults to = (equals).
+                ///
+                /// - Remark: Generated from `#/paths/v2/blogTag/query/GET/query/blogId`.
+                public var blogId: [Swift.String]?
+                /// Query on the Create Date field.  Can prefix value with an operator, else defaults to = (equals).
+                ///
+                /// - Remark: Generated from `#/paths/v2/blogTag/query/GET/query/createDate`.
+                public var createDate: [Swift.String]?
+                /// Query on the Description field.  Can prefix value with an operator, else defaults to = (equals).
+                ///
+                /// - Remark: Generated from `#/paths/v2/blogTag/query/GET/query/description`.
+                public var description: [Swift.String]?
+                /// Query on the Id field.  Can prefix value with an operator, else defaults to = (equals).
+                ///
+                /// - Remark: Generated from `#/paths/v2/blogTag/query/GET/query/id`.
+                public var id: [Swift.String]?
+                /// Query on the Modify Date field.  Can prefix value with an operator, else defaults to = (equals).
+                ///
+                /// - Remark: Generated from `#/paths/v2/blogTag/query/GET/query/modifyDate`.
+                public var modifyDate: [Swift.String]?
+                /// Query on the Name field.  Can prefix value with an operator, else defaults to = (equals).
+                ///
+                /// - Remark: Generated from `#/paths/v2/blogTag/query/GET/query/name`.
+                public var name: [Swift.String]?
+                /// Query on the Slug field.  Can prefix value with an operator, else defaults to = (equals).
+                ///
+                /// - Remark: Generated from `#/paths/v2/blogTag/query/GET/query/slug`.
+                public var slug: [Swift.String]?
+                /// Creates a new `Query`.
+                ///
+                /// - Parameters:
+                ///   - pageNo: Which page of results to return.  Starts at 1.
+                ///   - pageSize: Max number of records to include in a page.  Defaults to 50.  Must be between 1 and 1000.
+                ///   - includeCount: Whether or not to include the count (total matching records) in the result. Default is true.
+                ///   - orderBy: How the results of the query should be sorted. SQL-style, comma-separated list of field names, each optionally followed by ASC or DESC (defaults to ASC).
+                ///   - booleanOperator: Whether to combine query field as an AND or an OR.  Default is AND.
+                ///   - blogId: Query on the Blog field.  Can prefix value with an operator, else defaults to = (equals).
+                ///   - createDate: Query on the Create Date field.  Can prefix value with an operator, else defaults to = (equals).
+                ///   - description: Query on the Description field.  Can prefix value with an operator, else defaults to = (equals).
+                ///   - id: Query on the Id field.  Can prefix value with an operator, else defaults to = (equals).
+                ///   - modifyDate: Query on the Modify Date field.  Can prefix value with an operator, else defaults to = (equals).
+                ///   - name: Query on the Name field.  Can prefix value with an operator, else defaults to = (equals).
+                ///   - slug: Query on the Slug field.  Can prefix value with an operator, else defaults to = (equals).
+                public init(
+                    pageNo: Swift.Int? = nil,
+                    pageSize: Swift.Int? = nil,
+                    includeCount: Swift.Bool? = nil,
+                    orderBy: Swift.String? = nil,
+                    booleanOperator: Operations.QueryBlogTag.Input.Query.BooleanOperatorPayload? = nil,
+                    blogId: [Swift.String]? = nil,
+                    createDate: [Swift.String]? = nil,
+                    description: [Swift.String]? = nil,
+                    id: [Swift.String]? = nil,
+                    modifyDate: [Swift.String]? = nil,
+                    name: [Swift.String]? = nil,
+                    slug: [Swift.String]? = nil
+                ) {
+                    self.pageNo = pageNo
+                    self.pageSize = pageSize
+                    self.includeCount = includeCount
+                    self.orderBy = orderBy
+                    self.booleanOperator = booleanOperator
+                    self.blogId = blogId
+                    self.createDate = createDate
+                    self.description = description
+                    self.id = id
+                    self.modifyDate = modifyDate
+                    self.name = name
+                    self.slug = slug
+                }
+            }
+            public var query: Operations.QueryBlogTag.Input.Query
+            /// - Remark: Generated from `#/paths/v2/blogTag/query/GET/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.QueryBlogTag.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.QueryBlogTag.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.QueryBlogTag.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - query:
+            ///   - headers:
+            public init(
+                query: Operations.QueryBlogTag.Input.Query = .init(),
+                headers: Operations.QueryBlogTag.Input.Headers = .init()
+            ) {
+                self.query = query
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            /// Bad Request.  Some portion of the request's content was not acceptable to the server.  See error message in body for details.
+            ///
+            /// - Remark: Generated from `#/paths//v2/blogTag/query/get(queryBlogTag)/responses/400`.
+            ///
+            /// HTTP response code: `400 badRequest`.
+            case badRequest(Components.Responses.Error400)
+            /// The associated value of the enum case if `self` is `.badRequest`.
+            ///
+            /// - Throws: An error if `self` is not `.badRequest`.
+            /// - SeeAlso: `.badRequest`.
+            public var badRequest: Components.Responses.Error400 {
+                get throws {
+                    switch self {
+                    case let .badRequest(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "badRequest",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Unauthorized.  The required authentication credentials were missing or invalid.
+            ///
+            /// - Remark: Generated from `#/paths//v2/blogTag/query/get(queryBlogTag)/responses/401`.
+            ///
+            /// HTTP response code: `401 unauthorized`.
+            case unauthorized(Components.Responses.Error401)
+            /// The associated value of the enum case if `self` is `.unauthorized`.
+            ///
+            /// - Throws: An error if `self` is not `.unauthorized`.
+            /// - SeeAlso: `.unauthorized`.
+            public var unauthorized: Components.Responses.Error401 {
+                get throws {
+                    switch self {
+                    case let .unauthorized(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "unauthorized",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Forbidden.  You do not have permission to access the requested resource.
+            ///
+            /// - Remark: Generated from `#/paths//v2/blogTag/query/get(queryBlogTag)/responses/403`.
+            ///
+            /// HTTP response code: `403 forbidden`.
+            case forbidden(Components.Responses.Error403)
+            /// The associated value of the enum case if `self` is `.forbidden`.
+            ///
+            /// - Throws: An error if `self` is not `.forbidden`.
+            /// - SeeAlso: `.forbidden`.
+            public var forbidden: Components.Responses.Error403 {
+                get throws {
+                    switch self {
+                    case let .forbidden(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "forbidden",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Internal Server Error.  An error occurred in the server while processing the request.
+            ///
+            /// - Remark: Generated from `#/paths//v2/blogTag/query/get(queryBlogTag)/responses/500`.
+            ///
+            /// HTTP response code: `500 internalServerError`.
+            case internalServerError(Components.Responses.Error500)
+            /// The associated value of the enum case if `self` is `.internalServerError`.
+            ///
+            /// - Throws: An error if `self` is not `.internalServerError`.
+            /// - SeeAlso: `.internalServerError`.
+            public var internalServerError: Components.Responses.Error500 {
+                get throws {
+                    switch self {
+                    case let .internalServerError(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "internalServerError",
+                            response: self
+                        )
+                    }
+                }
+            }
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v2/blogTag/query/GET/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v2/blogTag/query/GET/responses/200/content/application\/json`.
+                    case json(Components.Schemas.BlogTagSearchResult)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas.BlogTagSearchResult {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.QueryBlogTag.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.QueryBlogTag.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Successfully searched the Blog Tags table (though may have found 0 records).
+            ///
+            /// - Remark: Generated from `#/paths//v2/blogTag/query/get(queryBlogTag)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.QueryBlogTag.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.QueryBlogTag.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Too Many Requests.  Your application has issued too many API requests in too short of a time frame.
+            ///
+            /// - Remark: Generated from `#/paths//v2/blogTag/query/get(queryBlogTag)/responses/429`.
+            ///
+            /// HTTP response code: `429 tooManyRequests`.
+            case tooManyRequests(Components.Responses.Error429)
+            /// The associated value of the enum case if `self` is `.tooManyRequests`.
+            ///
+            /// - Throws: An error if `self` is not `.tooManyRequests`.
+            /// - SeeAlso: `.tooManyRequests`.
+            public var tooManyRequests: Components.Responses.Error429 {
+                get throws {
+                    switch self {
+                    case let .tooManyRequests(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "tooManyRequests",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Undocumented response.
+            ///
+            /// A response with a code that is not documented in the OpenAPI document.
+            case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json
+                ]
+            }
+        }
+    }
+    /// Create one Blog Tags
+    ///
+    /// Insert one record into this table by supplying the values to be inserted in the request body.
+    /// * The request body should not include a value for the table's primary key.  Rather, a value will be generated and returned in a successful response's body.
+    /// * Any unrecognized field names in the body will cause a 400 error.
+    /// * Any read-only (non-editable) fields provided in the body will be silently ignored.
+    ///
+    /// Upon success, a status code of 201 (`Created`) is returned, and the generated value for the primary key will be returned in the response body object.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v2/blogTag/`.
+    /// - Remark: Generated from `#/paths//v2/blogTag//post(createBlogTag)`.
+    public enum CreateBlogTag {
+        public static let id: Swift.String = "createBlogTag"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v2/blogTag/POST/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.CreateBlogTag.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.CreateBlogTag.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.CreateBlogTag.Input.Headers
+            /// - Remark: Generated from `#/paths/v2/blogTag/POST/requestBody`.
+            @frozen public enum Body: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v2/blogTag/POST/requestBody/content/application\/json`.
+                case json(Components.Schemas.BlogTag)
+            }
+            public var body: Operations.CreateBlogTag.Input.Body
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - headers:
+            ///   - body:
+            public init(
+                headers: Operations.CreateBlogTag.Input.Headers = .init(),
+                body: Operations.CreateBlogTag.Input.Body
+            ) {
+                self.headers = headers
+                self.body = body
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            /// Bad Request.  Some portion of the request's content was not acceptable to the server.  See error message in body for details.
+            ///
+            /// - Remark: Generated from `#/paths//v2/blogTag//post(createBlogTag)/responses/400`.
+            ///
+            /// HTTP response code: `400 badRequest`.
+            case badRequest(Components.Responses.Error400)
+            /// The associated value of the enum case if `self` is `.badRequest`.
+            ///
+            /// - Throws: An error if `self` is not `.badRequest`.
+            /// - SeeAlso: `.badRequest`.
+            public var badRequest: Components.Responses.Error400 {
+                get throws {
+                    switch self {
+                    case let .badRequest(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "badRequest",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Unauthorized.  The required authentication credentials were missing or invalid.
+            ///
+            /// - Remark: Generated from `#/paths//v2/blogTag//post(createBlogTag)/responses/401`.
+            ///
+            /// HTTP response code: `401 unauthorized`.
+            case unauthorized(Components.Responses.Error401)
+            /// The associated value of the enum case if `self` is `.unauthorized`.
+            ///
+            /// - Throws: An error if `self` is not `.unauthorized`.
+            /// - SeeAlso: `.unauthorized`.
+            public var unauthorized: Components.Responses.Error401 {
+                get throws {
+                    switch self {
+                    case let .unauthorized(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "unauthorized",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Forbidden.  You do not have permission to access the requested resource.
+            ///
+            /// - Remark: Generated from `#/paths//v2/blogTag//post(createBlogTag)/responses/403`.
+            ///
+            /// HTTP response code: `403 forbidden`.
+            case forbidden(Components.Responses.Error403)
+            /// The associated value of the enum case if `self` is `.forbidden`.
+            ///
+            /// - Throws: An error if `self` is not `.forbidden`.
+            /// - SeeAlso: `.forbidden`.
+            public var forbidden: Components.Responses.Error403 {
+                get throws {
+                    switch self {
+                    case let .forbidden(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "forbidden",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Internal Server Error.  An error occurred in the server while processing the request.
+            ///
+            /// - Remark: Generated from `#/paths//v2/blogTag//post(createBlogTag)/responses/500`.
+            ///
+            /// HTTP response code: `500 internalServerError`.
+            case internalServerError(Components.Responses.Error500)
+            /// The associated value of the enum case if `self` is `.internalServerError`.
+            ///
+            /// - Throws: An error if `self` is not `.internalServerError`.
+            /// - SeeAlso: `.internalServerError`.
+            public var internalServerError: Components.Responses.Error500 {
+                get throws {
+                    switch self {
+                    case let .internalServerError(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "internalServerError",
+                            response: self
+                        )
+                    }
+                }
+            }
+            public struct Created: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v2/blogTag/POST/responses/201/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v2/blogTag/POST/responses/201/content/json`.
+                    public struct JsonPayload: Codable, Hashable, Sendable {
+                        /// - Remark: Generated from `#/paths/v2/blogTag/POST/responses/201/content/json/id`.
+                        public var id: Swift.Int?
+                        /// Creates a new `JsonPayload`.
+                        ///
+                        /// - Parameters:
+                        ///   - id:
+                        public init(id: Swift.Int? = nil) {
+                            self.id = id
+                        }
+                        public enum CodingKeys: String, CodingKey {
+                            case id
+                        }
+                    }
+                    /// - Remark: Generated from `#/paths/v2/blogTag/POST/responses/201/content/application\/json`.
+                    case json(Operations.CreateBlogTag.Output.Created.Body.JsonPayload)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Operations.CreateBlogTag.Output.Created.Body.JsonPayload {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.CreateBlogTag.Output.Created.Body
+                /// Creates a new `Created`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.CreateBlogTag.Output.Created.Body) {
+                    self.body = body
+                }
+            }
+            /// Successfully created the requested Blog Tags
+            ///
+            /// - Remark: Generated from `#/paths//v2/blogTag//post(createBlogTag)/responses/201`.
+            ///
+            /// HTTP response code: `201 created`.
+            case created(Operations.CreateBlogTag.Output.Created)
+            /// The associated value of the enum case if `self` is `.created`.
+            ///
+            /// - Throws: An error if `self` is not `.created`.
+            /// - SeeAlso: `.created`.
+            public var created: Operations.CreateBlogTag.Output.Created {
+                get throws {
+                    switch self {
+                    case let .created(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "created",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Too Many Requests.  Your application has issued too many API requests in too short of a time frame.
+            ///
+            /// - Remark: Generated from `#/paths//v2/blogTag//post(createBlogTag)/responses/429`.
             ///
             /// HTTP response code: `429 tooManyRequests`.
             case tooManyRequests(Components.Responses.Error429)
@@ -3562,73 +5127,85 @@ public enum Operations {
     ///   * Not Like: `myField=!LIKE value` (using standard SQL % and _ wildcards)
     ///
     ///
-    /// - Remark: HTTP `GET /v1/blog/query`.
-    /// - Remark: Generated from `#/paths//v1/blog/query/get(queryBlog)`.
+    /// - Remark: HTTP `GET /v2/blog/query`.
+    /// - Remark: Generated from `#/paths//v2/blog/query/get(queryBlog)`.
     public enum QueryBlog {
         public static let id: Swift.String = "queryBlog"
         public struct Input: Sendable, Hashable {
-            /// - Remark: Generated from `#/paths/v1/blog/query/GET/query`.
+            /// - Remark: Generated from `#/paths/v2/blog/query/GET/query`.
             public struct Query: Sendable, Hashable {
                 /// Which page of results to return.  Starts at 1.
                 ///
-                /// - Remark: Generated from `#/paths/v1/blog/query/GET/query/pageNo`.
+                /// - Remark: Generated from `#/paths/v2/blog/query/GET/query/pageNo`.
                 public var pageNo: Swift.Int?
                 /// Max number of records to include in a page.  Defaults to 50.  Must be between 1 and 1000.
                 ///
-                /// - Remark: Generated from `#/paths/v1/blog/query/GET/query/pageSize`.
+                /// - Remark: Generated from `#/paths/v2/blog/query/GET/query/pageSize`.
                 public var pageSize: Swift.Int?
                 /// Whether or not to include the count (total matching records) in the result. Default is true.
                 ///
-                /// - Remark: Generated from `#/paths/v1/blog/query/GET/query/includeCount`.
+                /// - Remark: Generated from `#/paths/v2/blog/query/GET/query/includeCount`.
                 public var includeCount: Swift.Bool?
                 /// How the results of the query should be sorted. SQL-style, comma-separated list of field names, each optionally followed by ASC or DESC (defaults to ASC).
                 ///
-                /// - Remark: Generated from `#/paths/v1/blog/query/GET/query/orderBy`.
+                /// - Remark: Generated from `#/paths/v2/blog/query/GET/query/orderBy`.
                 public var orderBy: Swift.String?
-                /// - Remark: Generated from `#/paths/v1/blog/query/GET/query/booleanOperator`.
+                /// - Remark: Generated from `#/paths/v2/blog/query/GET/query/booleanOperator`.
                 @frozen public enum BooleanOperatorPayload: String, Codable, Hashable, Sendable, CaseIterable {
                     case and = "AND"
                     case or = "OR"
                 }
                 /// Whether to combine query field as an AND or an OR.  Default is AND.
                 ///
-                /// - Remark: Generated from `#/paths/v1/blog/query/GET/query/booleanOperator`.
+                /// - Remark: Generated from `#/paths/v2/blog/query/GET/query/booleanOperator`.
                 public var booleanOperator: Operations.QueryBlog.Input.Query.BooleanOperatorPayload?
+                /// Query on the Blog Type field.  Can prefix value with an operator, else defaults to = (equals).
+                ///
+                /// - Remark: Generated from `#/paths/v2/blog/query/GET/query/blogTypeId`.
+                public var blogTypeId: [Swift.String]?
+                /// Query on the Create Date field.  Can prefix value with an operator, else defaults to = (equals).
+                ///
+                /// - Remark: Generated from `#/paths/v2/blog/query/GET/query/createDate`.
+                public var createDate: [Swift.String]?
                 /// Query on the Description field.  Can prefix value with an operator, else defaults to = (equals).
                 ///
-                /// - Remark: Generated from `#/paths/v1/blog/query/GET/query/description`.
+                /// - Remark: Generated from `#/paths/v2/blog/query/GET/query/description`.
                 public var description: [Swift.String]?
                 /// Query on the Id field.  Can prefix value with an operator, else defaults to = (equals).
                 ///
-                /// - Remark: Generated from `#/paths/v1/blog/query/GET/query/id`.
+                /// - Remark: Generated from `#/paths/v2/blog/query/GET/query/id`.
                 public var id: [Swift.String]?
                 /// Query on the Meta Description field.  Can prefix value with an operator, else defaults to = (equals).
                 ///
-                /// - Remark: Generated from `#/paths/v1/blog/query/GET/query/metaDescription`.
+                /// - Remark: Generated from `#/paths/v2/blog/query/GET/query/metaDescription`.
                 public var metaDescription: [Swift.String]?
                 /// Query on the Meta Keywords field.  Can prefix value with an operator, else defaults to = (equals).
                 ///
-                /// - Remark: Generated from `#/paths/v1/blog/query/GET/query/metaKeywords`.
+                /// - Remark: Generated from `#/paths/v2/blog/query/GET/query/metaKeywords`.
                 public var metaKeywords: [Swift.String]?
                 /// Query on the Meta Title field.  Can prefix value with an operator, else defaults to = (equals).
                 ///
-                /// - Remark: Generated from `#/paths/v1/blog/query/GET/query/metaTitle`.
+                /// - Remark: Generated from `#/paths/v2/blog/query/GET/query/metaTitle`.
                 public var metaTitle: [Swift.String]?
                 /// Query on the Modify Date field.  Can prefix value with an operator, else defaults to = (equals).
                 ///
-                /// - Remark: Generated from `#/paths/v1/blog/query/GET/query/modifyDate`.
+                /// - Remark: Generated from `#/paths/v2/blog/query/GET/query/modifyDate`.
                 public var modifyDate: [Swift.String]?
                 /// Query on the Name field.  Can prefix value with an operator, else defaults to = (equals).
                 ///
-                /// - Remark: Generated from `#/paths/v1/blog/query/GET/query/name`.
+                /// - Remark: Generated from `#/paths/v2/blog/query/GET/query/name`.
                 public var name: [Swift.String]?
                 /// Query on the Short Name field.  Can prefix value with an operator, else defaults to = (equals).
                 ///
-                /// - Remark: Generated from `#/paths/v1/blog/query/GET/query/shortName`.
+                /// - Remark: Generated from `#/paths/v2/blog/query/GET/query/shortName`.
                 public var shortName: [Swift.String]?
+                /// Query on the Site field.  Can prefix value with an operator, else defaults to = (equals).
+                ///
+                /// - Remark: Generated from `#/paths/v2/blog/query/GET/query/siteId`.
+                public var siteId: [Swift.String]?
                 /// Query on the Slug field.  Can prefix value with an operator, else defaults to = (equals).
                 ///
-                /// - Remark: Generated from `#/paths/v1/blog/query/GET/query/slug`.
+                /// - Remark: Generated from `#/paths/v2/blog/query/GET/query/slug`.
                 public var slug: [Swift.String]?
                 /// Creates a new `Query`.
                 ///
@@ -3638,6 +5215,8 @@ public enum Operations {
                 ///   - includeCount: Whether or not to include the count (total matching records) in the result. Default is true.
                 ///   - orderBy: How the results of the query should be sorted. SQL-style, comma-separated list of field names, each optionally followed by ASC or DESC (defaults to ASC).
                 ///   - booleanOperator: Whether to combine query field as an AND or an OR.  Default is AND.
+                ///   - blogTypeId: Query on the Blog Type field.  Can prefix value with an operator, else defaults to = (equals).
+                ///   - createDate: Query on the Create Date field.  Can prefix value with an operator, else defaults to = (equals).
                 ///   - description: Query on the Description field.  Can prefix value with an operator, else defaults to = (equals).
                 ///   - id: Query on the Id field.  Can prefix value with an operator, else defaults to = (equals).
                 ///   - metaDescription: Query on the Meta Description field.  Can prefix value with an operator, else defaults to = (equals).
@@ -3646,6 +5225,7 @@ public enum Operations {
                 ///   - modifyDate: Query on the Modify Date field.  Can prefix value with an operator, else defaults to = (equals).
                 ///   - name: Query on the Name field.  Can prefix value with an operator, else defaults to = (equals).
                 ///   - shortName: Query on the Short Name field.  Can prefix value with an operator, else defaults to = (equals).
+                ///   - siteId: Query on the Site field.  Can prefix value with an operator, else defaults to = (equals).
                 ///   - slug: Query on the Slug field.  Can prefix value with an operator, else defaults to = (equals).
                 public init(
                     pageNo: Swift.Int? = nil,
@@ -3653,6 +5233,8 @@ public enum Operations {
                     includeCount: Swift.Bool? = nil,
                     orderBy: Swift.String? = nil,
                     booleanOperator: Operations.QueryBlog.Input.Query.BooleanOperatorPayload? = nil,
+                    blogTypeId: [Swift.String]? = nil,
+                    createDate: [Swift.String]? = nil,
                     description: [Swift.String]? = nil,
                     id: [Swift.String]? = nil,
                     metaDescription: [Swift.String]? = nil,
@@ -3661,6 +5243,7 @@ public enum Operations {
                     modifyDate: [Swift.String]? = nil,
                     name: [Swift.String]? = nil,
                     shortName: [Swift.String]? = nil,
+                    siteId: [Swift.String]? = nil,
                     slug: [Swift.String]? = nil
                 ) {
                     self.pageNo = pageNo
@@ -3668,6 +5251,8 @@ public enum Operations {
                     self.includeCount = includeCount
                     self.orderBy = orderBy
                     self.booleanOperator = booleanOperator
+                    self.blogTypeId = blogTypeId
+                    self.createDate = createDate
                     self.description = description
                     self.id = id
                     self.metaDescription = metaDescription
@@ -3676,11 +5261,12 @@ public enum Operations {
                     self.modifyDate = modifyDate
                     self.name = name
                     self.shortName = shortName
+                    self.siteId = siteId
                     self.slug = slug
                 }
             }
             public var query: Operations.QueryBlog.Input.Query
-            /// - Remark: Generated from `#/paths/v1/blog/query/GET/header`.
+            /// - Remark: Generated from `#/paths/v2/blog/query/GET/header`.
             public struct Headers: Sendable, Hashable {
                 public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.QueryBlog.AcceptableContentType>]
                 /// Creates a new `Headers`.
@@ -3708,7 +5294,7 @@ public enum Operations {
         @frozen public enum Output: Sendable, Hashable {
             /// Bad Request.  Some portion of the request's content was not acceptable to the server.  See error message in body for details.
             ///
-            /// - Remark: Generated from `#/paths//v1/blog/query/get(queryBlog)/responses/400`.
+            /// - Remark: Generated from `#/paths//v2/blog/query/get(queryBlog)/responses/400`.
             ///
             /// HTTP response code: `400 badRequest`.
             case badRequest(Components.Responses.Error400)
@@ -3731,7 +5317,7 @@ public enum Operations {
             }
             /// Unauthorized.  The required authentication credentials were missing or invalid.
             ///
-            /// - Remark: Generated from `#/paths//v1/blog/query/get(queryBlog)/responses/401`.
+            /// - Remark: Generated from `#/paths//v2/blog/query/get(queryBlog)/responses/401`.
             ///
             /// HTTP response code: `401 unauthorized`.
             case unauthorized(Components.Responses.Error401)
@@ -3754,7 +5340,7 @@ public enum Operations {
             }
             /// Forbidden.  You do not have permission to access the requested resource.
             ///
-            /// - Remark: Generated from `#/paths//v1/blog/query/get(queryBlog)/responses/403`.
+            /// - Remark: Generated from `#/paths//v2/blog/query/get(queryBlog)/responses/403`.
             ///
             /// HTTP response code: `403 forbidden`.
             case forbidden(Components.Responses.Error403)
@@ -3777,7 +5363,7 @@ public enum Operations {
             }
             /// Internal Server Error.  An error occurred in the server while processing the request.
             ///
-            /// - Remark: Generated from `#/paths//v1/blog/query/get(queryBlog)/responses/500`.
+            /// - Remark: Generated from `#/paths//v2/blog/query/get(queryBlog)/responses/500`.
             ///
             /// HTTP response code: `500 internalServerError`.
             case internalServerError(Components.Responses.Error500)
@@ -3799,9 +5385,9 @@ public enum Operations {
                 }
             }
             public struct Ok: Sendable, Hashable {
-                /// - Remark: Generated from `#/paths/v1/blog/query/GET/responses/200/content`.
+                /// - Remark: Generated from `#/paths/v2/blog/query/GET/responses/200/content`.
                 @frozen public enum Body: Sendable, Hashable {
-                    /// - Remark: Generated from `#/paths/v1/blog/query/GET/responses/200/content/application\/json`.
+                    /// - Remark: Generated from `#/paths/v2/blog/query/GET/responses/200/content/application\/json`.
                     case json(Components.Schemas.BlogSearchResult)
                     /// The associated value of the enum case if `self` is `.json`.
                     ///
@@ -3828,7 +5414,7 @@ public enum Operations {
             }
             /// Successfully searched the Blogs table (though may have found 0 records).
             ///
-            /// - Remark: Generated from `#/paths//v1/blog/query/get(queryBlog)/responses/200`.
+            /// - Remark: Generated from `#/paths//v2/blog/query/get(queryBlog)/responses/200`.
             ///
             /// HTTP response code: `200 ok`.
             case ok(Operations.QueryBlog.Output.Ok)
@@ -3851,7 +5437,7 @@ public enum Operations {
             }
             /// Too Many Requests.  Your application has issued too many API requests in too short of a time frame.
             ///
-            /// - Remark: Generated from `#/paths//v1/blog/query/get(queryBlog)/responses/429`.
+            /// - Remark: Generated from `#/paths//v2/blog/query/get(queryBlog)/responses/429`.
             ///
             /// HTTP response code: `429 tooManyRequests`.
             case tooManyRequests(Components.Responses.Error429)
@@ -3908,16 +5494,16 @@ public enum Operations {
     /// Get one record from this table, by specifying its primary key as a path parameter.
     ///
     ///
-    /// - Remark: HTTP `GET /v1/blog/{id}`.
-    /// - Remark: Generated from `#/paths//v1/blog/{id}/get(getBlog)`.
+    /// - Remark: HTTP `GET /v2/blog/{id}`.
+    /// - Remark: Generated from `#/paths//v2/blog/{id}/get(getBlog)`.
     public enum GetBlog {
         public static let id: Swift.String = "getBlog"
         public struct Input: Sendable, Hashable {
-            /// - Remark: Generated from `#/paths/v1/blog/{id}/GET/path`.
+            /// - Remark: Generated from `#/paths/v2/blog/{id}/GET/path`.
             public struct Path: Sendable, Hashable {
                 /// Id of the Blogs to get.
                 ///
-                /// - Remark: Generated from `#/paths/v1/blog/{id}/GET/path/id`.
+                /// - Remark: Generated from `#/paths/v2/blog/{id}/GET/path/id`.
                 public var id: Swift.Int
                 /// Creates a new `Path`.
                 ///
@@ -3928,7 +5514,7 @@ public enum Operations {
                 }
             }
             public var path: Operations.GetBlog.Input.Path
-            /// - Remark: Generated from `#/paths/v1/blog/{id}/GET/header`.
+            /// - Remark: Generated from `#/paths/v2/blog/{id}/GET/header`.
             public struct Headers: Sendable, Hashable {
                 public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.GetBlog.AcceptableContentType>]
                 /// Creates a new `Headers`.
@@ -3956,7 +5542,7 @@ public enum Operations {
         @frozen public enum Output: Sendable, Hashable {
             /// Bad Request.  Some portion of the request's content was not acceptable to the server.  See error message in body for details.
             ///
-            /// - Remark: Generated from `#/paths//v1/blog/{id}/get(getBlog)/responses/400`.
+            /// - Remark: Generated from `#/paths//v2/blog/{id}/get(getBlog)/responses/400`.
             ///
             /// HTTP response code: `400 badRequest`.
             case badRequest(Components.Responses.Error400)
@@ -3979,7 +5565,7 @@ public enum Operations {
             }
             /// Unauthorized.  The required authentication credentials were missing or invalid.
             ///
-            /// - Remark: Generated from `#/paths//v1/blog/{id}/get(getBlog)/responses/401`.
+            /// - Remark: Generated from `#/paths//v2/blog/{id}/get(getBlog)/responses/401`.
             ///
             /// HTTP response code: `401 unauthorized`.
             case unauthorized(Components.Responses.Error401)
@@ -4002,7 +5588,7 @@ public enum Operations {
             }
             /// Forbidden.  You do not have permission to access the requested resource.
             ///
-            /// - Remark: Generated from `#/paths//v1/blog/{id}/get(getBlog)/responses/403`.
+            /// - Remark: Generated from `#/paths//v2/blog/{id}/get(getBlog)/responses/403`.
             ///
             /// HTTP response code: `403 forbidden`.
             case forbidden(Components.Responses.Error403)
@@ -4025,7 +5611,7 @@ public enum Operations {
             }
             /// Internal Server Error.  An error occurred in the server while processing the request.
             ///
-            /// - Remark: Generated from `#/paths//v1/blog/{id}/get(getBlog)/responses/500`.
+            /// - Remark: Generated from `#/paths//v2/blog/{id}/get(getBlog)/responses/500`.
             ///
             /// HTTP response code: `500 internalServerError`.
             case internalServerError(Components.Responses.Error500)
@@ -4047,15 +5633,30 @@ public enum Operations {
                 }
             }
             public struct NotFound: Sendable, Hashable {
-                /// - Remark: Generated from `#/paths/v1/blog/{id}/GET/responses/404/content`.
+                /// - Remark: Generated from `#/paths/v2/blog/{id}/GET/responses/404/content`.
                 @frozen public enum Body: Sendable, Hashable {
-                    /// - Remark: Generated from `#/paths/v1/blog/{id}/GET/responses/404/content/application\/json`.
-                    case json(Components.Schemas._Error)
+                    /// - Remark: Generated from `#/paths/v2/blog/{id}/GET/responses/404/content/json`.
+                    public struct JsonPayload: Codable, Hashable, Sendable {
+                        /// - Remark: Generated from `#/paths/v2/blog/{id}/GET/responses/404/content/json/error`.
+                        public var error: Swift.String?
+                        /// Creates a new `JsonPayload`.
+                        ///
+                        /// - Parameters:
+                        ///   - error:
+                        public init(error: Swift.String? = nil) {
+                            self.error = error
+                        }
+                        public enum CodingKeys: String, CodingKey {
+                            case error
+                        }
+                    }
+                    /// - Remark: Generated from `#/paths/v2/blog/{id}/GET/responses/404/content/application\/json`.
+                    case json(Operations.GetBlog.Output.NotFound.Body.JsonPayload)
                     /// The associated value of the enum case if `self` is `.json`.
                     ///
                     /// - Throws: An error if `self` is not `.json`.
                     /// - SeeAlso: `.json`.
-                    public var json: Components.Schemas._Error {
+                    public var json: Operations.GetBlog.Output.NotFound.Body.JsonPayload {
                         get throws {
                             switch self {
                             case let .json(body):
@@ -4076,7 +5677,7 @@ public enum Operations {
             }
             /// The requested Blogs record was not found.
             ///
-            /// - Remark: Generated from `#/paths//v1/blog/{id}/get(getBlog)/responses/404`.
+            /// - Remark: Generated from `#/paths//v2/blog/{id}/get(getBlog)/responses/404`.
             ///
             /// HTTP response code: `404 notFound`.
             case notFound(Operations.GetBlog.Output.NotFound)
@@ -4098,9 +5699,9 @@ public enum Operations {
                 }
             }
             public struct Ok: Sendable, Hashable {
-                /// - Remark: Generated from `#/paths/v1/blog/{id}/GET/responses/200/content`.
+                /// - Remark: Generated from `#/paths/v2/blog/{id}/GET/responses/200/content`.
                 @frozen public enum Body: Sendable, Hashable {
-                    /// - Remark: Generated from `#/paths/v1/blog/{id}/GET/responses/200/content/application\/json`.
+                    /// - Remark: Generated from `#/paths/v2/blog/{id}/GET/responses/200/content/application\/json`.
                     case json(Components.Schemas.Blog)
                     /// The associated value of the enum case if `self` is `.json`.
                     ///
@@ -4127,7 +5728,7 @@ public enum Operations {
             }
             /// Successfully got the requested Blogs
             ///
-            /// - Remark: Generated from `#/paths//v1/blog/{id}/get(getBlog)/responses/200`.
+            /// - Remark: Generated from `#/paths//v2/blog/{id}/get(getBlog)/responses/200`.
             ///
             /// HTTP response code: `200 ok`.
             case ok(Operations.GetBlog.Output.Ok)
@@ -4150,7 +5751,7 @@ public enum Operations {
             }
             /// Too Many Requests.  Your application has issued too many API requests in too short of a time frame.
             ///
-            /// - Remark: Generated from `#/paths//v1/blog/{id}/get(getBlog)/responses/429`.
+            /// - Remark: Generated from `#/paths//v2/blog/{id}/get(getBlog)/responses/429`.
             ///
             /// HTTP response code: `429 tooManyRequests`.
             case tooManyRequests(Components.Responses.Error429)
@@ -4202,7 +5803,321 @@ public enum Operations {
             }
         }
     }
-    /// Search for Tags records by query string
+    /// Get one Media by Id
+    ///
+    /// Get one record from this table, by specifying its primary key as a path parameter.
+    ///
+    ///
+    /// - Remark: HTTP `GET /v2/media/{id}`.
+    /// - Remark: Generated from `#/paths//v2/media/{id}/get(getMedia)`.
+    public enum GetMedia {
+        public static let id: Swift.String = "getMedia"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v2/media/{id}/GET/path`.
+            public struct Path: Sendable, Hashable {
+                /// Id of the Media to get.
+                ///
+                /// - Remark: Generated from `#/paths/v2/media/{id}/GET/path/id`.
+                public var id: Swift.Int
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - id: Id of the Media to get.
+                public init(id: Swift.Int) {
+                    self.id = id
+                }
+            }
+            public var path: Operations.GetMedia.Input.Path
+            /// - Remark: Generated from `#/paths/v2/media/{id}/GET/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.GetMedia.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.GetMedia.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.GetMedia.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            public init(
+                path: Operations.GetMedia.Input.Path,
+                headers: Operations.GetMedia.Input.Headers = .init()
+            ) {
+                self.path = path
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            /// Bad Request.  Some portion of the request's content was not acceptable to the server.  See error message in body for details.
+            ///
+            /// - Remark: Generated from `#/paths//v2/media/{id}/get(getMedia)/responses/400`.
+            ///
+            /// HTTP response code: `400 badRequest`.
+            case badRequest(Components.Responses.Error400)
+            /// The associated value of the enum case if `self` is `.badRequest`.
+            ///
+            /// - Throws: An error if `self` is not `.badRequest`.
+            /// - SeeAlso: `.badRequest`.
+            public var badRequest: Components.Responses.Error400 {
+                get throws {
+                    switch self {
+                    case let .badRequest(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "badRequest",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Unauthorized.  The required authentication credentials were missing or invalid.
+            ///
+            /// - Remark: Generated from `#/paths//v2/media/{id}/get(getMedia)/responses/401`.
+            ///
+            /// HTTP response code: `401 unauthorized`.
+            case unauthorized(Components.Responses.Error401)
+            /// The associated value of the enum case if `self` is `.unauthorized`.
+            ///
+            /// - Throws: An error if `self` is not `.unauthorized`.
+            /// - SeeAlso: `.unauthorized`.
+            public var unauthorized: Components.Responses.Error401 {
+                get throws {
+                    switch self {
+                    case let .unauthorized(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "unauthorized",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Forbidden.  You do not have permission to access the requested resource.
+            ///
+            /// - Remark: Generated from `#/paths//v2/media/{id}/get(getMedia)/responses/403`.
+            ///
+            /// HTTP response code: `403 forbidden`.
+            case forbidden(Components.Responses.Error403)
+            /// The associated value of the enum case if `self` is `.forbidden`.
+            ///
+            /// - Throws: An error if `self` is not `.forbidden`.
+            /// - SeeAlso: `.forbidden`.
+            public var forbidden: Components.Responses.Error403 {
+                get throws {
+                    switch self {
+                    case let .forbidden(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "forbidden",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Internal Server Error.  An error occurred in the server while processing the request.
+            ///
+            /// - Remark: Generated from `#/paths//v2/media/{id}/get(getMedia)/responses/500`.
+            ///
+            /// HTTP response code: `500 internalServerError`.
+            case internalServerError(Components.Responses.Error500)
+            /// The associated value of the enum case if `self` is `.internalServerError`.
+            ///
+            /// - Throws: An error if `self` is not `.internalServerError`.
+            /// - SeeAlso: `.internalServerError`.
+            public var internalServerError: Components.Responses.Error500 {
+                get throws {
+                    switch self {
+                    case let .internalServerError(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "internalServerError",
+                            response: self
+                        )
+                    }
+                }
+            }
+            public struct NotFound: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v2/media/{id}/GET/responses/404/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v2/media/{id}/GET/responses/404/content/json`.
+                    public struct JsonPayload: Codable, Hashable, Sendable {
+                        /// - Remark: Generated from `#/paths/v2/media/{id}/GET/responses/404/content/json/error`.
+                        public var error: Swift.String?
+                        /// Creates a new `JsonPayload`.
+                        ///
+                        /// - Parameters:
+                        ///   - error:
+                        public init(error: Swift.String? = nil) {
+                            self.error = error
+                        }
+                        public enum CodingKeys: String, CodingKey {
+                            case error
+                        }
+                    }
+                    /// - Remark: Generated from `#/paths/v2/media/{id}/GET/responses/404/content/application\/json`.
+                    case json(Operations.GetMedia.Output.NotFound.Body.JsonPayload)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Operations.GetMedia.Output.NotFound.Body.JsonPayload {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.GetMedia.Output.NotFound.Body
+                /// Creates a new `NotFound`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.GetMedia.Output.NotFound.Body) {
+                    self.body = body
+                }
+            }
+            /// The requested Media record was not found.
+            ///
+            /// - Remark: Generated from `#/paths//v2/media/{id}/get(getMedia)/responses/404`.
+            ///
+            /// HTTP response code: `404 notFound`.
+            case notFound(Operations.GetMedia.Output.NotFound)
+            /// The associated value of the enum case if `self` is `.notFound`.
+            ///
+            /// - Throws: An error if `self` is not `.notFound`.
+            /// - SeeAlso: `.notFound`.
+            public var notFound: Operations.GetMedia.Output.NotFound {
+                get throws {
+                    switch self {
+                    case let .notFound(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "notFound",
+                            response: self
+                        )
+                    }
+                }
+            }
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v2/media/{id}/GET/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v2/media/{id}/GET/responses/200/content/application\/json`.
+                    case json(Components.Schemas.Media)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas.Media {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.GetMedia.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.GetMedia.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Successfully got the requested Media
+            ///
+            /// - Remark: Generated from `#/paths//v2/media/{id}/get(getMedia)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.GetMedia.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.GetMedia.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Too Many Requests.  Your application has issued too many API requests in too short of a time frame.
+            ///
+            /// - Remark: Generated from `#/paths//v2/media/{id}/get(getMedia)/responses/429`.
+            ///
+            /// HTTP response code: `429 tooManyRequests`.
+            case tooManyRequests(Components.Responses.Error429)
+            /// The associated value of the enum case if `self` is `.tooManyRequests`.
+            ///
+            /// - Throws: An error if `self` is not `.tooManyRequests`.
+            /// - SeeAlso: `.tooManyRequests`.
+            public var tooManyRequests: Components.Responses.Error429 {
+                get throws {
+                    switch self {
+                    case let .tooManyRequests(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "tooManyRequests",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Undocumented response.
+            ///
+            /// A response with a code that is not documented in the OpenAPI document.
+            case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json
+                ]
+            }
+        }
+    }
+    /// Search for Sites records by query string
     ///
     /// Execute a query on this table, using query criteria as specified in query string parameters.
     ///
@@ -4228,58 +6143,62 @@ public enum Operations {
     ///   * Not Like: `myField=!LIKE value` (using standard SQL % and _ wildcards)
     ///
     ///
-    /// - Remark: HTTP `GET /v1/tag/query`.
-    /// - Remark: Generated from `#/paths//v1/tag/query/get(queryTag)`.
-    public enum QueryTag {
-        public static let id: Swift.String = "queryTag"
+    /// - Remark: HTTP `GET /v2/site/query`.
+    /// - Remark: Generated from `#/paths//v2/site/query/get(querySite)`.
+    public enum QuerySite {
+        public static let id: Swift.String = "querySite"
         public struct Input: Sendable, Hashable {
-            /// - Remark: Generated from `#/paths/v1/tag/query/GET/query`.
+            /// - Remark: Generated from `#/paths/v2/site/query/GET/query`.
             public struct Query: Sendable, Hashable {
                 /// Which page of results to return.  Starts at 1.
                 ///
-                /// - Remark: Generated from `#/paths/v1/tag/query/GET/query/pageNo`.
+                /// - Remark: Generated from `#/paths/v2/site/query/GET/query/pageNo`.
                 public var pageNo: Swift.Int?
                 /// Max number of records to include in a page.  Defaults to 50.  Must be between 1 and 1000.
                 ///
-                /// - Remark: Generated from `#/paths/v1/tag/query/GET/query/pageSize`.
+                /// - Remark: Generated from `#/paths/v2/site/query/GET/query/pageSize`.
                 public var pageSize: Swift.Int?
                 /// Whether or not to include the count (total matching records) in the result. Default is true.
                 ///
-                /// - Remark: Generated from `#/paths/v1/tag/query/GET/query/includeCount`.
+                /// - Remark: Generated from `#/paths/v2/site/query/GET/query/includeCount`.
                 public var includeCount: Swift.Bool?
                 /// How the results of the query should be sorted. SQL-style, comma-separated list of field names, each optionally followed by ASC or DESC (defaults to ASC).
                 ///
-                /// - Remark: Generated from `#/paths/v1/tag/query/GET/query/orderBy`.
+                /// - Remark: Generated from `#/paths/v2/site/query/GET/query/orderBy`.
                 public var orderBy: Swift.String?
-                /// - Remark: Generated from `#/paths/v1/tag/query/GET/query/booleanOperator`.
+                /// - Remark: Generated from `#/paths/v2/site/query/GET/query/booleanOperator`.
                 @frozen public enum BooleanOperatorPayload: String, Codable, Hashable, Sendable, CaseIterable {
                     case and = "AND"
                     case or = "OR"
                 }
                 /// Whether to combine query field as an AND or an OR.  Default is AND.
                 ///
-                /// - Remark: Generated from `#/paths/v1/tag/query/GET/query/booleanOperator`.
-                public var booleanOperator: Operations.QueryTag.Input.Query.BooleanOperatorPayload?
-                /// Query on the Blog field.  Can prefix value with an operator, else defaults to = (equals).
+                /// - Remark: Generated from `#/paths/v2/site/query/GET/query/booleanOperator`.
+                public var booleanOperator: Operations.QuerySite.Input.Query.BooleanOperatorPayload?
+                /// Query on the Create Date field.  Can prefix value with an operator, else defaults to = (equals).
                 ///
-                /// - Remark: Generated from `#/paths/v1/tag/query/GET/query/blogId`.
-                public var blogId: [Swift.String]?
+                /// - Remark: Generated from `#/paths/v2/site/query/GET/query/createDate`.
+                public var createDate: [Swift.String]?
                 /// Query on the Description field.  Can prefix value with an operator, else defaults to = (equals).
                 ///
-                /// - Remark: Generated from `#/paths/v1/tag/query/GET/query/description`.
+                /// - Remark: Generated from `#/paths/v2/site/query/GET/query/description`.
                 public var description: [Swift.String]?
                 /// Query on the Id field.  Can prefix value with an operator, else defaults to = (equals).
                 ///
-                /// - Remark: Generated from `#/paths/v1/tag/query/GET/query/id`.
+                /// - Remark: Generated from `#/paths/v2/site/query/GET/query/id`.
                 public var id: [Swift.String]?
+                /// Query on the Modify Date field.  Can prefix value with an operator, else defaults to = (equals).
+                ///
+                /// - Remark: Generated from `#/paths/v2/site/query/GET/query/modifyDate`.
+                public var modifyDate: [Swift.String]?
                 /// Query on the Name field.  Can prefix value with an operator, else defaults to = (equals).
                 ///
-                /// - Remark: Generated from `#/paths/v1/tag/query/GET/query/name`.
+                /// - Remark: Generated from `#/paths/v2/site/query/GET/query/name`.
                 public var name: [Swift.String]?
-                /// Query on the Slug field.  Can prefix value with an operator, else defaults to = (equals).
+                /// Query on the Short Name field.  Can prefix value with an operator, else defaults to = (equals).
                 ///
-                /// - Remark: Generated from `#/paths/v1/tag/query/GET/query/slug`.
-                public var slug: [Swift.String]?
+                /// - Remark: Generated from `#/paths/v2/site/query/GET/query/shortName`.
+                public var shortName: [Swift.String]?
                 /// Creates a new `Query`.
                 ///
                 /// - Parameters:
@@ -4288,56 +6207,59 @@ public enum Operations {
                 ///   - includeCount: Whether or not to include the count (total matching records) in the result. Default is true.
                 ///   - orderBy: How the results of the query should be sorted. SQL-style, comma-separated list of field names, each optionally followed by ASC or DESC (defaults to ASC).
                 ///   - booleanOperator: Whether to combine query field as an AND or an OR.  Default is AND.
-                ///   - blogId: Query on the Blog field.  Can prefix value with an operator, else defaults to = (equals).
+                ///   - createDate: Query on the Create Date field.  Can prefix value with an operator, else defaults to = (equals).
                 ///   - description: Query on the Description field.  Can prefix value with an operator, else defaults to = (equals).
                 ///   - id: Query on the Id field.  Can prefix value with an operator, else defaults to = (equals).
+                ///   - modifyDate: Query on the Modify Date field.  Can prefix value with an operator, else defaults to = (equals).
                 ///   - name: Query on the Name field.  Can prefix value with an operator, else defaults to = (equals).
-                ///   - slug: Query on the Slug field.  Can prefix value with an operator, else defaults to = (equals).
+                ///   - shortName: Query on the Short Name field.  Can prefix value with an operator, else defaults to = (equals).
                 public init(
                     pageNo: Swift.Int? = nil,
                     pageSize: Swift.Int? = nil,
                     includeCount: Swift.Bool? = nil,
                     orderBy: Swift.String? = nil,
-                    booleanOperator: Operations.QueryTag.Input.Query.BooleanOperatorPayload? = nil,
-                    blogId: [Swift.String]? = nil,
+                    booleanOperator: Operations.QuerySite.Input.Query.BooleanOperatorPayload? = nil,
+                    createDate: [Swift.String]? = nil,
                     description: [Swift.String]? = nil,
                     id: [Swift.String]? = nil,
+                    modifyDate: [Swift.String]? = nil,
                     name: [Swift.String]? = nil,
-                    slug: [Swift.String]? = nil
+                    shortName: [Swift.String]? = nil
                 ) {
                     self.pageNo = pageNo
                     self.pageSize = pageSize
                     self.includeCount = includeCount
                     self.orderBy = orderBy
                     self.booleanOperator = booleanOperator
-                    self.blogId = blogId
+                    self.createDate = createDate
                     self.description = description
                     self.id = id
+                    self.modifyDate = modifyDate
                     self.name = name
-                    self.slug = slug
+                    self.shortName = shortName
                 }
             }
-            public var query: Operations.QueryTag.Input.Query
-            /// - Remark: Generated from `#/paths/v1/tag/query/GET/header`.
+            public var query: Operations.QuerySite.Input.Query
+            /// - Remark: Generated from `#/paths/v2/site/query/GET/header`.
             public struct Headers: Sendable, Hashable {
-                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.QueryTag.AcceptableContentType>]
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.QuerySite.AcceptableContentType>]
                 /// Creates a new `Headers`.
                 ///
                 /// - Parameters:
                 ///   - accept:
-                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.QueryTag.AcceptableContentType>] = .defaultValues()) {
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.QuerySite.AcceptableContentType>] = .defaultValues()) {
                     self.accept = accept
                 }
             }
-            public var headers: Operations.QueryTag.Input.Headers
+            public var headers: Operations.QuerySite.Input.Headers
             /// Creates a new `Input`.
             ///
             /// - Parameters:
             ///   - query:
             ///   - headers:
             public init(
-                query: Operations.QueryTag.Input.Query = .init(),
-                headers: Operations.QueryTag.Input.Headers = .init()
+                query: Operations.QuerySite.Input.Query = .init(),
+                headers: Operations.QuerySite.Input.Headers = .init()
             ) {
                 self.query = query
                 self.headers = headers
@@ -4346,7 +6268,7 @@ public enum Operations {
         @frozen public enum Output: Sendable, Hashable {
             /// Bad Request.  Some portion of the request's content was not acceptable to the server.  See error message in body for details.
             ///
-            /// - Remark: Generated from `#/paths//v1/tag/query/get(queryTag)/responses/400`.
+            /// - Remark: Generated from `#/paths//v2/site/query/get(querySite)/responses/400`.
             ///
             /// HTTP response code: `400 badRequest`.
             case badRequest(Components.Responses.Error400)
@@ -4369,7 +6291,7 @@ public enum Operations {
             }
             /// Unauthorized.  The required authentication credentials were missing or invalid.
             ///
-            /// - Remark: Generated from `#/paths//v1/tag/query/get(queryTag)/responses/401`.
+            /// - Remark: Generated from `#/paths//v2/site/query/get(querySite)/responses/401`.
             ///
             /// HTTP response code: `401 unauthorized`.
             case unauthorized(Components.Responses.Error401)
@@ -4392,7 +6314,7 @@ public enum Operations {
             }
             /// Forbidden.  You do not have permission to access the requested resource.
             ///
-            /// - Remark: Generated from `#/paths//v1/tag/query/get(queryTag)/responses/403`.
+            /// - Remark: Generated from `#/paths//v2/site/query/get(querySite)/responses/403`.
             ///
             /// HTTP response code: `403 forbidden`.
             case forbidden(Components.Responses.Error403)
@@ -4415,7 +6337,7 @@ public enum Operations {
             }
             /// Internal Server Error.  An error occurred in the server while processing the request.
             ///
-            /// - Remark: Generated from `#/paths//v1/tag/query/get(queryTag)/responses/500`.
+            /// - Remark: Generated from `#/paths//v2/site/query/get(querySite)/responses/500`.
             ///
             /// HTTP response code: `500 internalServerError`.
             case internalServerError(Components.Responses.Error500)
@@ -4437,15 +6359,15 @@ public enum Operations {
                 }
             }
             public struct Ok: Sendable, Hashable {
-                /// - Remark: Generated from `#/paths/v1/tag/query/GET/responses/200/content`.
+                /// - Remark: Generated from `#/paths/v2/site/query/GET/responses/200/content`.
                 @frozen public enum Body: Sendable, Hashable {
-                    /// - Remark: Generated from `#/paths/v1/tag/query/GET/responses/200/content/application\/json`.
-                    case json(Components.Schemas.TagSearchResult)
+                    /// - Remark: Generated from `#/paths/v2/site/query/GET/responses/200/content/application\/json`.
+                    case json(Components.Schemas.SiteSearchResult)
                     /// The associated value of the enum case if `self` is `.json`.
                     ///
                     /// - Throws: An error if `self` is not `.json`.
                     /// - SeeAlso: `.json`.
-                    public var json: Components.Schemas.TagSearchResult {
+                    public var json: Components.Schemas.SiteSearchResult {
                         get throws {
                             switch self {
                             case let .json(body):
@@ -4455,26 +6377,26 @@ public enum Operations {
                     }
                 }
                 /// Received HTTP response body
-                public var body: Operations.QueryTag.Output.Ok.Body
+                public var body: Operations.QuerySite.Output.Ok.Body
                 /// Creates a new `Ok`.
                 ///
                 /// - Parameters:
                 ///   - body: Received HTTP response body
-                public init(body: Operations.QueryTag.Output.Ok.Body) {
+                public init(body: Operations.QuerySite.Output.Ok.Body) {
                     self.body = body
                 }
             }
-            /// Successfully searched the Tags table (though may have found 0 records).
+            /// Successfully searched the Sites table (though may have found 0 records).
             ///
-            /// - Remark: Generated from `#/paths//v1/tag/query/get(queryTag)/responses/200`.
+            /// - Remark: Generated from `#/paths//v2/site/query/get(querySite)/responses/200`.
             ///
             /// HTTP response code: `200 ok`.
-            case ok(Operations.QueryTag.Output.Ok)
+            case ok(Operations.QuerySite.Output.Ok)
             /// The associated value of the enum case if `self` is `.ok`.
             ///
             /// - Throws: An error if `self` is not `.ok`.
             /// - SeeAlso: `.ok`.
-            public var ok: Operations.QueryTag.Output.Ok {
+            public var ok: Operations.QuerySite.Output.Ok {
                 get throws {
                     switch self {
                     case let .ok(response):
@@ -4489,7 +6411,7 @@ public enum Operations {
             }
             /// Too Many Requests.  Your application has issued too many API requests in too short of a time frame.
             ///
-            /// - Remark: Generated from `#/paths//v1/tag/query/get(queryTag)/responses/429`.
+            /// - Remark: Generated from `#/paths//v2/site/query/get(querySite)/responses/429`.
             ///
             /// HTTP response code: `429 tooManyRequests`.
             case tooManyRequests(Components.Responses.Error429)
@@ -4541,51 +6463,51 @@ public enum Operations {
             }
         }
     }
-    /// Get one Tags by Id
+    /// Get one Sites by Id
     ///
     /// Get one record from this table, by specifying its primary key as a path parameter.
     ///
     ///
-    /// - Remark: HTTP `GET /v1/tag/{id}`.
-    /// - Remark: Generated from `#/paths//v1/tag/{id}/get(getTag)`.
-    public enum GetTag {
-        public static let id: Swift.String = "getTag"
+    /// - Remark: HTTP `GET /v2/site/{id}`.
+    /// - Remark: Generated from `#/paths//v2/site/{id}/get(getSite)`.
+    public enum GetSite {
+        public static let id: Swift.String = "getSite"
         public struct Input: Sendable, Hashable {
-            /// - Remark: Generated from `#/paths/v1/tag/{id}/GET/path`.
+            /// - Remark: Generated from `#/paths/v2/site/{id}/GET/path`.
             public struct Path: Sendable, Hashable {
-                /// Id of the Tags to get.
+                /// Id of the Sites to get.
                 ///
-                /// - Remark: Generated from `#/paths/v1/tag/{id}/GET/path/id`.
+                /// - Remark: Generated from `#/paths/v2/site/{id}/GET/path/id`.
                 public var id: Swift.Int
                 /// Creates a new `Path`.
                 ///
                 /// - Parameters:
-                ///   - id: Id of the Tags to get.
+                ///   - id: Id of the Sites to get.
                 public init(id: Swift.Int) {
                     self.id = id
                 }
             }
-            public var path: Operations.GetTag.Input.Path
-            /// - Remark: Generated from `#/paths/v1/tag/{id}/GET/header`.
+            public var path: Operations.GetSite.Input.Path
+            /// - Remark: Generated from `#/paths/v2/site/{id}/GET/header`.
             public struct Headers: Sendable, Hashable {
-                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.GetTag.AcceptableContentType>]
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.GetSite.AcceptableContentType>]
                 /// Creates a new `Headers`.
                 ///
                 /// - Parameters:
                 ///   - accept:
-                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.GetTag.AcceptableContentType>] = .defaultValues()) {
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.GetSite.AcceptableContentType>] = .defaultValues()) {
                     self.accept = accept
                 }
             }
-            public var headers: Operations.GetTag.Input.Headers
+            public var headers: Operations.GetSite.Input.Headers
             /// Creates a new `Input`.
             ///
             /// - Parameters:
             ///   - path:
             ///   - headers:
             public init(
-                path: Operations.GetTag.Input.Path,
-                headers: Operations.GetTag.Input.Headers = .init()
+                path: Operations.GetSite.Input.Path,
+                headers: Operations.GetSite.Input.Headers = .init()
             ) {
                 self.path = path
                 self.headers = headers
@@ -4594,7 +6516,7 @@ public enum Operations {
         @frozen public enum Output: Sendable, Hashable {
             /// Bad Request.  Some portion of the request's content was not acceptable to the server.  See error message in body for details.
             ///
-            /// - Remark: Generated from `#/paths//v1/tag/{id}/get(getTag)/responses/400`.
+            /// - Remark: Generated from `#/paths//v2/site/{id}/get(getSite)/responses/400`.
             ///
             /// HTTP response code: `400 badRequest`.
             case badRequest(Components.Responses.Error400)
@@ -4617,7 +6539,7 @@ public enum Operations {
             }
             /// Unauthorized.  The required authentication credentials were missing or invalid.
             ///
-            /// - Remark: Generated from `#/paths//v1/tag/{id}/get(getTag)/responses/401`.
+            /// - Remark: Generated from `#/paths//v2/site/{id}/get(getSite)/responses/401`.
             ///
             /// HTTP response code: `401 unauthorized`.
             case unauthorized(Components.Responses.Error401)
@@ -4640,7 +6562,7 @@ public enum Operations {
             }
             /// Forbidden.  You do not have permission to access the requested resource.
             ///
-            /// - Remark: Generated from `#/paths//v1/tag/{id}/get(getTag)/responses/403`.
+            /// - Remark: Generated from `#/paths//v2/site/{id}/get(getSite)/responses/403`.
             ///
             /// HTTP response code: `403 forbidden`.
             case forbidden(Components.Responses.Error403)
@@ -4663,7 +6585,7 @@ public enum Operations {
             }
             /// Internal Server Error.  An error occurred in the server while processing the request.
             ///
-            /// - Remark: Generated from `#/paths//v1/tag/{id}/get(getTag)/responses/500`.
+            /// - Remark: Generated from `#/paths//v2/site/{id}/get(getSite)/responses/500`.
             ///
             /// HTTP response code: `500 internalServerError`.
             case internalServerError(Components.Responses.Error500)
@@ -4685,15 +6607,30 @@ public enum Operations {
                 }
             }
             public struct NotFound: Sendable, Hashable {
-                /// - Remark: Generated from `#/paths/v1/tag/{id}/GET/responses/404/content`.
+                /// - Remark: Generated from `#/paths/v2/site/{id}/GET/responses/404/content`.
                 @frozen public enum Body: Sendable, Hashable {
-                    /// - Remark: Generated from `#/paths/v1/tag/{id}/GET/responses/404/content/application\/json`.
-                    case json(Components.Schemas._Error)
+                    /// - Remark: Generated from `#/paths/v2/site/{id}/GET/responses/404/content/json`.
+                    public struct JsonPayload: Codable, Hashable, Sendable {
+                        /// - Remark: Generated from `#/paths/v2/site/{id}/GET/responses/404/content/json/error`.
+                        public var error: Swift.String?
+                        /// Creates a new `JsonPayload`.
+                        ///
+                        /// - Parameters:
+                        ///   - error:
+                        public init(error: Swift.String? = nil) {
+                            self.error = error
+                        }
+                        public enum CodingKeys: String, CodingKey {
+                            case error
+                        }
+                    }
+                    /// - Remark: Generated from `#/paths/v2/site/{id}/GET/responses/404/content/application\/json`.
+                    case json(Operations.GetSite.Output.NotFound.Body.JsonPayload)
                     /// The associated value of the enum case if `self` is `.json`.
                     ///
                     /// - Throws: An error if `self` is not `.json`.
                     /// - SeeAlso: `.json`.
-                    public var json: Components.Schemas._Error {
+                    public var json: Operations.GetSite.Output.NotFound.Body.JsonPayload {
                         get throws {
                             switch self {
                             case let .json(body):
@@ -4703,26 +6640,26 @@ public enum Operations {
                     }
                 }
                 /// Received HTTP response body
-                public var body: Operations.GetTag.Output.NotFound.Body
+                public var body: Operations.GetSite.Output.NotFound.Body
                 /// Creates a new `NotFound`.
                 ///
                 /// - Parameters:
                 ///   - body: Received HTTP response body
-                public init(body: Operations.GetTag.Output.NotFound.Body) {
+                public init(body: Operations.GetSite.Output.NotFound.Body) {
                     self.body = body
                 }
             }
-            /// The requested Tags record was not found.
+            /// The requested Sites record was not found.
             ///
-            /// - Remark: Generated from `#/paths//v1/tag/{id}/get(getTag)/responses/404`.
+            /// - Remark: Generated from `#/paths//v2/site/{id}/get(getSite)/responses/404`.
             ///
             /// HTTP response code: `404 notFound`.
-            case notFound(Operations.GetTag.Output.NotFound)
+            case notFound(Operations.GetSite.Output.NotFound)
             /// The associated value of the enum case if `self` is `.notFound`.
             ///
             /// - Throws: An error if `self` is not `.notFound`.
             /// - SeeAlso: `.notFound`.
-            public var notFound: Operations.GetTag.Output.NotFound {
+            public var notFound: Operations.GetSite.Output.NotFound {
                 get throws {
                     switch self {
                     case let .notFound(response):
@@ -4736,15 +6673,15 @@ public enum Operations {
                 }
             }
             public struct Ok: Sendable, Hashable {
-                /// - Remark: Generated from `#/paths/v1/tag/{id}/GET/responses/200/content`.
+                /// - Remark: Generated from `#/paths/v2/site/{id}/GET/responses/200/content`.
                 @frozen public enum Body: Sendable, Hashable {
-                    /// - Remark: Generated from `#/paths/v1/tag/{id}/GET/responses/200/content/application\/json`.
-                    case json(Components.Schemas.Tag)
+                    /// - Remark: Generated from `#/paths/v2/site/{id}/GET/responses/200/content/application\/json`.
+                    case json(Components.Schemas.Site)
                     /// The associated value of the enum case if `self` is `.json`.
                     ///
                     /// - Throws: An error if `self` is not `.json`.
                     /// - SeeAlso: `.json`.
-                    public var json: Components.Schemas.Tag {
+                    public var json: Components.Schemas.Site {
                         get throws {
                             switch self {
                             case let .json(body):
@@ -4754,26 +6691,26 @@ public enum Operations {
                     }
                 }
                 /// Received HTTP response body
-                public var body: Operations.GetTag.Output.Ok.Body
+                public var body: Operations.GetSite.Output.Ok.Body
                 /// Creates a new `Ok`.
                 ///
                 /// - Parameters:
                 ///   - body: Received HTTP response body
-                public init(body: Operations.GetTag.Output.Ok.Body) {
+                public init(body: Operations.GetSite.Output.Ok.Body) {
                     self.body = body
                 }
             }
-            /// Successfully got the requested Tags
+            /// Successfully got the requested Sites
             ///
-            /// - Remark: Generated from `#/paths//v1/tag/{id}/get(getTag)/responses/200`.
+            /// - Remark: Generated from `#/paths//v2/site/{id}/get(getSite)/responses/200`.
             ///
             /// HTTP response code: `200 ok`.
-            case ok(Operations.GetTag.Output.Ok)
+            case ok(Operations.GetSite.Output.Ok)
             /// The associated value of the enum case if `self` is `.ok`.
             ///
             /// - Throws: An error if `self` is not `.ok`.
             /// - SeeAlso: `.ok`.
-            public var ok: Operations.GetTag.Output.Ok {
+            public var ok: Operations.GetSite.Output.Ok {
                 get throws {
                     switch self {
                     case let .ok(response):
@@ -4788,7 +6725,7 @@ public enum Operations {
             }
             /// Too Many Requests.  Your application has issued too many API requests in too short of a time frame.
             ///
-            /// - Remark: Generated from `#/paths//v1/tag/{id}/get(getTag)/responses/429`.
+            /// - Remark: Generated from `#/paths//v2/site/{id}/get(getSite)/responses/429`.
             ///
             /// HTTP response code: `429 tooManyRequests`.
             case tooManyRequests(Components.Responses.Error429)
@@ -4797,2636 +6734,6 @@ public enum Operations {
             /// - Throws: An error if `self` is not `.tooManyRequests`.
             /// - SeeAlso: `.tooManyRequests`.
             public var tooManyRequests: Components.Responses.Error429 {
-                get throws {
-                    switch self {
-                    case let .tooManyRequests(response):
-                        return response
-                    default:
-                        try throwUnexpectedResponseStatus(
-                            expectedStatus: "tooManyRequests",
-                            response: self
-                        )
-                    }
-                }
-            }
-            /// Undocumented response.
-            ///
-            /// A response with a code that is not documented in the OpenAPI document.
-            case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
-        }
-        @frozen public enum AcceptableContentType: AcceptableProtocol {
-            case json
-            case other(Swift.String)
-            public init?(rawValue: Swift.String) {
-                switch rawValue.lowercased() {
-                case "application/json":
-                    self = .json
-                default:
-                    self = .other(rawValue)
-                }
-            }
-            public var rawValue: Swift.String {
-                switch self {
-                case let .other(string):
-                    return string
-                case .json:
-                    return "application/json"
-                }
-            }
-            public static var allCases: [Self] {
-                [
-                    .json
-                ]
-            }
-        }
-    }
-    /// List API versions
-    ///
-    /// Supported path versions and the full semantic version of each.
-    ///
-    /// - Remark: HTTP `GET /versions.json`.
-    /// - Remark: Generated from `#/paths//versions.json/get(getApiVersions)`.
-    public enum GetApiVersions {
-        public static let id: Swift.String = "getApiVersions"
-        public struct Input: Sendable, Hashable {
-            /// - Remark: Generated from `#/paths/versions.json/GET/header`.
-            public struct Headers: Sendable, Hashable {
-                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.GetApiVersions.AcceptableContentType>]
-                /// Creates a new `Headers`.
-                ///
-                /// - Parameters:
-                ///   - accept:
-                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.GetApiVersions.AcceptableContentType>] = .defaultValues()) {
-                    self.accept = accept
-                }
-            }
-            public var headers: Operations.GetApiVersions.Input.Headers
-            /// Creates a new `Input`.
-            ///
-            /// - Parameters:
-            ///   - headers:
-            public init(headers: Operations.GetApiVersions.Input.Headers = .init()) {
-                self.headers = headers
-            }
-        }
-        @frozen public enum Output: Sendable, Hashable {
-            public struct Ok: Sendable, Hashable {
-                /// - Remark: Generated from `#/paths/versions.json/GET/responses/200/content`.
-                @frozen public enum Body: Sendable, Hashable {
-                    /// - Remark: Generated from `#/paths/versions.json/GET/responses/200/content/application\/json`.
-                    case json(Components.Schemas.Versions)
-                    /// The associated value of the enum case if `self` is `.json`.
-                    ///
-                    /// - Throws: An error if `self` is not `.json`.
-                    /// - SeeAlso: `.json`.
-                    public var json: Components.Schemas.Versions {
-                        get throws {
-                            switch self {
-                            case let .json(body):
-                                return body
-                            }
-                        }
-                    }
-                }
-                /// Received HTTP response body
-                public var body: Operations.GetApiVersions.Output.Ok.Body
-                /// Creates a new `Ok`.
-                ///
-                /// - Parameters:
-                ///   - body: Received HTTP response body
-                public init(body: Operations.GetApiVersions.Output.Ok.Body) {
-                    self.body = body
-                }
-            }
-            /// Version discovery document
-            ///
-            /// - Remark: Generated from `#/paths//versions.json/get(getApiVersions)/responses/200`.
-            ///
-            /// HTTP response code: `200 ok`.
-            case ok(Operations.GetApiVersions.Output.Ok)
-            /// The associated value of the enum case if `self` is `.ok`.
-            ///
-            /// - Throws: An error if `self` is not `.ok`.
-            /// - SeeAlso: `.ok`.
-            public var ok: Operations.GetApiVersions.Output.Ok {
-                get throws {
-                    switch self {
-                    case let .ok(response):
-                        return response
-                    default:
-                        try throwUnexpectedResponseStatus(
-                            expectedStatus: "ok",
-                            response: self
-                        )
-                    }
-                }
-            }
-            /// Undocumented response.
-            ///
-            /// A response with a code that is not documented in the OpenAPI document.
-            case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
-        }
-        @frozen public enum AcceptableContentType: AcceptableProtocol {
-            case json
-            case other(Swift.String)
-            public init?(rawValue: Swift.String) {
-                switch rawValue.lowercased() {
-                case "application/json":
-                    self = .json
-                default:
-                    self = .other(rawValue)
-                }
-            }
-            public var rawValue: Swift.String {
-                switch self {
-                case let .other(string):
-                    return string
-                case .json:
-                    return "application/json"
-                }
-            }
-            public static var allCases: [Self] {
-                [
-                    .json
-                ]
-            }
-        }
-    }
-    /// Who am I
-    ///
-    /// The signed-in publisher, their author profile, the blogs they can post to and the limits.
-    ///
-    /// - Remark: HTTP `GET /v1/me`.
-    /// - Remark: Generated from `#/paths//v1/me/get(getMe)`.
-    public enum GetMe {
-        public static let id: Swift.String = "getMe"
-        public struct Input: Sendable, Hashable {
-            /// - Remark: Generated from `#/paths/v1/me/GET/header`.
-            public struct Headers: Sendable, Hashable {
-                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.GetMe.AcceptableContentType>]
-                /// Creates a new `Headers`.
-                ///
-                /// - Parameters:
-                ///   - accept:
-                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.GetMe.AcceptableContentType>] = .defaultValues()) {
-                    self.accept = accept
-                }
-            }
-            public var headers: Operations.GetMe.Input.Headers
-            /// Creates a new `Input`.
-            ///
-            /// - Parameters:
-            ///   - headers:
-            public init(headers: Operations.GetMe.Input.Headers = .init()) {
-                self.headers = headers
-            }
-        }
-        @frozen public enum Output: Sendable, Hashable {
-            public struct Ok: Sendable, Hashable {
-                /// - Remark: Generated from `#/paths/v1/me/GET/responses/200/content`.
-                @frozen public enum Body: Sendable, Hashable {
-                    /// - Remark: Generated from `#/paths/v1/me/GET/responses/200/content/application\/json`.
-                    case json(Components.Schemas.Me)
-                    /// The associated value of the enum case if `self` is `.json`.
-                    ///
-                    /// - Throws: An error if `self` is not `.json`.
-                    /// - SeeAlso: `.json`.
-                    public var json: Components.Schemas.Me {
-                        get throws {
-                            switch self {
-                            case let .json(body):
-                                return body
-                            }
-                        }
-                    }
-                }
-                /// Received HTTP response body
-                public var body: Operations.GetMe.Output.Ok.Body
-                /// Creates a new `Ok`.
-                ///
-                /// - Parameters:
-                ///   - body: Received HTTP response body
-                public init(body: Operations.GetMe.Output.Ok.Body) {
-                    self.body = body
-                }
-            }
-            /// The current publisher
-            ///
-            /// - Remark: Generated from `#/paths//v1/me/get(getMe)/responses/200`.
-            ///
-            /// HTTP response code: `200 ok`.
-            case ok(Operations.GetMe.Output.Ok)
-            /// The associated value of the enum case if `self` is `.ok`.
-            ///
-            /// - Throws: An error if `self` is not `.ok`.
-            /// - SeeAlso: `.ok`.
-            public var ok: Operations.GetMe.Output.Ok {
-                get throws {
-                    switch self {
-                    case let .ok(response):
-                        return response
-                    default:
-                        try throwUnexpectedResponseStatus(
-                            expectedStatus: "ok",
-                            response: self
-                        )
-                    }
-                }
-            }
-            /// Missing, expired or invalid bearer token
-            ///
-            /// - Remark: Generated from `#/paths//v1/me/get(getMe)/responses/401`.
-            ///
-            /// HTTP response code: `401 unauthorized`.
-            case unauthorized(Components.Responses.Unauthorized)
-            /// The associated value of the enum case if `self` is `.unauthorized`.
-            ///
-            /// - Throws: An error if `self` is not `.unauthorized`.
-            /// - SeeAlso: `.unauthorized`.
-            public var unauthorized: Components.Responses.Unauthorized {
-                get throws {
-                    switch self {
-                    case let .unauthorized(response):
-                        return response
-                    default:
-                        try throwUnexpectedResponseStatus(
-                            expectedStatus: "unauthorized",
-                            response: self
-                        )
-                    }
-                }
-            }
-            /// Not allowed (scope, group or author profile)
-            ///
-            /// - Remark: Generated from `#/paths//v1/me/get(getMe)/responses/403`.
-            ///
-            /// HTTP response code: `403 forbidden`.
-            case forbidden(Components.Responses.Forbidden)
-            /// The associated value of the enum case if `self` is `.forbidden`.
-            ///
-            /// - Throws: An error if `self` is not `.forbidden`.
-            /// - SeeAlso: `.forbidden`.
-            public var forbidden: Components.Responses.Forbidden {
-                get throws {
-                    switch self {
-                    case let .forbidden(response):
-                        return response
-                    default:
-                        try throwUnexpectedResponseStatus(
-                            expectedStatus: "forbidden",
-                            response: self
-                        )
-                    }
-                }
-            }
-            /// Rate limited
-            ///
-            /// - Remark: Generated from `#/paths//v1/me/get(getMe)/responses/429`.
-            ///
-            /// HTTP response code: `429 tooManyRequests`.
-            case tooManyRequests(Components.Responses.TooManyRequests)
-            /// The associated value of the enum case if `self` is `.tooManyRequests`.
-            ///
-            /// - Throws: An error if `self` is not `.tooManyRequests`.
-            /// - SeeAlso: `.tooManyRequests`.
-            public var tooManyRequests: Components.Responses.TooManyRequests {
-                get throws {
-                    switch self {
-                    case let .tooManyRequests(response):
-                        return response
-                    default:
-                        try throwUnexpectedResponseStatus(
-                            expectedStatus: "tooManyRequests",
-                            response: self
-                        )
-                    }
-                }
-            }
-            /// Undocumented response.
-            ///
-            /// A response with a code that is not documented in the OpenAPI document.
-            case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
-        }
-        @frozen public enum AcceptableContentType: AcceptableProtocol {
-            case json
-            case other(Swift.String)
-            public init?(rawValue: Swift.String) {
-                switch rawValue.lowercased() {
-                case "application/json":
-                    self = .json
-                default:
-                    self = .other(rawValue)
-                }
-            }
-            public var rawValue: Swift.String {
-                switch self {
-                case let .other(string):
-                    return string
-                case .json:
-                    return "application/json"
-                }
-            }
-            public static var allCases: [Self] {
-                [
-                    .json
-                ]
-            }
-        }
-    }
-    /// List my posts
-    ///
-    /// My posts, most recently changed first, with cursor pagination.
-    ///
-    /// - Remark: HTTP `GET /v1/me/posts`.
-    /// - Remark: Generated from `#/paths//v1/me/posts/get(listMyPosts)`.
-    public enum ListMyPosts {
-        public static let id: Swift.String = "listMyPosts"
-        public struct Input: Sendable, Hashable {
-            /// - Remark: Generated from `#/paths/v1/me/posts/GET/query`.
-            public struct Query: Sendable, Hashable {
-                /// - Remark: Generated from `#/paths/v1/me/posts/GET/query/status`.
-                public var status: Components.Schemas.PostStatus?
-                /// The `nextCursor` of the previous page.
-                ///
-                /// - Remark: Generated from `#/paths/v1/me/posts/GET/query/cursor`.
-                public var cursor: Swift.String?
-                /// - Remark: Generated from `#/paths/v1/me/posts/GET/query/limit`.
-                public var limit: Swift.Int?
-                /// Creates a new `Query`.
-                ///
-                /// - Parameters:
-                ///   - status:
-                ///   - cursor: The `nextCursor` of the previous page.
-                ///   - limit:
-                public init(
-                    status: Components.Schemas.PostStatus? = nil,
-                    cursor: Swift.String? = nil,
-                    limit: Swift.Int? = nil
-                ) {
-                    self.status = status
-                    self.cursor = cursor
-                    self.limit = limit
-                }
-            }
-            public var query: Operations.ListMyPosts.Input.Query
-            /// - Remark: Generated from `#/paths/v1/me/posts/GET/header`.
-            public struct Headers: Sendable, Hashable {
-                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.ListMyPosts.AcceptableContentType>]
-                /// Creates a new `Headers`.
-                ///
-                /// - Parameters:
-                ///   - accept:
-                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.ListMyPosts.AcceptableContentType>] = .defaultValues()) {
-                    self.accept = accept
-                }
-            }
-            public var headers: Operations.ListMyPosts.Input.Headers
-            /// Creates a new `Input`.
-            ///
-            /// - Parameters:
-            ///   - query:
-            ///   - headers:
-            public init(
-                query: Operations.ListMyPosts.Input.Query = .init(),
-                headers: Operations.ListMyPosts.Input.Headers = .init()
-            ) {
-                self.query = query
-                self.headers = headers
-            }
-        }
-        @frozen public enum Output: Sendable, Hashable {
-            public struct Ok: Sendable, Hashable {
-                /// - Remark: Generated from `#/paths/v1/me/posts/GET/responses/200/content`.
-                @frozen public enum Body: Sendable, Hashable {
-                    /// - Remark: Generated from `#/paths/v1/me/posts/GET/responses/200/content/application\/json`.
-                    case json(Components.Schemas.PostPage)
-                    /// The associated value of the enum case if `self` is `.json`.
-                    ///
-                    /// - Throws: An error if `self` is not `.json`.
-                    /// - SeeAlso: `.json`.
-                    public var json: Components.Schemas.PostPage {
-                        get throws {
-                            switch self {
-                            case let .json(body):
-                                return body
-                            }
-                        }
-                    }
-                }
-                /// Received HTTP response body
-                public var body: Operations.ListMyPosts.Output.Ok.Body
-                /// Creates a new `Ok`.
-                ///
-                /// - Parameters:
-                ///   - body: Received HTTP response body
-                public init(body: Operations.ListMyPosts.Output.Ok.Body) {
-                    self.body = body
-                }
-            }
-            /// A page of posts
-            ///
-            /// - Remark: Generated from `#/paths//v1/me/posts/get(listMyPosts)/responses/200`.
-            ///
-            /// HTTP response code: `200 ok`.
-            case ok(Operations.ListMyPosts.Output.Ok)
-            /// The associated value of the enum case if `self` is `.ok`.
-            ///
-            /// - Throws: An error if `self` is not `.ok`.
-            /// - SeeAlso: `.ok`.
-            public var ok: Operations.ListMyPosts.Output.Ok {
-                get throws {
-                    switch self {
-                    case let .ok(response):
-                        return response
-                    default:
-                        try throwUnexpectedResponseStatus(
-                            expectedStatus: "ok",
-                            response: self
-                        )
-                    }
-                }
-            }
-            /// Malformed request
-            ///
-            /// - Remark: Generated from `#/paths//v1/me/posts/get(listMyPosts)/responses/400`.
-            ///
-            /// HTTP response code: `400 badRequest`.
-            case badRequest(Components.Responses.BadRequest)
-            /// The associated value of the enum case if `self` is `.badRequest`.
-            ///
-            /// - Throws: An error if `self` is not `.badRequest`.
-            /// - SeeAlso: `.badRequest`.
-            public var badRequest: Components.Responses.BadRequest {
-                get throws {
-                    switch self {
-                    case let .badRequest(response):
-                        return response
-                    default:
-                        try throwUnexpectedResponseStatus(
-                            expectedStatus: "badRequest",
-                            response: self
-                        )
-                    }
-                }
-            }
-            /// Missing, expired or invalid bearer token
-            ///
-            /// - Remark: Generated from `#/paths//v1/me/posts/get(listMyPosts)/responses/401`.
-            ///
-            /// HTTP response code: `401 unauthorized`.
-            case unauthorized(Components.Responses.Unauthorized)
-            /// The associated value of the enum case if `self` is `.unauthorized`.
-            ///
-            /// - Throws: An error if `self` is not `.unauthorized`.
-            /// - SeeAlso: `.unauthorized`.
-            public var unauthorized: Components.Responses.Unauthorized {
-                get throws {
-                    switch self {
-                    case let .unauthorized(response):
-                        return response
-                    default:
-                        try throwUnexpectedResponseStatus(
-                            expectedStatus: "unauthorized",
-                            response: self
-                        )
-                    }
-                }
-            }
-            /// Not allowed (scope, group or author profile)
-            ///
-            /// - Remark: Generated from `#/paths//v1/me/posts/get(listMyPosts)/responses/403`.
-            ///
-            /// HTTP response code: `403 forbidden`.
-            case forbidden(Components.Responses.Forbidden)
-            /// The associated value of the enum case if `self` is `.forbidden`.
-            ///
-            /// - Throws: An error if `self` is not `.forbidden`.
-            /// - SeeAlso: `.forbidden`.
-            public var forbidden: Components.Responses.Forbidden {
-                get throws {
-                    switch self {
-                    case let .forbidden(response):
-                        return response
-                    default:
-                        try throwUnexpectedResponseStatus(
-                            expectedStatus: "forbidden",
-                            response: self
-                        )
-                    }
-                }
-            }
-            /// Rate limited
-            ///
-            /// - Remark: Generated from `#/paths//v1/me/posts/get(listMyPosts)/responses/429`.
-            ///
-            /// HTTP response code: `429 tooManyRequests`.
-            case tooManyRequests(Components.Responses.TooManyRequests)
-            /// The associated value of the enum case if `self` is `.tooManyRequests`.
-            ///
-            /// - Throws: An error if `self` is not `.tooManyRequests`.
-            /// - SeeAlso: `.tooManyRequests`.
-            public var tooManyRequests: Components.Responses.TooManyRequests {
-                get throws {
-                    switch self {
-                    case let .tooManyRequests(response):
-                        return response
-                    default:
-                        try throwUnexpectedResponseStatus(
-                            expectedStatus: "tooManyRequests",
-                            response: self
-                        )
-                    }
-                }
-            }
-            /// Undocumented response.
-            ///
-            /// A response with a code that is not documented in the OpenAPI document.
-            case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
-        }
-        @frozen public enum AcceptableContentType: AcceptableProtocol {
-            case json
-            case other(Swift.String)
-            public init?(rawValue: Swift.String) {
-                switch rawValue.lowercased() {
-                case "application/json":
-                    self = .json
-                default:
-                    self = .other(rawValue)
-                }
-            }
-            public var rawValue: Swift.String {
-                switch self {
-                case let .other(string):
-                    return string
-                case .json:
-                    return "application/json"
-                }
-            }
-            public static var allCases: [Self] {
-                [
-                    .json
-                ]
-            }
-        }
-    }
-    /// Create a post
-    ///
-    /// Creates a draft, publishes immediately (`status: published`) or schedules (`status: scheduled` with `publishAt`). Retry-safe with `Idempotency-Key`.
-    ///
-    /// - Remark: HTTP `POST /v1/me/posts`.
-    /// - Remark: Generated from `#/paths//v1/me/posts/post(createPost)`.
-    public enum CreatePost {
-        public static let id: Swift.String = "createPost"
-        public struct Input: Sendable, Hashable {
-            /// - Remark: Generated from `#/paths/v1/me/posts/POST/header`.
-            public struct Headers: Sendable, Hashable {
-                /// 8-255 characters; the same key and body replays the first response for 24 hours.
-                ///
-                /// - Remark: Generated from `#/paths/v1/me/posts/POST/header/Idempotency-Key`.
-                public var idempotencyKey: Components.Parameters.IdempotencyKey?
-                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.CreatePost.AcceptableContentType>]
-                /// Creates a new `Headers`.
-                ///
-                /// - Parameters:
-                ///   - idempotencyKey: 8-255 characters; the same key and body replays the first response for 24 hours.
-                ///   - accept:
-                public init(
-                    idempotencyKey: Components.Parameters.IdempotencyKey? = nil,
-                    accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.CreatePost.AcceptableContentType>] = .defaultValues()
-                ) {
-                    self.idempotencyKey = idempotencyKey
-                    self.accept = accept
-                }
-            }
-            public var headers: Operations.CreatePost.Input.Headers
-            /// - Remark: Generated from `#/paths/v1/me/posts/POST/requestBody`.
-            @frozen public enum Body: Sendable, Hashable {
-                /// - Remark: Generated from `#/paths/v1/me/posts/POST/requestBody/content/application\/json`.
-                case json(Components.Schemas.PostCreate)
-            }
-            public var body: Operations.CreatePost.Input.Body
-            /// Creates a new `Input`.
-            ///
-            /// - Parameters:
-            ///   - headers:
-            ///   - body:
-            public init(
-                headers: Operations.CreatePost.Input.Headers = .init(),
-                body: Operations.CreatePost.Input.Body
-            ) {
-                self.headers = headers
-                self.body = body
-            }
-        }
-        @frozen public enum Output: Sendable, Hashable {
-            public struct Created: Sendable, Hashable {
-                /// - Remark: Generated from `#/paths/v1/me/posts/POST/responses/201/headers`.
-                public struct Headers: Sendable, Hashable {
-                    /// Version of the returned post, for If-Match.
-                    ///
-                    /// - Remark: Generated from `#/paths/v1/me/posts/POST/responses/201/headers/ETag`.
-                    public var eTag: Components.Headers.ETag?
-                    /// URL of the created resource.
-                    ///
-                    /// - Remark: Generated from `#/paths/v1/me/posts/POST/responses/201/headers/Location`.
-                    public var location: Components.Headers.Location?
-                    /// Creates a new `Headers`.
-                    ///
-                    /// - Parameters:
-                    ///   - eTag: Version of the returned post, for If-Match.
-                    ///   - location: URL of the created resource.
-                    public init(
-                        eTag: Components.Headers.ETag? = nil,
-                        location: Components.Headers.Location? = nil
-                    ) {
-                        self.eTag = eTag
-                        self.location = location
-                    }
-                }
-                /// Received HTTP response headers
-                public var headers: Operations.CreatePost.Output.Created.Headers
-                /// - Remark: Generated from `#/paths/v1/me/posts/POST/responses/201/content`.
-                @frozen public enum Body: Sendable, Hashable {
-                    /// - Remark: Generated from `#/paths/v1/me/posts/POST/responses/201/content/application\/json`.
-                    case json(Components.Schemas.AuthoringPost)
-                    /// The associated value of the enum case if `self` is `.json`.
-                    ///
-                    /// - Throws: An error if `self` is not `.json`.
-                    /// - SeeAlso: `.json`.
-                    public var json: Components.Schemas.AuthoringPost {
-                        get throws {
-                            switch self {
-                            case let .json(body):
-                                return body
-                            }
-                        }
-                    }
-                }
-                /// Received HTTP response body
-                public var body: Operations.CreatePost.Output.Created.Body
-                /// Creates a new `Created`.
-                ///
-                /// - Parameters:
-                ///   - headers: Received HTTP response headers
-                ///   - body: Received HTTP response body
-                public init(
-                    headers: Operations.CreatePost.Output.Created.Headers = .init(),
-                    body: Operations.CreatePost.Output.Created.Body
-                ) {
-                    self.headers = headers
-                    self.body = body
-                }
-            }
-            /// Created
-            ///
-            /// - Remark: Generated from `#/paths//v1/me/posts/post(createPost)/responses/201`.
-            ///
-            /// HTTP response code: `201 created`.
-            case created(Operations.CreatePost.Output.Created)
-            /// The associated value of the enum case if `self` is `.created`.
-            ///
-            /// - Throws: An error if `self` is not `.created`.
-            /// - SeeAlso: `.created`.
-            public var created: Operations.CreatePost.Output.Created {
-                get throws {
-                    switch self {
-                    case let .created(response):
-                        return response
-                    default:
-                        try throwUnexpectedResponseStatus(
-                            expectedStatus: "created",
-                            response: self
-                        )
-                    }
-                }
-            }
-            /// Malformed request
-            ///
-            /// - Remark: Generated from `#/paths//v1/me/posts/post(createPost)/responses/400`.
-            ///
-            /// HTTP response code: `400 badRequest`.
-            case badRequest(Components.Responses.BadRequest)
-            /// The associated value of the enum case if `self` is `.badRequest`.
-            ///
-            /// - Throws: An error if `self` is not `.badRequest`.
-            /// - SeeAlso: `.badRequest`.
-            public var badRequest: Components.Responses.BadRequest {
-                get throws {
-                    switch self {
-                    case let .badRequest(response):
-                        return response
-                    default:
-                        try throwUnexpectedResponseStatus(
-                            expectedStatus: "badRequest",
-                            response: self
-                        )
-                    }
-                }
-            }
-            /// Missing, expired or invalid bearer token
-            ///
-            /// - Remark: Generated from `#/paths//v1/me/posts/post(createPost)/responses/401`.
-            ///
-            /// HTTP response code: `401 unauthorized`.
-            case unauthorized(Components.Responses.Unauthorized)
-            /// The associated value of the enum case if `self` is `.unauthorized`.
-            ///
-            /// - Throws: An error if `self` is not `.unauthorized`.
-            /// - SeeAlso: `.unauthorized`.
-            public var unauthorized: Components.Responses.Unauthorized {
-                get throws {
-                    switch self {
-                    case let .unauthorized(response):
-                        return response
-                    default:
-                        try throwUnexpectedResponseStatus(
-                            expectedStatus: "unauthorized",
-                            response: self
-                        )
-                    }
-                }
-            }
-            /// Not allowed (scope, group or author profile)
-            ///
-            /// - Remark: Generated from `#/paths//v1/me/posts/post(createPost)/responses/403`.
-            ///
-            /// HTTP response code: `403 forbidden`.
-            case forbidden(Components.Responses.Forbidden)
-            /// The associated value of the enum case if `self` is `.forbidden`.
-            ///
-            /// - Throws: An error if `self` is not `.forbidden`.
-            /// - SeeAlso: `.forbidden`.
-            public var forbidden: Components.Responses.Forbidden {
-                get throws {
-                    switch self {
-                    case let .forbidden(response):
-                        return response
-                    default:
-                        try throwUnexpectedResponseStatus(
-                            expectedStatus: "forbidden",
-                            response: self
-                        )
-                    }
-                }
-            }
-            /// Conflict (idempotency key in flight, upload state, delete blocked)
-            ///
-            /// - Remark: Generated from `#/paths//v1/me/posts/post(createPost)/responses/409`.
-            ///
-            /// HTTP response code: `409 conflict`.
-            case conflict(Components.Responses.Conflict)
-            /// The associated value of the enum case if `self` is `.conflict`.
-            ///
-            /// - Throws: An error if `self` is not `.conflict`.
-            /// - SeeAlso: `.conflict`.
-            public var conflict: Components.Responses.Conflict {
-                get throws {
-                    switch self {
-                    case let .conflict(response):
-                        return response
-                    default:
-                        try throwUnexpectedResponseStatus(
-                            expectedStatus: "conflict",
-                            response: self
-                        )
-                    }
-                }
-            }
-            /// Validation failed
-            ///
-            /// - Remark: Generated from `#/paths//v1/me/posts/post(createPost)/responses/422`.
-            ///
-            /// HTTP response code: `422 unprocessableContent`.
-            case unprocessableContent(Components.Responses.ValidationFailed)
-            /// The associated value of the enum case if `self` is `.unprocessableContent`.
-            ///
-            /// - Throws: An error if `self` is not `.unprocessableContent`.
-            /// - SeeAlso: `.unprocessableContent`.
-            public var unprocessableContent: Components.Responses.ValidationFailed {
-                get throws {
-                    switch self {
-                    case let .unprocessableContent(response):
-                        return response
-                    default:
-                        try throwUnexpectedResponseStatus(
-                            expectedStatus: "unprocessableContent",
-                            response: self
-                        )
-                    }
-                }
-            }
-            /// Rate limited
-            ///
-            /// - Remark: Generated from `#/paths//v1/me/posts/post(createPost)/responses/429`.
-            ///
-            /// HTTP response code: `429 tooManyRequests`.
-            case tooManyRequests(Components.Responses.TooManyRequests)
-            /// The associated value of the enum case if `self` is `.tooManyRequests`.
-            ///
-            /// - Throws: An error if `self` is not `.tooManyRequests`.
-            /// - SeeAlso: `.tooManyRequests`.
-            public var tooManyRequests: Components.Responses.TooManyRequests {
-                get throws {
-                    switch self {
-                    case let .tooManyRequests(response):
-                        return response
-                    default:
-                        try throwUnexpectedResponseStatus(
-                            expectedStatus: "tooManyRequests",
-                            response: self
-                        )
-                    }
-                }
-            }
-            /// Undocumented response.
-            ///
-            /// A response with a code that is not documented in the OpenAPI document.
-            case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
-        }
-        @frozen public enum AcceptableContentType: AcceptableProtocol {
-            case json
-            case other(Swift.String)
-            public init?(rawValue: Swift.String) {
-                switch rawValue.lowercased() {
-                case "application/json":
-                    self = .json
-                default:
-                    self = .other(rawValue)
-                }
-            }
-            public var rawValue: Swift.String {
-                switch self {
-                case let .other(string):
-                    return string
-                case .json:
-                    return "application/json"
-                }
-            }
-            public static var allCases: [Self] {
-                [
-                    .json
-                ]
-            }
-        }
-    }
-    /// Get one of my posts
-    ///
-    /// - Remark: HTTP `GET /v1/me/posts/{postId}`.
-    /// - Remark: Generated from `#/paths//v1/me/posts/{postId}/get(getMyPost)`.
-    public enum GetMyPost {
-        public static let id: Swift.String = "getMyPost"
-        public struct Input: Sendable, Hashable {
-            /// - Remark: Generated from `#/paths/v1/me/posts/{postId}/GET/path`.
-            public struct Path: Sendable, Hashable {
-                /// - Remark: Generated from `#/paths/v1/me/posts/{postId}/GET/path/postId`.
-                public var postId: Components.Parameters.PostId
-                /// Creates a new `Path`.
-                ///
-                /// - Parameters:
-                ///   - postId:
-                public init(postId: Components.Parameters.PostId) {
-                    self.postId = postId
-                }
-            }
-            public var path: Operations.GetMyPost.Input.Path
-            /// - Remark: Generated from `#/paths/v1/me/posts/{postId}/GET/header`.
-            public struct Headers: Sendable, Hashable {
-                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.GetMyPost.AcceptableContentType>]
-                /// Creates a new `Headers`.
-                ///
-                /// - Parameters:
-                ///   - accept:
-                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.GetMyPost.AcceptableContentType>] = .defaultValues()) {
-                    self.accept = accept
-                }
-            }
-            public var headers: Operations.GetMyPost.Input.Headers
-            /// Creates a new `Input`.
-            ///
-            /// - Parameters:
-            ///   - path:
-            ///   - headers:
-            public init(
-                path: Operations.GetMyPost.Input.Path,
-                headers: Operations.GetMyPost.Input.Headers = .init()
-            ) {
-                self.path = path
-                self.headers = headers
-            }
-        }
-        @frozen public enum Output: Sendable, Hashable {
-            public struct Ok: Sendable, Hashable {
-                /// - Remark: Generated from `#/paths/v1/me/posts/{postId}/GET/responses/200/headers`.
-                public struct Headers: Sendable, Hashable {
-                    /// Version of the returned post, for If-Match.
-                    ///
-                    /// - Remark: Generated from `#/paths/v1/me/posts/{postId}/GET/responses/200/headers/ETag`.
-                    public var eTag: Components.Headers.ETag?
-                    /// Creates a new `Headers`.
-                    ///
-                    /// - Parameters:
-                    ///   - eTag: Version of the returned post, for If-Match.
-                    public init(eTag: Components.Headers.ETag? = nil) {
-                        self.eTag = eTag
-                    }
-                }
-                /// Received HTTP response headers
-                public var headers: Operations.GetMyPost.Output.Ok.Headers
-                /// - Remark: Generated from `#/paths/v1/me/posts/{postId}/GET/responses/200/content`.
-                @frozen public enum Body: Sendable, Hashable {
-                    /// - Remark: Generated from `#/paths/v1/me/posts/{postId}/GET/responses/200/content/application\/json`.
-                    case json(Components.Schemas.AuthoringPost)
-                    /// The associated value of the enum case if `self` is `.json`.
-                    ///
-                    /// - Throws: An error if `self` is not `.json`.
-                    /// - SeeAlso: `.json`.
-                    public var json: Components.Schemas.AuthoringPost {
-                        get throws {
-                            switch self {
-                            case let .json(body):
-                                return body
-                            }
-                        }
-                    }
-                }
-                /// Received HTTP response body
-                public var body: Operations.GetMyPost.Output.Ok.Body
-                /// Creates a new `Ok`.
-                ///
-                /// - Parameters:
-                ///   - headers: Received HTTP response headers
-                ///   - body: Received HTTP response body
-                public init(
-                    headers: Operations.GetMyPost.Output.Ok.Headers = .init(),
-                    body: Operations.GetMyPost.Output.Ok.Body
-                ) {
-                    self.headers = headers
-                    self.body = body
-                }
-            }
-            /// The post
-            ///
-            /// - Remark: Generated from `#/paths//v1/me/posts/{postId}/get(getMyPost)/responses/200`.
-            ///
-            /// HTTP response code: `200 ok`.
-            case ok(Operations.GetMyPost.Output.Ok)
-            /// The associated value of the enum case if `self` is `.ok`.
-            ///
-            /// - Throws: An error if `self` is not `.ok`.
-            /// - SeeAlso: `.ok`.
-            public var ok: Operations.GetMyPost.Output.Ok {
-                get throws {
-                    switch self {
-                    case let .ok(response):
-                        return response
-                    default:
-                        try throwUnexpectedResponseStatus(
-                            expectedStatus: "ok",
-                            response: self
-                        )
-                    }
-                }
-            }
-            /// Missing, expired or invalid bearer token
-            ///
-            /// - Remark: Generated from `#/paths//v1/me/posts/{postId}/get(getMyPost)/responses/401`.
-            ///
-            /// HTTP response code: `401 unauthorized`.
-            case unauthorized(Components.Responses.Unauthorized)
-            /// The associated value of the enum case if `self` is `.unauthorized`.
-            ///
-            /// - Throws: An error if `self` is not `.unauthorized`.
-            /// - SeeAlso: `.unauthorized`.
-            public var unauthorized: Components.Responses.Unauthorized {
-                get throws {
-                    switch self {
-                    case let .unauthorized(response):
-                        return response
-                    default:
-                        try throwUnexpectedResponseStatus(
-                            expectedStatus: "unauthorized",
-                            response: self
-                        )
-                    }
-                }
-            }
-            /// Not allowed (scope, group or author profile)
-            ///
-            /// - Remark: Generated from `#/paths//v1/me/posts/{postId}/get(getMyPost)/responses/403`.
-            ///
-            /// HTTP response code: `403 forbidden`.
-            case forbidden(Components.Responses.Forbidden)
-            /// The associated value of the enum case if `self` is `.forbidden`.
-            ///
-            /// - Throws: An error if `self` is not `.forbidden`.
-            /// - SeeAlso: `.forbidden`.
-            public var forbidden: Components.Responses.Forbidden {
-                get throws {
-                    switch self {
-                    case let .forbidden(response):
-                        return response
-                    default:
-                        try throwUnexpectedResponseStatus(
-                            expectedStatus: "forbidden",
-                            response: self
-                        )
-                    }
-                }
-            }
-            /// Not found or not public
-            ///
-            /// - Remark: Generated from `#/paths//v1/me/posts/{postId}/get(getMyPost)/responses/404`.
-            ///
-            /// HTTP response code: `404 notFound`.
-            case notFound(Components.Responses.NotFound)
-            /// The associated value of the enum case if `self` is `.notFound`.
-            ///
-            /// - Throws: An error if `self` is not `.notFound`.
-            /// - SeeAlso: `.notFound`.
-            public var notFound: Components.Responses.NotFound {
-                get throws {
-                    switch self {
-                    case let .notFound(response):
-                        return response
-                    default:
-                        try throwUnexpectedResponseStatus(
-                            expectedStatus: "notFound",
-                            response: self
-                        )
-                    }
-                }
-            }
-            /// Undocumented response.
-            ///
-            /// A response with a code that is not documented in the OpenAPI document.
-            case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
-        }
-        @frozen public enum AcceptableContentType: AcceptableProtocol {
-            case json
-            case other(Swift.String)
-            public init?(rawValue: Swift.String) {
-                switch rawValue.lowercased() {
-                case "application/json":
-                    self = .json
-                default:
-                    self = .other(rawValue)
-                }
-            }
-            public var rawValue: Swift.String {
-                switch self {
-                case let .other(string):
-                    return string
-                case .json:
-                    return "application/json"
-                }
-            }
-            public static var allCases: [Self] {
-                [
-                    .json
-                ]
-            }
-        }
-    }
-    /// Update one of my posts
-    ///
-    /// Omitted fields are unchanged; `null` clears optional fields. `tags` and `media` replace the whole list. Requires `If-Match` with the current ETag.
-    ///
-    /// - Remark: HTTP `PATCH /v1/me/posts/{postId}`.
-    /// - Remark: Generated from `#/paths//v1/me/posts/{postId}/patch(updatePost)`.
-    public enum UpdatePost {
-        public static let id: Swift.String = "updatePost"
-        public struct Input: Sendable, Hashable {
-            /// - Remark: Generated from `#/paths/v1/me/posts/{postId}/PATCH/path`.
-            public struct Path: Sendable, Hashable {
-                /// - Remark: Generated from `#/paths/v1/me/posts/{postId}/PATCH/path/postId`.
-                public var postId: Components.Parameters.PostId
-                /// Creates a new `Path`.
-                ///
-                /// - Parameters:
-                ///   - postId:
-                public init(postId: Components.Parameters.PostId) {
-                    self.postId = postId
-                }
-            }
-            public var path: Operations.UpdatePost.Input.Path
-            /// - Remark: Generated from `#/paths/v1/me/posts/{postId}/PATCH/header`.
-            public struct Headers: Sendable, Hashable {
-                /// The ETag from the last read of this post.
-                ///
-                /// - Remark: Generated from `#/paths/v1/me/posts/{postId}/PATCH/header/If-Match`.
-                public var ifMatch: Components.Parameters.IfMatch
-                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.UpdatePost.AcceptableContentType>]
-                /// Creates a new `Headers`.
-                ///
-                /// - Parameters:
-                ///   - ifMatch: The ETag from the last read of this post.
-                ///   - accept:
-                public init(
-                    ifMatch: Components.Parameters.IfMatch,
-                    accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.UpdatePost.AcceptableContentType>] = .defaultValues()
-                ) {
-                    self.ifMatch = ifMatch
-                    self.accept = accept
-                }
-            }
-            public var headers: Operations.UpdatePost.Input.Headers
-            /// - Remark: Generated from `#/paths/v1/me/posts/{postId}/PATCH/requestBody`.
-            @frozen public enum Body: Sendable, Hashable {
-                /// - Remark: Generated from `#/paths/v1/me/posts/{postId}/PATCH/requestBody/content/application\/json`.
-                case json(Components.Schemas.PostUpdate)
-            }
-            public var body: Operations.UpdatePost.Input.Body
-            /// Creates a new `Input`.
-            ///
-            /// - Parameters:
-            ///   - path:
-            ///   - headers:
-            ///   - body:
-            public init(
-                path: Operations.UpdatePost.Input.Path,
-                headers: Operations.UpdatePost.Input.Headers,
-                body: Operations.UpdatePost.Input.Body
-            ) {
-                self.path = path
-                self.headers = headers
-                self.body = body
-            }
-        }
-        @frozen public enum Output: Sendable, Hashable {
-            public struct Ok: Sendable, Hashable {
-                /// - Remark: Generated from `#/paths/v1/me/posts/{postId}/PATCH/responses/200/headers`.
-                public struct Headers: Sendable, Hashable {
-                    /// Version of the returned post, for If-Match.
-                    ///
-                    /// - Remark: Generated from `#/paths/v1/me/posts/{postId}/PATCH/responses/200/headers/ETag`.
-                    public var eTag: Components.Headers.ETag?
-                    /// Creates a new `Headers`.
-                    ///
-                    /// - Parameters:
-                    ///   - eTag: Version of the returned post, for If-Match.
-                    public init(eTag: Components.Headers.ETag? = nil) {
-                        self.eTag = eTag
-                    }
-                }
-                /// Received HTTP response headers
-                public var headers: Operations.UpdatePost.Output.Ok.Headers
-                /// - Remark: Generated from `#/paths/v1/me/posts/{postId}/PATCH/responses/200/content`.
-                @frozen public enum Body: Sendable, Hashable {
-                    /// - Remark: Generated from `#/paths/v1/me/posts/{postId}/PATCH/responses/200/content/application\/json`.
-                    case json(Components.Schemas.AuthoringPost)
-                    /// The associated value of the enum case if `self` is `.json`.
-                    ///
-                    /// - Throws: An error if `self` is not `.json`.
-                    /// - SeeAlso: `.json`.
-                    public var json: Components.Schemas.AuthoringPost {
-                        get throws {
-                            switch self {
-                            case let .json(body):
-                                return body
-                            }
-                        }
-                    }
-                }
-                /// Received HTTP response body
-                public var body: Operations.UpdatePost.Output.Ok.Body
-                /// Creates a new `Ok`.
-                ///
-                /// - Parameters:
-                ///   - headers: Received HTTP response headers
-                ///   - body: Received HTTP response body
-                public init(
-                    headers: Operations.UpdatePost.Output.Ok.Headers = .init(),
-                    body: Operations.UpdatePost.Output.Ok.Body
-                ) {
-                    self.headers = headers
-                    self.body = body
-                }
-            }
-            /// Updated
-            ///
-            /// - Remark: Generated from `#/paths//v1/me/posts/{postId}/patch(updatePost)/responses/200`.
-            ///
-            /// HTTP response code: `200 ok`.
-            case ok(Operations.UpdatePost.Output.Ok)
-            /// The associated value of the enum case if `self` is `.ok`.
-            ///
-            /// - Throws: An error if `self` is not `.ok`.
-            /// - SeeAlso: `.ok`.
-            public var ok: Operations.UpdatePost.Output.Ok {
-                get throws {
-                    switch self {
-                    case let .ok(response):
-                        return response
-                    default:
-                        try throwUnexpectedResponseStatus(
-                            expectedStatus: "ok",
-                            response: self
-                        )
-                    }
-                }
-            }
-            /// Malformed request
-            ///
-            /// - Remark: Generated from `#/paths//v1/me/posts/{postId}/patch(updatePost)/responses/400`.
-            ///
-            /// HTTP response code: `400 badRequest`.
-            case badRequest(Components.Responses.BadRequest)
-            /// The associated value of the enum case if `self` is `.badRequest`.
-            ///
-            /// - Throws: An error if `self` is not `.badRequest`.
-            /// - SeeAlso: `.badRequest`.
-            public var badRequest: Components.Responses.BadRequest {
-                get throws {
-                    switch self {
-                    case let .badRequest(response):
-                        return response
-                    default:
-                        try throwUnexpectedResponseStatus(
-                            expectedStatus: "badRequest",
-                            response: self
-                        )
-                    }
-                }
-            }
-            /// Missing, expired or invalid bearer token
-            ///
-            /// - Remark: Generated from `#/paths//v1/me/posts/{postId}/patch(updatePost)/responses/401`.
-            ///
-            /// HTTP response code: `401 unauthorized`.
-            case unauthorized(Components.Responses.Unauthorized)
-            /// The associated value of the enum case if `self` is `.unauthorized`.
-            ///
-            /// - Throws: An error if `self` is not `.unauthorized`.
-            /// - SeeAlso: `.unauthorized`.
-            public var unauthorized: Components.Responses.Unauthorized {
-                get throws {
-                    switch self {
-                    case let .unauthorized(response):
-                        return response
-                    default:
-                        try throwUnexpectedResponseStatus(
-                            expectedStatus: "unauthorized",
-                            response: self
-                        )
-                    }
-                }
-            }
-            /// Not allowed (scope, group or author profile)
-            ///
-            /// - Remark: Generated from `#/paths//v1/me/posts/{postId}/patch(updatePost)/responses/403`.
-            ///
-            /// HTTP response code: `403 forbidden`.
-            case forbidden(Components.Responses.Forbidden)
-            /// The associated value of the enum case if `self` is `.forbidden`.
-            ///
-            /// - Throws: An error if `self` is not `.forbidden`.
-            /// - SeeAlso: `.forbidden`.
-            public var forbidden: Components.Responses.Forbidden {
-                get throws {
-                    switch self {
-                    case let .forbidden(response):
-                        return response
-                    default:
-                        try throwUnexpectedResponseStatus(
-                            expectedStatus: "forbidden",
-                            response: self
-                        )
-                    }
-                }
-            }
-            /// Not found or not public
-            ///
-            /// - Remark: Generated from `#/paths//v1/me/posts/{postId}/patch(updatePost)/responses/404`.
-            ///
-            /// HTTP response code: `404 notFound`.
-            case notFound(Components.Responses.NotFound)
-            /// The associated value of the enum case if `self` is `.notFound`.
-            ///
-            /// - Throws: An error if `self` is not `.notFound`.
-            /// - SeeAlso: `.notFound`.
-            public var notFound: Components.Responses.NotFound {
-                get throws {
-                    switch self {
-                    case let .notFound(response):
-                        return response
-                    default:
-                        try throwUnexpectedResponseStatus(
-                            expectedStatus: "notFound",
-                            response: self
-                        )
-                    }
-                }
-            }
-            /// If-Match does not match the current version
-            ///
-            /// - Remark: Generated from `#/paths//v1/me/posts/{postId}/patch(updatePost)/responses/412`.
-            ///
-            /// HTTP response code: `412 preconditionFailed`.
-            case preconditionFailed(Components.Responses.PreconditionFailed)
-            /// The associated value of the enum case if `self` is `.preconditionFailed`.
-            ///
-            /// - Throws: An error if `self` is not `.preconditionFailed`.
-            /// - SeeAlso: `.preconditionFailed`.
-            public var preconditionFailed: Components.Responses.PreconditionFailed {
-                get throws {
-                    switch self {
-                    case let .preconditionFailed(response):
-                        return response
-                    default:
-                        try throwUnexpectedResponseStatus(
-                            expectedStatus: "preconditionFailed",
-                            response: self
-                        )
-                    }
-                }
-            }
-            /// Validation failed
-            ///
-            /// - Remark: Generated from `#/paths//v1/me/posts/{postId}/patch(updatePost)/responses/422`.
-            ///
-            /// HTTP response code: `422 unprocessableContent`.
-            case unprocessableContent(Components.Responses.ValidationFailed)
-            /// The associated value of the enum case if `self` is `.unprocessableContent`.
-            ///
-            /// - Throws: An error if `self` is not `.unprocessableContent`.
-            /// - SeeAlso: `.unprocessableContent`.
-            public var unprocessableContent: Components.Responses.ValidationFailed {
-                get throws {
-                    switch self {
-                    case let .unprocessableContent(response):
-                        return response
-                    default:
-                        try throwUnexpectedResponseStatus(
-                            expectedStatus: "unprocessableContent",
-                            response: self
-                        )
-                    }
-                }
-            }
-            /// If-Match is required
-            ///
-            /// - Remark: Generated from `#/paths//v1/me/posts/{postId}/patch(updatePost)/responses/428`.
-            ///
-            /// HTTP response code: `428 preconditionRequired`.
-            case preconditionRequired(Components.Responses.PreconditionRequired)
-            /// The associated value of the enum case if `self` is `.preconditionRequired`.
-            ///
-            /// - Throws: An error if `self` is not `.preconditionRequired`.
-            /// - SeeAlso: `.preconditionRequired`.
-            public var preconditionRequired: Components.Responses.PreconditionRequired {
-                get throws {
-                    switch self {
-                    case let .preconditionRequired(response):
-                        return response
-                    default:
-                        try throwUnexpectedResponseStatus(
-                            expectedStatus: "preconditionRequired",
-                            response: self
-                        )
-                    }
-                }
-            }
-            /// Rate limited
-            ///
-            /// - Remark: Generated from `#/paths//v1/me/posts/{postId}/patch(updatePost)/responses/429`.
-            ///
-            /// HTTP response code: `429 tooManyRequests`.
-            case tooManyRequests(Components.Responses.TooManyRequests)
-            /// The associated value of the enum case if `self` is `.tooManyRequests`.
-            ///
-            /// - Throws: An error if `self` is not `.tooManyRequests`.
-            /// - SeeAlso: `.tooManyRequests`.
-            public var tooManyRequests: Components.Responses.TooManyRequests {
-                get throws {
-                    switch self {
-                    case let .tooManyRequests(response):
-                        return response
-                    default:
-                        try throwUnexpectedResponseStatus(
-                            expectedStatus: "tooManyRequests",
-                            response: self
-                        )
-                    }
-                }
-            }
-            /// Undocumented response.
-            ///
-            /// A response with a code that is not documented in the OpenAPI document.
-            case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
-        }
-        @frozen public enum AcceptableContentType: AcceptableProtocol {
-            case json
-            case other(Swift.String)
-            public init?(rawValue: Swift.String) {
-                switch rawValue.lowercased() {
-                case "application/json":
-                    self = .json
-                default:
-                    self = .other(rawValue)
-                }
-            }
-            public var rawValue: Swift.String {
-                switch self {
-                case let .other(string):
-                    return string
-                case .json:
-                    return "application/json"
-                }
-            }
-            public static var allCases: [Self] {
-                [
-                    .json
-                ]
-            }
-        }
-    }
-    /// Delete one of my posts
-    ///
-    /// - Remark: HTTP `DELETE /v1/me/posts/{postId}`.
-    /// - Remark: Generated from `#/paths//v1/me/posts/{postId}/delete(deletePost)`.
-    public enum DeletePost {
-        public static let id: Swift.String = "deletePost"
-        public struct Input: Sendable, Hashable {
-            /// - Remark: Generated from `#/paths/v1/me/posts/{postId}/DELETE/path`.
-            public struct Path: Sendable, Hashable {
-                /// - Remark: Generated from `#/paths/v1/me/posts/{postId}/DELETE/path/postId`.
-                public var postId: Components.Parameters.PostId
-                /// Creates a new `Path`.
-                ///
-                /// - Parameters:
-                ///   - postId:
-                public init(postId: Components.Parameters.PostId) {
-                    self.postId = postId
-                }
-            }
-            public var path: Operations.DeletePost.Input.Path
-            /// - Remark: Generated from `#/paths/v1/me/posts/{postId}/DELETE/header`.
-            public struct Headers: Sendable, Hashable {
-                /// - Remark: Generated from `#/paths/v1/me/posts/{postId}/DELETE/header/If-Match`.
-                public var ifMatch: Components.Parameters.IfMatchOptional?
-                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.DeletePost.AcceptableContentType>]
-                /// Creates a new `Headers`.
-                ///
-                /// - Parameters:
-                ///   - ifMatch:
-                ///   - accept:
-                public init(
-                    ifMatch: Components.Parameters.IfMatchOptional? = nil,
-                    accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.DeletePost.AcceptableContentType>] = .defaultValues()
-                ) {
-                    self.ifMatch = ifMatch
-                    self.accept = accept
-                }
-            }
-            public var headers: Operations.DeletePost.Input.Headers
-            /// Creates a new `Input`.
-            ///
-            /// - Parameters:
-            ///   - path:
-            ///   - headers:
-            public init(
-                path: Operations.DeletePost.Input.Path,
-                headers: Operations.DeletePost.Input.Headers = .init()
-            ) {
-                self.path = path
-                self.headers = headers
-            }
-        }
-        @frozen public enum Output: Sendable, Hashable {
-            public struct NoContent: Sendable, Hashable {
-                /// Creates a new `NoContent`.
-                public init() {}
-            }
-            /// Deleted
-            ///
-            /// - Remark: Generated from `#/paths//v1/me/posts/{postId}/delete(deletePost)/responses/204`.
-            ///
-            /// HTTP response code: `204 noContent`.
-            case noContent(Operations.DeletePost.Output.NoContent)
-            /// Deleted
-            ///
-            /// - Remark: Generated from `#/paths//v1/me/posts/{postId}/delete(deletePost)/responses/204`.
-            ///
-            /// HTTP response code: `204 noContent`.
-            public static var noContent: Self {
-                .noContent(.init())
-            }
-            /// The associated value of the enum case if `self` is `.noContent`.
-            ///
-            /// - Throws: An error if `self` is not `.noContent`.
-            /// - SeeAlso: `.noContent`.
-            public var noContent: Operations.DeletePost.Output.NoContent {
-                get throws {
-                    switch self {
-                    case let .noContent(response):
-                        return response
-                    default:
-                        try throwUnexpectedResponseStatus(
-                            expectedStatus: "noContent",
-                            response: self
-                        )
-                    }
-                }
-            }
-            /// Missing, expired or invalid bearer token
-            ///
-            /// - Remark: Generated from `#/paths//v1/me/posts/{postId}/delete(deletePost)/responses/401`.
-            ///
-            /// HTTP response code: `401 unauthorized`.
-            case unauthorized(Components.Responses.Unauthorized)
-            /// The associated value of the enum case if `self` is `.unauthorized`.
-            ///
-            /// - Throws: An error if `self` is not `.unauthorized`.
-            /// - SeeAlso: `.unauthorized`.
-            public var unauthorized: Components.Responses.Unauthorized {
-                get throws {
-                    switch self {
-                    case let .unauthorized(response):
-                        return response
-                    default:
-                        try throwUnexpectedResponseStatus(
-                            expectedStatus: "unauthorized",
-                            response: self
-                        )
-                    }
-                }
-            }
-            /// Not allowed (scope, group or author profile)
-            ///
-            /// - Remark: Generated from `#/paths//v1/me/posts/{postId}/delete(deletePost)/responses/403`.
-            ///
-            /// HTTP response code: `403 forbidden`.
-            case forbidden(Components.Responses.Forbidden)
-            /// The associated value of the enum case if `self` is `.forbidden`.
-            ///
-            /// - Throws: An error if `self` is not `.forbidden`.
-            /// - SeeAlso: `.forbidden`.
-            public var forbidden: Components.Responses.Forbidden {
-                get throws {
-                    switch self {
-                    case let .forbidden(response):
-                        return response
-                    default:
-                        try throwUnexpectedResponseStatus(
-                            expectedStatus: "forbidden",
-                            response: self
-                        )
-                    }
-                }
-            }
-            /// Not found or not public
-            ///
-            /// - Remark: Generated from `#/paths//v1/me/posts/{postId}/delete(deletePost)/responses/404`.
-            ///
-            /// HTTP response code: `404 notFound`.
-            case notFound(Components.Responses.NotFound)
-            /// The associated value of the enum case if `self` is `.notFound`.
-            ///
-            /// - Throws: An error if `self` is not `.notFound`.
-            /// - SeeAlso: `.notFound`.
-            public var notFound: Components.Responses.NotFound {
-                get throws {
-                    switch self {
-                    case let .notFound(response):
-                        return response
-                    default:
-                        try throwUnexpectedResponseStatus(
-                            expectedStatus: "notFound",
-                            response: self
-                        )
-                    }
-                }
-            }
-            /// Conflict (idempotency key in flight, upload state, delete blocked)
-            ///
-            /// - Remark: Generated from `#/paths//v1/me/posts/{postId}/delete(deletePost)/responses/409`.
-            ///
-            /// HTTP response code: `409 conflict`.
-            case conflict(Components.Responses.Conflict)
-            /// The associated value of the enum case if `self` is `.conflict`.
-            ///
-            /// - Throws: An error if `self` is not `.conflict`.
-            /// - SeeAlso: `.conflict`.
-            public var conflict: Components.Responses.Conflict {
-                get throws {
-                    switch self {
-                    case let .conflict(response):
-                        return response
-                    default:
-                        try throwUnexpectedResponseStatus(
-                            expectedStatus: "conflict",
-                            response: self
-                        )
-                    }
-                }
-            }
-            /// If-Match does not match the current version
-            ///
-            /// - Remark: Generated from `#/paths//v1/me/posts/{postId}/delete(deletePost)/responses/412`.
-            ///
-            /// HTTP response code: `412 preconditionFailed`.
-            case preconditionFailed(Components.Responses.PreconditionFailed)
-            /// The associated value of the enum case if `self` is `.preconditionFailed`.
-            ///
-            /// - Throws: An error if `self` is not `.preconditionFailed`.
-            /// - SeeAlso: `.preconditionFailed`.
-            public var preconditionFailed: Components.Responses.PreconditionFailed {
-                get throws {
-                    switch self {
-                    case let .preconditionFailed(response):
-                        return response
-                    default:
-                        try throwUnexpectedResponseStatus(
-                            expectedStatus: "preconditionFailed",
-                            response: self
-                        )
-                    }
-                }
-            }
-            /// Undocumented response.
-            ///
-            /// A response with a code that is not documented in the OpenAPI document.
-            case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
-        }
-        @frozen public enum AcceptableContentType: AcceptableProtocol {
-            case json
-            case other(Swift.String)
-            public init?(rawValue: Swift.String) {
-                switch rawValue.lowercased() {
-                case "application/json":
-                    self = .json
-                default:
-                    self = .other(rawValue)
-                }
-            }
-            public var rawValue: Swift.String {
-                switch self {
-                case let .other(string):
-                    return string
-                case .json:
-                    return "application/json"
-                }
-            }
-            public static var allCases: [Self] {
-                [
-                    .json
-                ]
-            }
-        }
-    }
-    /// Start a photo upload
-    ///
-    /// Returns a presigned `uploadUrl`. PUT the file bytes there with the returned headers (within 15 minutes; PUT is retry-safe), then call `completeUpload`. JPEG, PNG and HEIC (when the server converter is enabled); at most 25 MB. Photos only.
-    ///
-    /// - Remark: HTTP `POST /v1/me/uploads`.
-    /// - Remark: Generated from `#/paths//v1/me/uploads/post(createUpload)`.
-    public enum CreateUpload {
-        public static let id: Swift.String = "createUpload"
-        public struct Input: Sendable, Hashable {
-            /// - Remark: Generated from `#/paths/v1/me/uploads/POST/header`.
-            public struct Headers: Sendable, Hashable {
-                /// 8-255 characters; the same key and body replays the first response for 24 hours.
-                ///
-                /// - Remark: Generated from `#/paths/v1/me/uploads/POST/header/Idempotency-Key`.
-                public var idempotencyKey: Components.Parameters.IdempotencyKey?
-                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.CreateUpload.AcceptableContentType>]
-                /// Creates a new `Headers`.
-                ///
-                /// - Parameters:
-                ///   - idempotencyKey: 8-255 characters; the same key and body replays the first response for 24 hours.
-                ///   - accept:
-                public init(
-                    idempotencyKey: Components.Parameters.IdempotencyKey? = nil,
-                    accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.CreateUpload.AcceptableContentType>] = .defaultValues()
-                ) {
-                    self.idempotencyKey = idempotencyKey
-                    self.accept = accept
-                }
-            }
-            public var headers: Operations.CreateUpload.Input.Headers
-            /// - Remark: Generated from `#/paths/v1/me/uploads/POST/requestBody`.
-            @frozen public enum Body: Sendable, Hashable {
-                /// - Remark: Generated from `#/paths/v1/me/uploads/POST/requestBody/content/application\/json`.
-                case json(Components.Schemas.UploadCreate)
-            }
-            public var body: Operations.CreateUpload.Input.Body
-            /// Creates a new `Input`.
-            ///
-            /// - Parameters:
-            ///   - headers:
-            ///   - body:
-            public init(
-                headers: Operations.CreateUpload.Input.Headers = .init(),
-                body: Operations.CreateUpload.Input.Body
-            ) {
-                self.headers = headers
-                self.body = body
-            }
-        }
-        @frozen public enum Output: Sendable, Hashable {
-            public struct Created: Sendable, Hashable {
-                /// - Remark: Generated from `#/paths/v1/me/uploads/POST/responses/201/content`.
-                @frozen public enum Body: Sendable, Hashable {
-                    /// - Remark: Generated from `#/paths/v1/me/uploads/POST/responses/201/content/application\/json`.
-                    case json(Components.Schemas.UploadTicket)
-                    /// The associated value of the enum case if `self` is `.json`.
-                    ///
-                    /// - Throws: An error if `self` is not `.json`.
-                    /// - SeeAlso: `.json`.
-                    public var json: Components.Schemas.UploadTicket {
-                        get throws {
-                            switch self {
-                            case let .json(body):
-                                return body
-                            }
-                        }
-                    }
-                }
-                /// Received HTTP response body
-                public var body: Operations.CreateUpload.Output.Created.Body
-                /// Creates a new `Created`.
-                ///
-                /// - Parameters:
-                ///   - body: Received HTTP response body
-                public init(body: Operations.CreateUpload.Output.Created.Body) {
-                    self.body = body
-                }
-            }
-            /// Upload ticket
-            ///
-            /// - Remark: Generated from `#/paths//v1/me/uploads/post(createUpload)/responses/201`.
-            ///
-            /// HTTP response code: `201 created`.
-            case created(Operations.CreateUpload.Output.Created)
-            /// The associated value of the enum case if `self` is `.created`.
-            ///
-            /// - Throws: An error if `self` is not `.created`.
-            /// - SeeAlso: `.created`.
-            public var created: Operations.CreateUpload.Output.Created {
-                get throws {
-                    switch self {
-                    case let .created(response):
-                        return response
-                    default:
-                        try throwUnexpectedResponseStatus(
-                            expectedStatus: "created",
-                            response: self
-                        )
-                    }
-                }
-            }
-            /// Missing, expired or invalid bearer token
-            ///
-            /// - Remark: Generated from `#/paths//v1/me/uploads/post(createUpload)/responses/401`.
-            ///
-            /// HTTP response code: `401 unauthorized`.
-            case unauthorized(Components.Responses.Unauthorized)
-            /// The associated value of the enum case if `self` is `.unauthorized`.
-            ///
-            /// - Throws: An error if `self` is not `.unauthorized`.
-            /// - SeeAlso: `.unauthorized`.
-            public var unauthorized: Components.Responses.Unauthorized {
-                get throws {
-                    switch self {
-                    case let .unauthorized(response):
-                        return response
-                    default:
-                        try throwUnexpectedResponseStatus(
-                            expectedStatus: "unauthorized",
-                            response: self
-                        )
-                    }
-                }
-            }
-            /// Not allowed (scope, group or author profile)
-            ///
-            /// - Remark: Generated from `#/paths//v1/me/uploads/post(createUpload)/responses/403`.
-            ///
-            /// HTTP response code: `403 forbidden`.
-            case forbidden(Components.Responses.Forbidden)
-            /// The associated value of the enum case if `self` is `.forbidden`.
-            ///
-            /// - Throws: An error if `self` is not `.forbidden`.
-            /// - SeeAlso: `.forbidden`.
-            public var forbidden: Components.Responses.Forbidden {
-                get throws {
-                    switch self {
-                    case let .forbidden(response):
-                        return response
-                    default:
-                        try throwUnexpectedResponseStatus(
-                            expectedStatus: "forbidden",
-                            response: self
-                        )
-                    }
-                }
-            }
-            /// Conflict (idempotency key in flight, upload state, delete blocked)
-            ///
-            /// - Remark: Generated from `#/paths//v1/me/uploads/post(createUpload)/responses/409`.
-            ///
-            /// HTTP response code: `409 conflict`.
-            case conflict(Components.Responses.Conflict)
-            /// The associated value of the enum case if `self` is `.conflict`.
-            ///
-            /// - Throws: An error if `self` is not `.conflict`.
-            /// - SeeAlso: `.conflict`.
-            public var conflict: Components.Responses.Conflict {
-                get throws {
-                    switch self {
-                    case let .conflict(response):
-                        return response
-                    default:
-                        try throwUnexpectedResponseStatus(
-                            expectedStatus: "conflict",
-                            response: self
-                        )
-                    }
-                }
-            }
-            /// Too large
-            ///
-            /// - Remark: Generated from `#/paths//v1/me/uploads/post(createUpload)/responses/413`.
-            ///
-            /// HTTP response code: `413 contentTooLarge`.
-            case contentTooLarge(Components.Responses.PayloadTooLarge)
-            /// The associated value of the enum case if `self` is `.contentTooLarge`.
-            ///
-            /// - Throws: An error if `self` is not `.contentTooLarge`.
-            /// - SeeAlso: `.contentTooLarge`.
-            public var contentTooLarge: Components.Responses.PayloadTooLarge {
-                get throws {
-                    switch self {
-                    case let .contentTooLarge(response):
-                        return response
-                    default:
-                        try throwUnexpectedResponseStatus(
-                            expectedStatus: "contentTooLarge",
-                            response: self
-                        )
-                    }
-                }
-            }
-            /// Unsupported file type
-            ///
-            /// - Remark: Generated from `#/paths//v1/me/uploads/post(createUpload)/responses/415`.
-            ///
-            /// HTTP response code: `415 unsupportedMediaType`.
-            case unsupportedMediaType(Components.Responses.UnsupportedMediaType)
-            /// The associated value of the enum case if `self` is `.unsupportedMediaType`.
-            ///
-            /// - Throws: An error if `self` is not `.unsupportedMediaType`.
-            /// - SeeAlso: `.unsupportedMediaType`.
-            public var unsupportedMediaType: Components.Responses.UnsupportedMediaType {
-                get throws {
-                    switch self {
-                    case let .unsupportedMediaType(response):
-                        return response
-                    default:
-                        try throwUnexpectedResponseStatus(
-                            expectedStatus: "unsupportedMediaType",
-                            response: self
-                        )
-                    }
-                }
-            }
-            /// Validation failed
-            ///
-            /// - Remark: Generated from `#/paths//v1/me/uploads/post(createUpload)/responses/422`.
-            ///
-            /// HTTP response code: `422 unprocessableContent`.
-            case unprocessableContent(Components.Responses.ValidationFailed)
-            /// The associated value of the enum case if `self` is `.unprocessableContent`.
-            ///
-            /// - Throws: An error if `self` is not `.unprocessableContent`.
-            /// - SeeAlso: `.unprocessableContent`.
-            public var unprocessableContent: Components.Responses.ValidationFailed {
-                get throws {
-                    switch self {
-                    case let .unprocessableContent(response):
-                        return response
-                    default:
-                        try throwUnexpectedResponseStatus(
-                            expectedStatus: "unprocessableContent",
-                            response: self
-                        )
-                    }
-                }
-            }
-            /// Rate limited
-            ///
-            /// - Remark: Generated from `#/paths//v1/me/uploads/post(createUpload)/responses/429`.
-            ///
-            /// HTTP response code: `429 tooManyRequests`.
-            case tooManyRequests(Components.Responses.TooManyRequests)
-            /// The associated value of the enum case if `self` is `.tooManyRequests`.
-            ///
-            /// - Throws: An error if `self` is not `.tooManyRequests`.
-            /// - SeeAlso: `.tooManyRequests`.
-            public var tooManyRequests: Components.Responses.TooManyRequests {
-                get throws {
-                    switch self {
-                    case let .tooManyRequests(response):
-                        return response
-                    default:
-                        try throwUnexpectedResponseStatus(
-                            expectedStatus: "tooManyRequests",
-                            response: self
-                        )
-                    }
-                }
-            }
-            /// Undocumented response.
-            ///
-            /// A response with a code that is not documented in the OpenAPI document.
-            case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
-        }
-        @frozen public enum AcceptableContentType: AcceptableProtocol {
-            case json
-            case other(Swift.String)
-            public init?(rawValue: Swift.String) {
-                switch rawValue.lowercased() {
-                case "application/json":
-                    self = .json
-                default:
-                    self = .other(rawValue)
-                }
-            }
-            public var rawValue: Swift.String {
-                switch self {
-                case let .other(string):
-                    return string
-                case .json:
-                    return "application/json"
-                }
-            }
-            public static var allCases: [Self] {
-                [
-                    .json
-                ]
-            }
-        }
-    }
-    /// Finish a photo upload
-    ///
-    /// Verifies the uploaded bytes, converts HEIC, strips EXIF location data unless `keepLocation` is true, generates renditions and returns the media to attach to a post. Calling it again returns the same media.
-    ///
-    /// - Remark: HTTP `POST /v1/me/uploads/{uploadId}/complete`.
-    /// - Remark: Generated from `#/paths//v1/me/uploads/{uploadId}/complete/post(completeUpload)`.
-    public enum CompleteUpload {
-        public static let id: Swift.String = "completeUpload"
-        public struct Input: Sendable, Hashable {
-            /// - Remark: Generated from `#/paths/v1/me/uploads/{uploadId}/complete/POST/path`.
-            public struct Path: Sendable, Hashable {
-                /// - Remark: Generated from `#/paths/v1/me/uploads/{uploadId}/complete/POST/path/uploadId`.
-                public var uploadId: Components.Parameters.UploadId
-                /// Creates a new `Path`.
-                ///
-                /// - Parameters:
-                ///   - uploadId:
-                public init(uploadId: Components.Parameters.UploadId) {
-                    self.uploadId = uploadId
-                }
-            }
-            public var path: Operations.CompleteUpload.Input.Path
-            /// - Remark: Generated from `#/paths/v1/me/uploads/{uploadId}/complete/POST/header`.
-            public struct Headers: Sendable, Hashable {
-                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.CompleteUpload.AcceptableContentType>]
-                /// Creates a new `Headers`.
-                ///
-                /// - Parameters:
-                ///   - accept:
-                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.CompleteUpload.AcceptableContentType>] = .defaultValues()) {
-                    self.accept = accept
-                }
-            }
-            public var headers: Operations.CompleteUpload.Input.Headers
-            /// - Remark: Generated from `#/paths/v1/me/uploads/{uploadId}/complete/POST/requestBody`.
-            @frozen public enum Body: Sendable, Hashable {
-                /// - Remark: Generated from `#/paths/v1/me/uploads/{uploadId}/complete/POST/requestBody/content/application\/json`.
-                case json(Components.Schemas.UploadComplete)
-            }
-            public var body: Operations.CompleteUpload.Input.Body?
-            /// Creates a new `Input`.
-            ///
-            /// - Parameters:
-            ///   - path:
-            ///   - headers:
-            ///   - body:
-            public init(
-                path: Operations.CompleteUpload.Input.Path,
-                headers: Operations.CompleteUpload.Input.Headers = .init(),
-                body: Operations.CompleteUpload.Input.Body? = nil
-            ) {
-                self.path = path
-                self.headers = headers
-                self.body = body
-            }
-        }
-        @frozen public enum Output: Sendable, Hashable {
-            public struct Ok: Sendable, Hashable {
-                /// - Remark: Generated from `#/paths/v1/me/uploads/{uploadId}/complete/POST/responses/200/content`.
-                @frozen public enum Body: Sendable, Hashable {
-                    /// - Remark: Generated from `#/paths/v1/me/uploads/{uploadId}/complete/POST/responses/200/content/application\/json`.
-                    case json(Components.Schemas.MediaItem)
-                    /// The associated value of the enum case if `self` is `.json`.
-                    ///
-                    /// - Throws: An error if `self` is not `.json`.
-                    /// - SeeAlso: `.json`.
-                    public var json: Components.Schemas.MediaItem {
-                        get throws {
-                            switch self {
-                            case let .json(body):
-                                return body
-                            }
-                        }
-                    }
-                }
-                /// Received HTTP response body
-                public var body: Operations.CompleteUpload.Output.Ok.Body
-                /// Creates a new `Ok`.
-                ///
-                /// - Parameters:
-                ///   - body: Received HTTP response body
-                public init(body: Operations.CompleteUpload.Output.Ok.Body) {
-                    self.body = body
-                }
-            }
-            /// The published photo
-            ///
-            /// - Remark: Generated from `#/paths//v1/me/uploads/{uploadId}/complete/post(completeUpload)/responses/200`.
-            ///
-            /// HTTP response code: `200 ok`.
-            case ok(Operations.CompleteUpload.Output.Ok)
-            /// The associated value of the enum case if `self` is `.ok`.
-            ///
-            /// - Throws: An error if `self` is not `.ok`.
-            /// - SeeAlso: `.ok`.
-            public var ok: Operations.CompleteUpload.Output.Ok {
-                get throws {
-                    switch self {
-                    case let .ok(response):
-                        return response
-                    default:
-                        try throwUnexpectedResponseStatus(
-                            expectedStatus: "ok",
-                            response: self
-                        )
-                    }
-                }
-            }
-            /// Missing, expired or invalid bearer token
-            ///
-            /// - Remark: Generated from `#/paths//v1/me/uploads/{uploadId}/complete/post(completeUpload)/responses/401`.
-            ///
-            /// HTTP response code: `401 unauthorized`.
-            case unauthorized(Components.Responses.Unauthorized)
-            /// The associated value of the enum case if `self` is `.unauthorized`.
-            ///
-            /// - Throws: An error if `self` is not `.unauthorized`.
-            /// - SeeAlso: `.unauthorized`.
-            public var unauthorized: Components.Responses.Unauthorized {
-                get throws {
-                    switch self {
-                    case let .unauthorized(response):
-                        return response
-                    default:
-                        try throwUnexpectedResponseStatus(
-                            expectedStatus: "unauthorized",
-                            response: self
-                        )
-                    }
-                }
-            }
-            /// Not allowed (scope, group or author profile)
-            ///
-            /// - Remark: Generated from `#/paths//v1/me/uploads/{uploadId}/complete/post(completeUpload)/responses/403`.
-            ///
-            /// HTTP response code: `403 forbidden`.
-            case forbidden(Components.Responses.Forbidden)
-            /// The associated value of the enum case if `self` is `.forbidden`.
-            ///
-            /// - Throws: An error if `self` is not `.forbidden`.
-            /// - SeeAlso: `.forbidden`.
-            public var forbidden: Components.Responses.Forbidden {
-                get throws {
-                    switch self {
-                    case let .forbidden(response):
-                        return response
-                    default:
-                        try throwUnexpectedResponseStatus(
-                            expectedStatus: "forbidden",
-                            response: self
-                        )
-                    }
-                }
-            }
-            /// Not found or not public
-            ///
-            /// - Remark: Generated from `#/paths//v1/me/uploads/{uploadId}/complete/post(completeUpload)/responses/404`.
-            ///
-            /// HTTP response code: `404 notFound`.
-            case notFound(Components.Responses.NotFound)
-            /// The associated value of the enum case if `self` is `.notFound`.
-            ///
-            /// - Throws: An error if `self` is not `.notFound`.
-            /// - SeeAlso: `.notFound`.
-            public var notFound: Components.Responses.NotFound {
-                get throws {
-                    switch self {
-                    case let .notFound(response):
-                        return response
-                    default:
-                        try throwUnexpectedResponseStatus(
-                            expectedStatus: "notFound",
-                            response: self
-                        )
-                    }
-                }
-            }
-            /// Conflict (idempotency key in flight, upload state, delete blocked)
-            ///
-            /// - Remark: Generated from `#/paths//v1/me/uploads/{uploadId}/complete/post(completeUpload)/responses/409`.
-            ///
-            /// HTTP response code: `409 conflict`.
-            case conflict(Components.Responses.Conflict)
-            /// The associated value of the enum case if `self` is `.conflict`.
-            ///
-            /// - Throws: An error if `self` is not `.conflict`.
-            /// - SeeAlso: `.conflict`.
-            public var conflict: Components.Responses.Conflict {
-                get throws {
-                    switch self {
-                    case let .conflict(response):
-                        return response
-                    default:
-                        try throwUnexpectedResponseStatus(
-                            expectedStatus: "conflict",
-                            response: self
-                        )
-                    }
-                }
-            }
-            /// Too large
-            ///
-            /// - Remark: Generated from `#/paths//v1/me/uploads/{uploadId}/complete/post(completeUpload)/responses/413`.
-            ///
-            /// HTTP response code: `413 contentTooLarge`.
-            case contentTooLarge(Components.Responses.PayloadTooLarge)
-            /// The associated value of the enum case if `self` is `.contentTooLarge`.
-            ///
-            /// - Throws: An error if `self` is not `.contentTooLarge`.
-            /// - SeeAlso: `.contentTooLarge`.
-            public var contentTooLarge: Components.Responses.PayloadTooLarge {
-                get throws {
-                    switch self {
-                    case let .contentTooLarge(response):
-                        return response
-                    default:
-                        try throwUnexpectedResponseStatus(
-                            expectedStatus: "contentTooLarge",
-                            response: self
-                        )
-                    }
-                }
-            }
-            /// Unsupported file type
-            ///
-            /// - Remark: Generated from `#/paths//v1/me/uploads/{uploadId}/complete/post(completeUpload)/responses/415`.
-            ///
-            /// HTTP response code: `415 unsupportedMediaType`.
-            case unsupportedMediaType(Components.Responses.UnsupportedMediaType)
-            /// The associated value of the enum case if `self` is `.unsupportedMediaType`.
-            ///
-            /// - Throws: An error if `self` is not `.unsupportedMediaType`.
-            /// - SeeAlso: `.unsupportedMediaType`.
-            public var unsupportedMediaType: Components.Responses.UnsupportedMediaType {
-                get throws {
-                    switch self {
-                    case let .unsupportedMediaType(response):
-                        return response
-                    default:
-                        try throwUnexpectedResponseStatus(
-                            expectedStatus: "unsupportedMediaType",
-                            response: self
-                        )
-                    }
-                }
-            }
-            /// Undocumented response.
-            ///
-            /// A response with a code that is not documented in the OpenAPI document.
-            case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
-        }
-        @frozen public enum AcceptableContentType: AcceptableProtocol {
-            case json
-            case other(Swift.String)
-            public init?(rawValue: Swift.String) {
-                switch rawValue.lowercased() {
-                case "application/json":
-                    self = .json
-                default:
-                    self = .other(rawValue)
-                }
-            }
-            public var rawValue: Swift.String {
-                switch self {
-                case let .other(string):
-                    return string
-                case .json:
-                    return "application/json"
-                }
-            }
-            public static var allCases: [Self] {
-                [
-                    .json
-                ]
-            }
-        }
-    }
-    /// Tag autocomplete
-    ///
-    /// - Remark: HTTP `GET /v1/me/tags`.
-    /// - Remark: Generated from `#/paths//v1/me/tags/get(listMyTags)`.
-    public enum ListMyTags {
-        public static let id: Swift.String = "listMyTags"
-        public struct Input: Sendable, Hashable {
-            /// - Remark: Generated from `#/paths/v1/me/tags/GET/query`.
-            public struct Query: Sendable, Hashable {
-                /// - Remark: Generated from `#/paths/v1/me/tags/GET/query/q`.
-                public var q: Swift.String?
-                /// Blog slug (default quick-bits).
-                ///
-                /// - Remark: Generated from `#/paths/v1/me/tags/GET/query/blog`.
-                public var blog: Swift.String?
-                /// - Remark: Generated from `#/paths/v1/me/tags/GET/query/limit`.
-                public var limit: Swift.Int?
-                /// Creates a new `Query`.
-                ///
-                /// - Parameters:
-                ///   - q:
-                ///   - blog: Blog slug (default quick-bits).
-                ///   - limit:
-                public init(
-                    q: Swift.String? = nil,
-                    blog: Swift.String? = nil,
-                    limit: Swift.Int? = nil
-                ) {
-                    self.q = q
-                    self.blog = blog
-                    self.limit = limit
-                }
-            }
-            public var query: Operations.ListMyTags.Input.Query
-            /// - Remark: Generated from `#/paths/v1/me/tags/GET/header`.
-            public struct Headers: Sendable, Hashable {
-                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.ListMyTags.AcceptableContentType>]
-                /// Creates a new `Headers`.
-                ///
-                /// - Parameters:
-                ///   - accept:
-                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.ListMyTags.AcceptableContentType>] = .defaultValues()) {
-                    self.accept = accept
-                }
-            }
-            public var headers: Operations.ListMyTags.Input.Headers
-            /// Creates a new `Input`.
-            ///
-            /// - Parameters:
-            ///   - query:
-            ///   - headers:
-            public init(
-                query: Operations.ListMyTags.Input.Query = .init(),
-                headers: Operations.ListMyTags.Input.Headers = .init()
-            ) {
-                self.query = query
-                self.headers = headers
-            }
-        }
-        @frozen public enum Output: Sendable, Hashable {
-            public struct Ok: Sendable, Hashable {
-                /// - Remark: Generated from `#/paths/v1/me/tags/GET/responses/200/content`.
-                @frozen public enum Body: Sendable, Hashable {
-                    /// - Remark: Generated from `#/paths/v1/me/tags/GET/responses/200/content/application\/json`.
-                    case json(Components.Schemas.TagList)
-                    /// The associated value of the enum case if `self` is `.json`.
-                    ///
-                    /// - Throws: An error if `self` is not `.json`.
-                    /// - SeeAlso: `.json`.
-                    public var json: Components.Schemas.TagList {
-                        get throws {
-                            switch self {
-                            case let .json(body):
-                                return body
-                            }
-                        }
-                    }
-                }
-                /// Received HTTP response body
-                public var body: Operations.ListMyTags.Output.Ok.Body
-                /// Creates a new `Ok`.
-                ///
-                /// - Parameters:
-                ///   - body: Received HTTP response body
-                public init(body: Operations.ListMyTags.Output.Ok.Body) {
-                    self.body = body
-                }
-            }
-            /// Matching tags
-            ///
-            /// - Remark: Generated from `#/paths//v1/me/tags/get(listMyTags)/responses/200`.
-            ///
-            /// HTTP response code: `200 ok`.
-            case ok(Operations.ListMyTags.Output.Ok)
-            /// The associated value of the enum case if `self` is `.ok`.
-            ///
-            /// - Throws: An error if `self` is not `.ok`.
-            /// - SeeAlso: `.ok`.
-            public var ok: Operations.ListMyTags.Output.Ok {
-                get throws {
-                    switch self {
-                    case let .ok(response):
-                        return response
-                    default:
-                        try throwUnexpectedResponseStatus(
-                            expectedStatus: "ok",
-                            response: self
-                        )
-                    }
-                }
-            }
-            /// Missing, expired or invalid bearer token
-            ///
-            /// - Remark: Generated from `#/paths//v1/me/tags/get(listMyTags)/responses/401`.
-            ///
-            /// HTTP response code: `401 unauthorized`.
-            case unauthorized(Components.Responses.Unauthorized)
-            /// The associated value of the enum case if `self` is `.unauthorized`.
-            ///
-            /// - Throws: An error if `self` is not `.unauthorized`.
-            /// - SeeAlso: `.unauthorized`.
-            public var unauthorized: Components.Responses.Unauthorized {
-                get throws {
-                    switch self {
-                    case let .unauthorized(response):
-                        return response
-                    default:
-                        try throwUnexpectedResponseStatus(
-                            expectedStatus: "unauthorized",
-                            response: self
-                        )
-                    }
-                }
-            }
-            /// Not allowed (scope, group or author profile)
-            ///
-            /// - Remark: Generated from `#/paths//v1/me/tags/get(listMyTags)/responses/403`.
-            ///
-            /// HTTP response code: `403 forbidden`.
-            case forbidden(Components.Responses.Forbidden)
-            /// The associated value of the enum case if `self` is `.forbidden`.
-            ///
-            /// - Throws: An error if `self` is not `.forbidden`.
-            /// - SeeAlso: `.forbidden`.
-            public var forbidden: Components.Responses.Forbidden {
-                get throws {
-                    switch self {
-                    case let .forbidden(response):
-                        return response
-                    default:
-                        try throwUnexpectedResponseStatus(
-                            expectedStatus: "forbidden",
-                            response: self
-                        )
-                    }
-                }
-            }
-            /// Validation failed
-            ///
-            /// - Remark: Generated from `#/paths//v1/me/tags/get(listMyTags)/responses/422`.
-            ///
-            /// HTTP response code: `422 unprocessableContent`.
-            case unprocessableContent(Components.Responses.ValidationFailed)
-            /// The associated value of the enum case if `self` is `.unprocessableContent`.
-            ///
-            /// - Throws: An error if `self` is not `.unprocessableContent`.
-            /// - SeeAlso: `.unprocessableContent`.
-            public var unprocessableContent: Components.Responses.ValidationFailed {
-                get throws {
-                    switch self {
-                    case let .unprocessableContent(response):
-                        return response
-                    default:
-                        try throwUnexpectedResponseStatus(
-                            expectedStatus: "unprocessableContent",
-                            response: self
-                        )
-                    }
-                }
-            }
-            /// Undocumented response.
-            ///
-            /// A response with a code that is not documented in the OpenAPI document.
-            case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
-        }
-        @frozen public enum AcceptableContentType: AcceptableProtocol {
-            case json
-            case other(Swift.String)
-            public init?(rawValue: Swift.String) {
-                switch rawValue.lowercased() {
-                case "application/json":
-                    self = .json
-                default:
-                    self = .other(rawValue)
-                }
-            }
-            public var rawValue: Swift.String {
-                switch self {
-                case let .other(string):
-                    return string
-                case .json:
-                    return "application/json"
-                }
-            }
-            public static var allCases: [Self] {
-                [
-                    .json
-                ]
-            }
-        }
-    }
-    /// Preview a link
-    ///
-    /// Fetches title, description and image server-side (public addresses only).
-    ///
-    /// - Remark: HTTP `POST /v1/me/link-preview`.
-    /// - Remark: Generated from `#/paths//v1/me/link-preview/post(getLinkPreview)`.
-    public enum GetLinkPreview {
-        public static let id: Swift.String = "getLinkPreview"
-        public struct Input: Sendable, Hashable {
-            /// - Remark: Generated from `#/paths/v1/me/link-preview/POST/header`.
-            public struct Headers: Sendable, Hashable {
-                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.GetLinkPreview.AcceptableContentType>]
-                /// Creates a new `Headers`.
-                ///
-                /// - Parameters:
-                ///   - accept:
-                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.GetLinkPreview.AcceptableContentType>] = .defaultValues()) {
-                    self.accept = accept
-                }
-            }
-            public var headers: Operations.GetLinkPreview.Input.Headers
-            /// - Remark: Generated from `#/paths/v1/me/link-preview/POST/requestBody`.
-            @frozen public enum Body: Sendable, Hashable {
-                /// - Remark: Generated from `#/paths/v1/me/link-preview/POST/requestBody/content/application\/json`.
-                case json(Components.Schemas.LinkPreviewRequest)
-            }
-            public var body: Operations.GetLinkPreview.Input.Body
-            /// Creates a new `Input`.
-            ///
-            /// - Parameters:
-            ///   - headers:
-            ///   - body:
-            public init(
-                headers: Operations.GetLinkPreview.Input.Headers = .init(),
-                body: Operations.GetLinkPreview.Input.Body
-            ) {
-                self.headers = headers
-                self.body = body
-            }
-        }
-        @frozen public enum Output: Sendable, Hashable {
-            public struct Ok: Sendable, Hashable {
-                /// - Remark: Generated from `#/paths/v1/me/link-preview/POST/responses/200/content`.
-                @frozen public enum Body: Sendable, Hashable {
-                    /// - Remark: Generated from `#/paths/v1/me/link-preview/POST/responses/200/content/application\/json`.
-                    case json(Components.Schemas.LinkPreview)
-                    /// The associated value of the enum case if `self` is `.json`.
-                    ///
-                    /// - Throws: An error if `self` is not `.json`.
-                    /// - SeeAlso: `.json`.
-                    public var json: Components.Schemas.LinkPreview {
-                        get throws {
-                            switch self {
-                            case let .json(body):
-                                return body
-                            }
-                        }
-                    }
-                }
-                /// Received HTTP response body
-                public var body: Operations.GetLinkPreview.Output.Ok.Body
-                /// Creates a new `Ok`.
-                ///
-                /// - Parameters:
-                ///   - body: Received HTTP response body
-                public init(body: Operations.GetLinkPreview.Output.Ok.Body) {
-                    self.body = body
-                }
-            }
-            /// The preview (fields are null when the page had none)
-            ///
-            /// - Remark: Generated from `#/paths//v1/me/link-preview/post(getLinkPreview)/responses/200`.
-            ///
-            /// HTTP response code: `200 ok`.
-            case ok(Operations.GetLinkPreview.Output.Ok)
-            /// The associated value of the enum case if `self` is `.ok`.
-            ///
-            /// - Throws: An error if `self` is not `.ok`.
-            /// - SeeAlso: `.ok`.
-            public var ok: Operations.GetLinkPreview.Output.Ok {
-                get throws {
-                    switch self {
-                    case let .ok(response):
-                        return response
-                    default:
-                        try throwUnexpectedResponseStatus(
-                            expectedStatus: "ok",
-                            response: self
-                        )
-                    }
-                }
-            }
-            /// Missing, expired or invalid bearer token
-            ///
-            /// - Remark: Generated from `#/paths//v1/me/link-preview/post(getLinkPreview)/responses/401`.
-            ///
-            /// HTTP response code: `401 unauthorized`.
-            case unauthorized(Components.Responses.Unauthorized)
-            /// The associated value of the enum case if `self` is `.unauthorized`.
-            ///
-            /// - Throws: An error if `self` is not `.unauthorized`.
-            /// - SeeAlso: `.unauthorized`.
-            public var unauthorized: Components.Responses.Unauthorized {
-                get throws {
-                    switch self {
-                    case let .unauthorized(response):
-                        return response
-                    default:
-                        try throwUnexpectedResponseStatus(
-                            expectedStatus: "unauthorized",
-                            response: self
-                        )
-                    }
-                }
-            }
-            /// Not allowed (scope, group or author profile)
-            ///
-            /// - Remark: Generated from `#/paths//v1/me/link-preview/post(getLinkPreview)/responses/403`.
-            ///
-            /// HTTP response code: `403 forbidden`.
-            case forbidden(Components.Responses.Forbidden)
-            /// The associated value of the enum case if `self` is `.forbidden`.
-            ///
-            /// - Throws: An error if `self` is not `.forbidden`.
-            /// - SeeAlso: `.forbidden`.
-            public var forbidden: Components.Responses.Forbidden {
-                get throws {
-                    switch self {
-                    case let .forbidden(response):
-                        return response
-                    default:
-                        try throwUnexpectedResponseStatus(
-                            expectedStatus: "forbidden",
-                            response: self
-                        )
-                    }
-                }
-            }
-            /// Validation failed
-            ///
-            /// - Remark: Generated from `#/paths//v1/me/link-preview/post(getLinkPreview)/responses/422`.
-            ///
-            /// HTTP response code: `422 unprocessableContent`.
-            case unprocessableContent(Components.Responses.ValidationFailed)
-            /// The associated value of the enum case if `self` is `.unprocessableContent`.
-            ///
-            /// - Throws: An error if `self` is not `.unprocessableContent`.
-            /// - SeeAlso: `.unprocessableContent`.
-            public var unprocessableContent: Components.Responses.ValidationFailed {
-                get throws {
-                    switch self {
-                    case let .unprocessableContent(response):
-                        return response
-                    default:
-                        try throwUnexpectedResponseStatus(
-                            expectedStatus: "unprocessableContent",
-                            response: self
-                        )
-                    }
-                }
-            }
-            /// Rate limited
-            ///
-            /// - Remark: Generated from `#/paths//v1/me/link-preview/post(getLinkPreview)/responses/429`.
-            ///
-            /// HTTP response code: `429 tooManyRequests`.
-            case tooManyRequests(Components.Responses.TooManyRequests)
-            /// The associated value of the enum case if `self` is `.tooManyRequests`.
-            ///
-            /// - Throws: An error if `self` is not `.tooManyRequests`.
-            /// - SeeAlso: `.tooManyRequests`.
-            public var tooManyRequests: Components.Responses.TooManyRequests {
                 get throws {
                     switch self {
                     case let .tooManyRequests(response):

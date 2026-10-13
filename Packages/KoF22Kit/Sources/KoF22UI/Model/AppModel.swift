@@ -44,8 +44,8 @@ public final class AppModel {
    }
 
    /// Blog used when neither settings nor the account name a default.
-   static let fallbackBlogSlug = "quick-bits"
-   /// Shown when `/v1/me` reports an account that is not allowed to post.
+   static let fallbackBlogSlug = Post.defaultBlogSlug
+   /// Shown when `/me` reports an account that is not allowed to post.
    static let cannotPostMessage =
       "This KoF22 account can't publish. It needs the kof22:publish scope and a publisher group, and its email must belong to an author."
    /// Simulated network latency of the mock backend, in milliseconds.
@@ -81,9 +81,12 @@ public final class AppModel {
    public private(set) var me: Me?  // swiftlint:disable:this identifier_name
    /// Semantic version reported by the API, shown in Settings.
    public private(set) var apiVersion: String?
-   /// Why the signed-in account cannot publish (a 403 from `/v1/me`, or `canPost` false),
+   /// Why the signed-in account cannot publish (a 403 from `/me`, or `canPost` false),
    /// or nil when it can. The root view shows a dedicated screen while this is set.
    public private(set) var cannotPublishReason: String?
+   /// Authors the account can choose for a post, by name; empty until loaded (the
+   /// composer then shows the account's own author).
+   public internal(set) var authors: [AuthorRef] = []
    /// The latest error to show the user, or nil.
    public var lastError: String?
    /// The selected tab of the signed-in shell.
@@ -100,10 +103,10 @@ public final class AppModel {
    /// Where the mock backend keeps its posts and photos.
    private let mockDirectory: URL
 
-   /// Authoring limits from the account, or conservative defaults before it loads.
-   public var limits: AuthoringLimits { me?.limits ?? .fallback }
-   /// Blogs the account can post to, or the mock list before it loads.
-   public var blogs: [BlogRef] { me?.blogs ?? MockBackend.blogs }
+   /// Photo rules from the account, or the backend's defaults before it loads.
+   public var limits: PhotoLimits { me?.limits ?? .fallback }
+   /// Blogs the account can post to, or the demo list before it loads.
+   public var blogs: [BlogRef] { me?.blogs ?? MockBackend.demoBlogs }
    /// The blog last posted to, else the account default, else Quick Bits.
    public var defaultBlog: String { settings.lastBlogSlug ?? me?.defaultBlog ?? Self.fallbackBlogSlug }
 
@@ -232,6 +235,7 @@ public final class AppModel {
       await box.set(nil)
       isSignedIn = false
       me = nil
+      authors = []
       cannotPublishReason = nil
    }
 
@@ -258,6 +262,7 @@ public final class AppModel {
          }
          return
       }
+      await refreshAuthors()
       await refreshAPIVersion()
    }
 
@@ -265,7 +270,7 @@ public final class AppModel {
    /// the value (Settings shows a dash) and is logged.
    private func refreshAPIVersion() async {
       do {
-         apiVersion = try await service.versions().versions.first?.semver
+         apiVersion = try await service.versions().appVersion
       }
       catch {
          apiVersion = nil
@@ -360,5 +365,26 @@ public final class AppModel {
       guard let string else { return nil }
       if let file = mockBackend.fileURL(forMockMedia: string, directory: mockDirectory) { return file }
       return URL(string: string)
+   }
+}
+
+/// Authors for the composer's picker.
+extension AppModel {
+   /// Loads the authors for the composer's picker. Only the picker needs them, so a
+   /// failure keeps the account's own author as the only choice and is logged.
+   func refreshAuthors() async {
+      do {
+         authors = try await service.authors()
+      }
+      catch {
+         authors = []
+         Log.api.notice("Authors could not be loaded: \(error.localizedDescription, privacy: .public)")
+      }
+   }
+
+   /// The authors to offer: the loaded list, or just the account's own author.
+   public var authorChoices: [AuthorRef] {
+      if !authors.isEmpty { return authors }
+      return me?.author.map { [$0] } ?? []
    }
 }

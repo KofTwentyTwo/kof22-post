@@ -10,26 +10,24 @@ import Testing
 
 @testable import KoF22Kit
 
-/// Records the operation and idempotency key of every request before handing it to the
-/// mock backend.
-final class KeyRecordingTransport: ClientTransport, @unchecked Sendable {
+/// Records the operation of every request before handing it to the fake backend.
+final class OperationRecordingTransport: ClientTransport, @unchecked Sendable {
    /// The transport that answers.
    let inner: MockTransport
    /// Guards `recorded`.
    private let lock = NSLock()
-   /// `(operationID, Idempotency-Key)` per request, in order.
-   private var recorded: [(String, String?)] = []
+   /// The operation id of each request, in order.
+   private var recorded: [String] = []
 
    /// Wraps a mock transport for `backend`.
    init(backend: MockBackend) { inner = MockTransport(backend: backend) }
 
-   /// The idempotency keys sent with `operation`, in order.
-   func keys(for operation: String) -> [String?] { lock.withLock { recorded.filter { $0.0 == operation }.map(\.1) } }
+   /// How many requests were sent for `operation`.
+   func count(of operation: String) -> Int { lock.withLock { recorded.filter { $0 == operation }.count } }
 
    /// Records the request and forwards it.
    func send(_ request: HTTPRequest, body: HTTPBody?, baseURL: URL, operationID: String) async throws -> (HTTPResponse, HTTPBody?) {
-      let key = request.headerFields.first { $0.name.canonicalName == "idempotency-key" }?.value
-      lock.withLock { recorded.append((operationID, key)) }
+      lock.withLock { recorded.append(operationID) }
       return try await inner.send(request, body: body, baseURL: baseURL, operationID: operationID)
    }
 }
@@ -113,7 +111,7 @@ struct PipelineRig {
    /// The scripted PUT performer.
    let uploader: ScriptedUploadPerformer
    /// The recording transport.
-   let transport: KeyRecordingTransport
+   let transport: OperationRecordingTransport
    /// The shared clock.
    let clock: TestClock
 
@@ -133,7 +131,7 @@ struct PipelineRig {
       let auth = AuthSession(mode: .mock, store: MemorySecureStore())
       try await auth.signIn(using: RefusingAuthenticator())
       let uploader = ScriptedUploadPerformer(backend: backend, clock: clock, script: script)
-      let transport = KeyRecordingTransport(backend: backend)
+      let transport = OperationRecordingTransport(backend: backend)
       let service = SiteService(serverURL: AppConfig.mockAPIBaseURL, transport: transport, auth: auth, uploader: uploader)
       let photos = root.appending(path: "Outbox Photos")
       try FileManager.default.createDirectory(at: photos, withIntermediateDirectories: true)
@@ -196,10 +194,7 @@ struct PipelineRig {
       let item = try await rig.item(id)
       #expect(item.state == .sent)
       #expect(item.composition.photos.first?.uploadGeneration == 1)
-      let keys = rig.transport.keys(for: "createUpload")
-      #expect(keys.count == 2)
-      #expect(keys.first != keys.last)
-      #expect(keys.allSatisfy { $0?.hasPrefix(item.idempotencyKey) == true })
+      #expect(rig.transport.count(of: "createUpload") == 2)
    }
 
    @Test func anUploadThatExpiredBeforeItArrivedRestarts() async throws {
@@ -207,7 +202,7 @@ struct PipelineRig {
       let id = try await rig.enqueuePhotoPost()
       await rig.processor.drain()
       #expect(try await rig.item(id).state == .sent)
-      #expect(rig.transport.keys(for: "createUpload").count == 2)
+      #expect(rig.transport.count(of: "createUpload") == 2)
    }
 
    @Test func anUploadRestartsOnlyOncePerPass() async throws {
@@ -218,7 +213,7 @@ struct PipelineRig {
       #expect(item.state == .failed)
       #expect(item.lastError?.localizedCaseInsensitiveContains("expired") == true)
       #expect(item.composition.photos.first?.uploadGeneration == 1)
-      #expect(rig.transport.keys(for: "createUpload").count == 2)
+      #expect(rig.transport.count(of: "createUpload") == 2)
       ////////////////////////////////////////////////////////////////
       // The prepared file stays for the next attempt.              //
       ////////////////////////////////////////////////////////////////
@@ -230,7 +225,7 @@ struct PipelineRig {
       let id = try await rig.enqueuePhotoPost()
       await rig.processor.drain()
       #expect(try await rig.item(id).state == .failed)
-      #expect(rig.transport.keys(for: "createUpload").count == 1)
+      #expect(rig.transport.count(of: "createUpload") == 1)
    }
 
    @Test func retriesReuseTheKeyAndThePreparedFile() async throws {
@@ -247,9 +242,7 @@ struct PipelineRig {
       try await rig.store.retry(id)
       await rig.processor.drain()
       #expect(try await rig.item(id).state == .sent)
-      let keys = rig.transport.keys(for: "createUpload")
-      #expect(keys.count == 2)
-      #expect(keys.first == keys.last)
+      #expect(rig.transport.count(of: "createUpload") == 2)
       #expect(rig.workFiles().isEmpty)
    }
 

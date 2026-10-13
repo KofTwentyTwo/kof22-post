@@ -114,9 +114,16 @@
          }
       }
 
+      /// How far around the position nearby places are looked up, in meters.
+      private static let nearbyRadius: CLLocationDistance = 120
+      /// Most place labels offered.
+      private static let maximumPlaceOptions = 5
+
       /// Asks for When In Use access with precise accuracy (the service session
-      /// prompts for both), then returns a short place label such as "Chester, IL".
-      public func currentPlaceLabel() async throws -> String {
+      /// prompts for both), then returns place labels for where the iPhone is, most
+      /// specific first: nearby places with their town ("Smith's Diner, Chester, IL"),
+      /// then the town itself ("Chester, IL").
+      public func currentPlaceOptions() async throws -> [String] {
          let session = CLServiceSession(authorization: .whenInUse, fullAccuracyPurposeKey: "PostLocation")
          defer { session.invalidate() }
          var found: CLLocation?
@@ -132,22 +139,44 @@
          }
          refresh()
          guard let found else { throw LocationError.unavailable }
-         return try await Self.label(for: found)
+         return try await Self.placeOptions(for: found)
       }
 
-      /// Reverse-geocodes `location` to "Place, City", "City", the place name, or the
-      /// rounded coordinates, whichever is the most specific available.
-      static func label(for location: CLLocation) async throws -> String {
-         guard let request = MKReverseGeocodingRequest(location: location),
-            let item = try await request.mapItems.first
-         else { throw LocationError.unavailable }
-         if let city = item.addressRepresentations?.cityWithContext, !city.isEmpty {
-            if let name = item.name, !name.isEmpty, !city.hasPrefix(name), item.pointOfInterestCategory != nil {
-               return "\(name), \(city)"
-            }
-            return city
+      /// Labels for `location`: the nearest points of interest within `nearbyRadius`
+      /// joined with the town ("Name, Town, ST"), then the town, then the rounded
+      /// coordinates when nothing else is known. Duplicates are dropped.
+      static func placeOptions(for location: CLLocation) async throws -> [String] {
+         guard let request = MKReverseGeocodingRequest(location: location) else { throw LocationError.unavailable }
+         let address = try await request.mapItems.first
+         let town = address?.addressRepresentations?.cityWithContext?.nilIfEmpty
+         var options: [String] = []
+         for place in await nearbyPlaces(around: location) {
+            guard let name = place.name?.nilIfEmpty else { continue }
+            options.append(town.map { $0.hasPrefix(name) ? $0 : "\(name), \($0)" } ?? name)
          }
-         return item.name ?? String(format: Self.coordinateFormat, location.coordinate.latitude, location.coordinate.longitude)
+         if let name = address?.name?.nilIfEmpty, address?.pointOfInterestCategory != nil {
+            options.append(town.map { $0.hasPrefix(name) ? $0 : "\(name), \($0)" } ?? name)
+         }
+         if let town { options.append(town) }
+         if options.isEmpty {
+            options.append(String(format: Self.coordinateFormat, location.coordinate.latitude, location.coordinate.longitude))
+         }
+         var seen = Set<String>()
+         return Array(options.filter { seen.insert($0).inserted }.prefix(Self.maximumPlaceOptions))
+      }
+
+      /// Points of interest near `location`, nearest first. Nearby places only make the
+      /// label richer, so a failed search yields none and is logged.
+      static func nearbyPlaces(around location: CLLocation) async -> [MKMapItem] {
+         let request = MKLocalPointsOfInterestRequest(center: location.coordinate, radius: Self.nearbyRadius)
+         do {
+            let response = try await MKLocalSearch(request: request).start()
+            return response.mapItems.sorted { $0.location.distance(from: location) < $1.location.distance(from: location) }
+         }
+         catch {
+            Log.ui.notice("Nearby places could not be found: \(error.localizedDescription, privacy: .public)")
+            return []
+         }
       }
 
       /// Opens this app's page in the Settings app.
@@ -158,5 +187,12 @@
          }
          UIApplication.shared.open(url)
       }
+   }
+#endif
+
+#if os(iOS)
+   extension String {
+      /// The string, or nil when it is empty.
+      fileprivate var nilIfEmpty: String? { isEmpty ? nil : self }
    }
 #endif

@@ -1,1 +1,39 @@
-{"pageNo":1,"pageSize":5,"count":2,"records":[{"description":"A CTO's perspective on how technical ideas become systems, and what those decisions mean for the people building and depending on them.","id":2,"metaDescription":"A CTO's perspective on how technical ideas become systems, and what those decisions mean for the people building and depending on them.","metaKeywords":"technology, architecture, leadership, engineering, systems","metaTitle":"Ideas Into Systems - A CTO's Perspective","modifyDate":"2026-10-11T12:36:21.332554Z","name":"Ideas Into Systems","shortName":"Ideas Into Systems","slug":"ideas-into-systems"},{"description":"Notes from the work of building systems, making decisions and understanding what changes along the way.","id":1,"metaDescription":"Notes from the work of building systems, making decisions and understanding what changes along the way.","metaKeywords":"engineering, leadership, observations, systems","metaTitle":"Field Notes - Engineering & Leadership","modifyDate":"2026-10-10T23:01:39.964678Z","name":"Field Notes","shortName":"Field Notes","slug":"quick-bits"}]}
+{
+    "pageNo": 1,
+    "pageSize": 2,
+    "count": 2,
+    "records": [
+        {
+            "blogTypeId": 1,
+            "createDate": "2026-07-05T23:33:29.807615Z",
+            "description": "A CTO's perspective on how technical ideas become systems, and what those decisions mean for the people building and depending on them.",
+            "id": 2,
+            "metaDescription": "A CTO's perspective on how technical ideas become systems, and what those decisions mean for the people building and depending on them.",
+            "metaKeywords": "technology, architecture, leadership, engineering, systems",
+            "metaTitle": "Ideas Into Systems - A CTO's Perspective",
+            "modifyDate": "2026-10-11T12:36:21.332554Z",
+            "name": "Ideas Into Systems",
+            "siteUrl": "https://www.kof22.com/blogs/ideas-into-systems",
+            "shortName": "Ideas Into Systems",
+            "siteId": 1,
+            "sitePath": "/blogs/ideas-into-systems",
+            "slug": "ideas-into-systems"
+        },
+        {
+            "blogTypeId": 1,
+            "createDate": "2026-07-05T23:33:29.807615Z",
+            "description": "Notes from the work of building systems, making decisions and understanding what changes along the way.",
+            "id": 1,
+            "metaDescription": "Notes from the work of building systems, making decisions and understanding what changes along the way.",
+            "metaKeywords": "engineering, leadership, observations, systems",
+            "metaTitle": "Field Notes - Engineering & Leadership",
+            "modifyDate": "2026-10-10T23:01:39.964678Z",
+            "name": "Field Notes",
+            "siteUrl": "https://www.kof22.com/blogs/quick-bits",
+            "shortName": "Field Notes",
+            "siteId": 1,
+            "sitePath": "/blogs/quick-bits",
+            "slug": "quick-bits"
+        }
+    ]
+}

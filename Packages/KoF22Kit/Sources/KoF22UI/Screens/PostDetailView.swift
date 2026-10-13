@@ -70,8 +70,15 @@
             if !post.tags.isEmpty {
                FlowLayout(spacing: Theme.Spacing.small) { ForEach(post.tags, id: \.self) { TagChip($0) } }
             }
+            PostFieldsCard(post: post, authorName: authorName)
             if let error { Text(error).font(.caption).foregroundStyle(Theme.danger) }
          }
+      }
+
+      /// The author's name, from the picker's list or the account.
+      private var authorName: String? {
+         let authors = app.authorChoices
+         return authors.first { $0.id == post.authorId }?.name ?? (post.authorId == app.me?.author?.id ? app.me?.author?.name : nil)
       }
 
       /// The status badge, the scheduled time when scheduled, and the blog.
@@ -80,6 +87,9 @@
             StatusBadge(post.status)
             if post.status == .scheduled, let publishAt = post.publishAt {
                Text("for \(publishAt, format: .dateTime.month().day().hour().minute())").font(.caption).foregroundStyle(Theme.muted)
+            }
+            if post.isFeatured {
+               Label("Featured", systemImage: "star.fill").font(.caption).foregroundStyle(Theme.accent)
             }
             Spacer()
             Text(post.blog).font(Theme.mono(.caption)).foregroundStyle(Theme.muted)
@@ -172,6 +182,49 @@
          }
          catch {
             Log.storage.notice("Deleted post could not be removed from the cache: \(error.localizedDescription, privacy: .public)")
+         }
+      }
+   }
+
+   /// Every stored field of a post that is not its content: the details, SEO fields,
+   /// featured image, author, blog and read time, as the server has them.
+   struct PostFieldsCard: View {
+      /// The post.
+      let post: Post
+      /// The author's name, when known.
+      let authorName: String?
+
+      /// Label and value rows.
+      var body: some View {
+         VStack(alignment: .leading, spacing: Theme.Spacing.small) {
+            Text("Details").font(.subheadline.weight(.semibold)).foregroundStyle(Theme.heading)
+            row("Name", post.name)
+            row("Short name", post.shortName)
+            row("Slug", post.slug)
+            row("Description", post.description)
+            row("SEO title", post.metaTitle)
+            row("SEO description", post.metaDescription)
+            row("Keywords", post.metaKeywords)
+            row("Blog", post.blog)
+            row("Author", authorName ?? post.authorId.map { "#\($0)" })
+            row("Read time", post.readTime.map { "\($0) min" })
+            row("Post image", post.featuredMediaId == nil ? "None" : post.featuredImage ?? "Photo #\(post.featuredMediaId ?? 0)")
+            row("Photos", "\(post.media.count)")
+            row("Published", post.publishedAt?.formatted(date: .abbreviated, time: .shortened))
+         }
+         .padding(Theme.Spacing.large)
+         .frame(maxWidth: .infinity, alignment: .leading)
+         .background(Theme.surface, in: RoundedRectangle(cornerRadius: Theme.Radius.card))
+         .accessibilityElement(children: .contain)
+         .accessibilityIdentifier("post.fields")
+      }
+
+      /// One row; a missing value shows a dash.
+      private func row(_ label: String, _ value: String?) -> some View {
+         HStack(alignment: .firstTextBaseline) {
+            Text(label).font(.caption).foregroundStyle(Theme.muted)
+            Spacer()
+            Text(value?.isEmpty == false ? value ?? "" : "–").font(.caption).foregroundStyle(Theme.body).multilineTextAlignment(.trailing)
          }
       }
    }

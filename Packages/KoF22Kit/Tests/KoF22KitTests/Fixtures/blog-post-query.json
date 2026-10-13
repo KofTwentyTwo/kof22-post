@@ -1,0 +1,120 @@
+{
+    "pageNo": 1,
+    "pageSize": 2,
+    "count": 16,
+    "records": [
+        {
+            "authorId": 2,
+            "blogId": 1,
+            "content": "Daily workstation #1.  Stl office.  2026 Mac Book Pro M5 Max with 128 Gb / 2 Tb.  Random stolen office monitors. Stream deck XL, Razer Huntsmen, Apple Magic Mouse.  Weird desk standy thing. ",
+            "createDate": "2026-10-12T18:37:56.978854Z",
+            "description": "Daily workstation 1. Stl office. 2026 Mac Book Pro M5 Max with 128 Gb / 2 Tb. ",
+            "excerpt": "Daily workstation 1. Stl office. 2026 Mac Book Pro M5 Max with 128 Gb / 2 Tb. Random stolen office monitors. Stream deck XL, Razer Huntsmen, Apple Magic Mouse. Weird desk standy thing.",
+            "featuredImage": "https://s3.kof22.com/kof22-website-files/media/post-photo-db5f7706-bf65-470c-a5c7-c594aac66fb2/gallery.jpg",
+            "featuredMediaId": 100,
+            "id": 17,
+            "isFeatured": false,
+            "isPublished": true,
+            "linkDescription": null,
+            "linkImageUrl": null,
+            "linkTitle": null,
+            "linkUrl": null,
+            "locationLabel": "4427 Chouteau Ave",
+            "metaDescription": "Daily workstation #1.  Stl office.  2026 Mac Book Pro M5 Max with 128 Gb / 2 Tb.  Random stolen office monitors. Stream deck XL, Razer Huntsmen, Apple Magic Mouse.  Weird desk standy thing. ",
+            "metaKeywords": "Mac Book Pro",
+            "metaTitle": "Daily workstation 1. Stl office. 2026 Mac Book Pro M5 Max with 128 Gb / 2 Tb. ",
+            "modifyDate": "2026-10-13T19:48:49.148605Z",
+            "name": "Daily workstation #1 / Stl Office",
+            "siteUrl": "https://www.kof22.com/blogs/quick-bits/daily-workstation-1",
+            "publishDate": "2026-10-12T18:37:56.978491Z",
+            "readTime": 1,
+            "scheduledPublishAt": null,
+            "shortName": "Daily workstation #1",
+            "sitePath": "/blogs/quick-bits/daily-workstation-1",
+            "slug": "daily-workstation-1",
+            "title": "Daily workstation #1 / Stl Office",
+            "viewCount": 0,
+            "tags": [
+                {
+                    "blogPostId": 17,
+                    "blogTagId": 15,
+                    "createDate": "2026-10-12T18:37:57.403583Z",
+                    "id": 30,
+                    "modifyDate": "2026-10-12T18:37:57.403585Z"
+                }
+            ],
+            "media": [
+                {
+                    "altText": null,
+                    "blogPostId": 17,
+                    "caption": null,
+                    "createDate": "2026-10-12T18:37:57.556260Z",
+                    "height": 3024,
+                    "id": 2,
+                    "mediaId": 100,
+                    "modifyDate": "2026-10-12T18:37:57.556263Z",
+                    "sortOrder": 0,
+                    "thumbnailUrl": "https://s3.kof22.com/kof22-website-files/media/post-photo-db5f7706-bf65-470c-a5c7-c594aac66fb2/thumbnail.jpg",
+                    "url": "https://s3.kof22.com/kof22-website-files/media/post-photo-db5f7706-bf65-470c-a5c7-c594aac66fb2/gallery.jpg",
+                    "width": 4032
+                },
+                {
+                    "altText": null,
+                    "blogPostId": 17,
+                    "caption": null,
+                    "createDate": "2026-10-12T18:37:57.572162Z",
+                    "height": 4032,
+                    "id": 3,
+                    "mediaId": 101,
+                    "modifyDate": "2026-10-12T18:37:57.572163Z",
+                    "sortOrder": 1,
+                    "thumbnailUrl": "https://s3.kof22.com/kof22-website-files/media/post-photo-1a95cd4b-9e4a-46d5-9bcd-642e904ae6c1/thumbnail.jpg",
+                    "url": "https://s3.kof22.com/kof22-website-files/media/post-photo-1a95cd4b-9e4a-46d5-9bcd-642e904ae6c1/gallery.jpg",
+                    "width": 3024
+                }
+            ]
+        },
+        {
+            "authorId": 2,
+            "blogId": 2,
+            "content": "An agent can read a rule and still have an incomplete picture of what satisfying it means. I want shared standards to connect expectations to applicable configuration, evidence and an explicit adoption decision. A versioned repository gives that conversation a concrete reference.\r\n\r\n## CTO to Human: what the history tells us\r\n\r\nThe selected October history covers a coding baseline and the 1.0 assurance release. This is a short public release history, not a year of claimed compliance. The release notes also preserve the difference between reserved tags whose workflows failed and the first bundle actually published.\r\n\r\n## Engineer to Engineer: the boundary that matters\r\n\r\nIDE and command-line configuration can make part of a written standard executable. Reusable checks can gather evidence. A release can identify when requirements changed. Those layers need to agree, but they remain distinct: a passing badge describes a check, while conformance depends on which requirements apply and whether the evidence is sufficient.\r\n\r\n## Milestones in the public record\r\n\r\n- **2026-10-09 \u2014 [Standards gives coding expectations an executable home](https://github.com/KofTwentyTwo/standards/commit/d6fedc762b9ad01caed9a4665097172b11c4f830).** The October coding-standard commit added language guidance with IDE and command-line configuration. It made conventions available as versioned repository material. [Project journal](/projects/standards/updates/2026-10-09-standards-gives-coding-expectations-an-executable-home).\r\n- **2026-10-10 \u2014 [Standards 1.0 makes assurance expectations versioned](https://github.com/KofTwentyTwo/standards/releases/tag/v1.0.0).** The 1.0 release records changes to assurance expectations, including applicable fuzzing and badge participation. Its notes also distinguish the first published bundle from earlier reserved tags whose workflows failed. [Project journal](/projects/standards/updates/2026-10-10-standards-1-0-makes-assurance-expectations-versioned).\r\n\r\nThe goal is continuity across people, repositories and agent sessions. Shared expectations are most useful when a contributor can find the rule, understand why it applies and inspect what demonstrates it, without turning every new task into a negotiation from memory.\r\n\r\n[Explore the standards project hub](/projects/standards).\r\n\r\n*Retrospective written on October 12, 2026, covering the public evidence available for October 12, 2025 through October 12, 2026. Linked journal entries use source event dates; this essay is a newly written retrospective. Quiet months do not imply an unrecorded release, and short-lived projects are not presented as having a full year of activity.*",
+            "createDate": "2026-10-12T16:03:24.754534Z",
+            "description": "A source-linked retrospective of standards milestones, engineering decisions and release boundaries from October 2025 through October 2026.",
+            "excerpt": "Versioned rules connect engineering expectations to configuration, evidence and adoption, from early release attempts to the first standards bundle.",
+            "featuredImage": null,
+            "featuredMediaId": null,
+            "id": 16,
+            "isFeatured": false,
+            "isPublished": true,
+            "linkDescription": null,
+            "linkImageUrl": null,
+            "linkTitle": null,
+            "linkUrl": null,
+            "locationLabel": null,
+            "metaDescription": null,
+            "metaKeywords": null,
+            "metaTitle": null,
+            "modifyDate": "2026-10-13T19:52:31.451940Z",
+            "name": "standards-history-2026",
+            "siteUrl": "https://www.kof22.com/blogs/ideas-into-systems/standards-engineering-history-2025-2026",
+            "publishDate": "2026-10-12T16:03:25.256461Z",
+            "readTime": 2,
+            "scheduledPublishAt": null,
+            "shortName": "standards-history",
+            "sitePath": "/blogs/ideas-into-systems/standards-engineering-history-2025-2026",
+            "slug": "standards-engineering-history-2025-2026",
+            "title": "Standards: version the expectations you ask agents to follow",
+            "viewCount": 0,
+            "tags": [
+                {
+                    "blogPostId": 16,
+                    "blogTagId": 9,
+                    "createDate": "2026-10-12T16:03:25.180702Z",
+                    "id": 29,
+                    "modifyDate": "2026-10-12T16:03:25.180708Z"
+                }
+            ],
+            "media": []
+        }
+    ]
+}

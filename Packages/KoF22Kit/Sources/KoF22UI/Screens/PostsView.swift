@@ -6,7 +6,7 @@
 #if os(iOS)
    import SwiftUI
 
-   /// The post list's data: a status filter, cursor paging and the local cache shown
+   /// The post list's data: a status filter, page-number paging and the local cache shown
    /// before the first page arrives.
    @MainActor
    @Observable
@@ -16,8 +16,8 @@
 
       /// Posts loaded so far, newest first.
       var posts: [Post] = []
-      /// Cursor of the next page, or nil when there are no more.
-      var nextCursor: String?
+      /// Number of the next page, or nil when there are no more.
+      var nextPage: Int?
       /// Only posts with this status, or all when nil.
       var filter: PostStatus?
       /// Whether a page is being loaded.
@@ -35,9 +35,9 @@
          isLoading = true
          defer { isLoading = false }
          do {
-            let page = try await app.service.myPosts(status: filter, cursor: reset ? nil : nextCursor, limit: Self.pageSize)
+            let page = try await app.service.myPosts(status: filter, page: reset ? 1 : nextPage ?? 1, limit: Self.pageSize)
             posts = reset ? page.items : posts + page.items.filter { new in !posts.contains { $0.id == new.id } }
-            nextCursor = page.nextCursor
+            nextPage = page.nextPage
             error = nil
             await cache(page.items, app: app)
          }
@@ -102,7 +102,7 @@
                ForEach(model.posts) { post in
                   NavigationLink(value: post) { PostRow(post: post) }
                }
-               if model.nextCursor != nil {
+               if model.nextPage != nil {
                   ProgressView().frame(maxWidth: .infinity).task { await model.load(app: app, reset: false) }
                }
             }

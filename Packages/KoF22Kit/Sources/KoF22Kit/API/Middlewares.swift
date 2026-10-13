@@ -41,33 +41,22 @@ struct ErrorEnvelopeMiddleware: ClientMiddleware {
    }
 }
 
-/// Adds the bearer token to the authoring endpoints and, on a 401, refreshes once and
-/// replays the request. The spec allows bearer tokens on `/v1/me` and `/v1/me/...`
-/// only; every other request (versions, content reads) goes out without credentials and
-/// never triggers a refresh.
+/// Adds the bearer token to every request and, on a 401, refreshes once and replays the
+/// request. Site API v2 serves the signed-in user's view (drafts included) to any
+/// request that carries a token, and the app only talks to it while signed in.
 struct AuthMiddleware: ClientMiddleware {
    /// Upper bound for a request body buffered for a possible replay.
    static let maximumReplayBodyBytes = 4 << 20
 
-   /// The only path that carries a bearer token, with its sub-paths.
-   static let authoringPath = "/v1/me"
-
    /// The session that supplies and refreshes tokens.
    let auth: any SessionAuthenticating
 
-   /// True when `path` (with or without a query string) is `/v1/me` or below it.
-   static func needsBearer(_ path: String?) -> Bool {
-      let bare = String((path ?? "").prefix { $0 != "?" })
-      return bare == authoringPath || bare.hasPrefix(authoringPath + "/")
-   }
-
-   /// Sends authoring requests with the current token and replays them once with a fresh
-   /// token when the server rejects the first one. Other requests pass through untouched.
+   /// Sends the request with the current token and replays it once with a fresh token
+   /// when the server rejects the first one.
    func intercept(
       _ request: HTTPRequest, body: HTTPBody?, baseURL: URL, operationID: String,
       next: (HTTPRequest, HTTPBody?, URL) async throws -> (HTTPResponse, HTTPBody?)
    ) async throws -> (HTTPResponse, HTTPBody?) {
-      guard Self.needsBearer(request.path) else { return try await next(request, body, baseURL) }
       //////////////////////////////////////////////////
       // buffer the body so it can be sent twice.     //
       //////////////////////////////////////////////////
@@ -82,30 +71,31 @@ struct AuthMiddleware: ClientMiddleware {
    }
 }
 
-/// The generator cannot encode an explicit JSON `null`, but `PATCH /v1/me/posts/{id}`
-/// needs `"linkUrl": null` to remove a link. `SiteService` marks that intent with a
-/// sentinel value which this middleware rewrites to `null`.
+/// The generator cannot encode an explicit JSON `null`, but a full-state
+/// `PATCH /blogPost/{id}` must clear optional fields the user emptied. `SiteService` names
+/// those fields in the task-local `fields` around the call and this middleware adds them
+/// to the body as `null`.
 struct ExplicitNullMiddleware: ClientMiddleware {
-   /// The string `SiteService` puts in a field that must be sent as JSON `null`.
-   static let sentinel = "__kof22_null__"
+   /// The fields to send as `null` on the update made in the current task.
+   @TaskLocal static var fields: Set<String> = []
 
    /// Upper bound for the update body read for rewriting.
    static let maximumBodyBytes = 4 << 20
 
-   /// Rewrites the sentinel in `updatePost` bodies and leaves every other request alone.
+   /// Adds the nulls to `updateBlogPost` bodies and leaves every other request alone.
    func intercept(
       _ request: HTTPRequest, body: HTTPBody?, baseURL: URL, operationID: String,
       next: (HTTPRequest, HTTPBody?, URL) async throws -> (HTTPResponse, HTTPBody?)
    ) async throws -> (HTTPResponse, HTTPBody?) {
-      guard operationID == "updatePost", let body else { return try await next(request, body, baseURL) }
+      let fields = Self.fields
+      guard operationID == "updateBlogPost", !fields.isEmpty, let body else { return try await next(request, body, baseURL) }
       let data = try await Data(collecting: body, upTo: Self.maximumBodyBytes)
-      let rewritten = Self.rewrite(data)
-      return try await next(request, HTTPBody(rewritten), baseURL)
+      return try await next(request, HTTPBody(Self.rewrite(data, nulls: fields)), baseURL)
    }
 
-   /// Replaces every top-level sentinel value with `null`. Bodies that are not a JSON
-   /// object, or carry no sentinel, are returned unchanged.
-   static func rewrite(_ data: Data) -> Data {
+   /// Sets each of `nulls` to `null` in a JSON object body (keys that carry a value are
+   /// left alone). Bodies that are not a JSON object are returned unchanged.
+   static func rewrite(_ data: Data, nulls: Set<String>) -> Data {
       var object: [String: Any]
       do {
          guard let parsed = try JSONSerialization.jsonObject(with: data) as? [String: Any] else { return data }
@@ -115,35 +105,13 @@ struct ExplicitNullMiddleware: ClientMiddleware {
          Log.api.warning("Update body is not JSON, sent unchanged: \(error.localizedDescription, privacy: .public)")
          return data
       }
-      var changed = false
-      for (key, value) in object where (value as? String) == sentinel {
-         object[key] = NSNull()
-         changed = true
-      }
+      for key in nulls where object[key] == nil { object[key] = NSNull() }
       ////////////////////////////////////////////////////////////
       // re-serialising values JSONSerialization just parsed    //
       // cannot fail; the original body is the safe fallback.   //
       ////////////////////////////////////////////////////////////
-      guard changed, let rewritten = try? JSONSerialization.data(withJSONObject: object, options: [.sortedKeys]) else {
-         return data
-      }
+      guard let rewritten = try? JSONSerialization.data(withJSONObject: object, options: [.sortedKeys]) else { return data }
       return rewritten
-   }
-}
-
-/// The runtime URI-encodes header values, which turns a quoted ETag into
-/// `%22...%22`. `If-Match` must reach the server verbatim.
-struct RawHeaderMiddleware: ClientMiddleware {
-   /// Percent-decodes `If-Match` and forwards the request.
-   func intercept(
-      _ request: HTTPRequest, body: HTTPBody?, baseURL: URL, operationID: String,
-      next: (HTTPRequest, HTTPBody?, URL) async throws -> (HTTPResponse, HTTPBody?)
-   ) async throws -> (HTTPResponse, HTTPBody?) {
-      var request = request
-      if let value = request.headerFields[.ifMatch], let decoded = value.removingPercentEncoding {
-         request.headerFields[.ifMatch] = decoded
-      }
-      return try await next(request, body, baseURL)
    }
 }
 

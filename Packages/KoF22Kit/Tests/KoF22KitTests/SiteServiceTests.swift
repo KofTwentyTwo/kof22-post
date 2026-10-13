@@ -4,233 +4,242 @@
  */
 
 import Foundation
-import HTTPTypes
-import OpenAPIRuntime
 import Testing
 
 @testable import KoF22Kit
 
-/// Exercises the generated client + hand-written layer against the mock contract.
+/// `SiteService` on Site API v2, against the in-process fake.
 @Suite struct SiteServiceTests {
-   /// The mock profile lists both blogs, the default blog and the photo limit.
-   @Test func meListsBlogsAndLimits() async throws {
-      let (service, _, _) = try await makeMockService()
-      let profile = try await service.me()
-      #expect(profile.defaultBlog == "quick-bits")
-      #expect(profile.blogs.map(\.slug) == ["quick-bits", "deep-thoughts"])
-      #expect(profile.limits.maxPhotosPerPost == 20)
+   /// Status of a stale edit.
+   static let preconditionFailed = 412
+
+   /// A signed-in service over a fresh fake with a controllable clock.
+   static func make() async throws -> (SiteService, MockBackend, TestClock) {  // swiftlint:disable:this large_tuple
+      ////////////////////////////////////////////////////////////////
+      // whole seconds, because the client sends dates without     //
+      // fractions.                                                 //
+      ////////////////////////////////////////////////////////////////
+      let clock = TestClock(Date(timeIntervalSince1970: Date.now.timeIntervalSince1970.rounded(.down)))
+      let backend = MockBackend(directory: nil, now: clock.provider)
+      let (service, _) = try await makeSignedInService(backend)
+      return (service, backend, clock)
    }
 
-   /// Creating a post derives a plain-text title from the Markdown, dedupes tags and publishes it.
-   @Test func createDerivesTitleAndPublishes() async throws {
-      let (service, _, _) = try await makeMockService()
-      let post = try await service.createPost(
-         PostCreate(body: "## Hello *world*\nmore", status: .published, tags: ["#Swift", "swift"]),
-         idempotencyKey: "test-create-derives-title"
-      )
-      #expect(post.title == "Hello world")
+   @Test func meListsBlogsAuthorAndLimitsAndTheVersionIsKnown() async throws {
+      let (service, _, _) = try await Self.make()
+      let caller = try await service.me()
+      #expect(caller.canPost)
+      #expect(caller.author?.id == Int64(MockBackend.ownerAuthorID))
+      #expect(caller.blogs.map(\.slug) == [Post.defaultBlogSlug, "deep-thoughts"])
+      #expect(try await service.versions().appVersion == "2.1.0")
+      #expect(try await service.authors().map(\.name) == ["Guest Writer", "Mock Author"])
+   }
+
+   @Test func createFillsEveryFieldAndPublishes() async throws {
+      let (service, _, clock) = try await Self.make()
+      let draft = PostComposition(body: "Morning at the lake\n\nHerons everywhere.", tags: ["Birds", "Swift"], linkURL: "https://example.com/herons")
+         .draft()
+      let post = try await service.createPost(draft)
       #expect(post.status == .published)
-      #expect(post.tags == ["Swift"])
-      #expect(post.url?.hasPrefix("https://www.kof22.com/blogs/quick-bits/") == true)
+      #expect(post.slug == "morning-at-the-lake")
+      #expect(post.name == "Morning at the lake")
+      #expect(post.metaKeywords == "Birds, Swift")
+      #expect(post.tags == ["Birds", "Swift"])
+      #expect(post.link?.title == "herons")
+      #expect(post.url == "https://www.kof22.com/blogs/quick-bits/morning-at-the-lake")
+      #expect(post.publishedAt == clock.now)
+      #expect(post.blog == Post.defaultBlogSlug)
+      #expect(post.version != APIMapping.unknownVersion)
    }
 
-   /// Reusing an idempotency key replays the same post, and reusing it with a different body is refused.
-   @Test func idempotentCreateReplaysTheSamePost() async throws {
-      let (service, _, _) = try await makeMockService()
-      let body = PostCreate(body: "once", status: .published)
-      let first = try await service.createPost(body, idempotencyKey: "same-key-123")
-      let second = try await service.createPost(body, idempotencyKey: "same-key-123")
-      #expect(first.id == second.id)
-      let reused = await #expect(throws: APIError.self) {
-         try await service.createPost(PostCreate(body: "different"), idempotencyKey: "same-key-123")
-      }
-      #expect(reused?.code == "idempotency_key_reused")
+   @Test func aSecondPostWithTheSameTitleGetsTheNextSlug() async throws {
+      let (service, _, _) = try await Self.make()
+      let first = try await service.createPost(PostComposition(title: "Trip", body: "one").draft())
+      let second = try await service.createPost(PostComposition(title: "Trip", body: "two").draft())
+      #expect(first.slug == "trip")
+      #expect(second.slug == "trip-2")
    }
 
-   /// A 422 response carries the failing field and is classified as permanent.
-   @Test func validationErrorsCarryDetails() async throws {
-      let (service, _, _) = try await makeMockService()
-      let error = await #expect(throws: APIError.self) {
-         try await service.createPost(PostCreate(title: String(repeating: "t", count: 101), body: "x"), idempotencyKey: "k-validation")
-      }
-      #expect(error?.status == 422)
-      #expect(error?.details.first?.field == "title")
-      let validation = try #require(error)
-      #expect(ErrorClassifier.disposition(for: validation) == .permanent)
+   @Test func aRetriedCreateFindsThePostTheFirstAttemptMade() async throws {
+      let (service, _, _) = try await Self.make()
+      let draft = PostComposition(title: "Once", body: "only once").draft()
+      let first = try await service.createPost(draft)
+      let again = try await service.createPost(draft)
+      #expect(again.id == first.id)
    }
 
-   /// Scheduling without `publishAt` is rejected; with a future time it is accepted.
-   @Test func scheduleNeedsAFutureTime() async throws {
-      let (service, _, _) = try await makeMockService()
-      let error = await #expect(throws: APIError.self) {
-         try await service.createPost(PostCreate(body: "later", status: .scheduled), idempotencyKey: "k-schedule")
-      }
-      #expect(error?.details.first?.field == "publishAt")
-      let post = try await service.createPost(
-         PostCreate(body: "later", status: .scheduled, publishAt: .now.addingTimeInterval(3600)), idempotencyKey: "k-schedule-2"
-      )
+   @Test func aLinkThePreviewCannotReadIsStillSent() async throws {
+      let (service, _, _) = try await Self.make()
+      let post = try await service.createPost(PostComposition(body: "x", linkURL: "ftp://files.example/a").draft())
+      #expect(post.link == PostLink(url: "ftp://files.example/a"))
+      #expect(try await service.linkPreview(for: "https://example.com").title == "example.com")
+   }
+
+   @Test func scheduledPostsGoLiveWhenTheirTimeComes() async throws {
+      let (service, _, clock) = try await Self.make()
+      let goLive = clock.now.addingTimeInterval(3_600)
+      let post = try await service.createPost(PostComposition(body: "later", status: .scheduled, publishAt: goLive).draft())
       #expect(post.status == .scheduled)
+      #expect(post.publishAt == goLive)
+      #expect(post.url == nil)
+      clock.advance(by: 7_200)
+      let live = try await service.post(id: post.id)
+      #expect(live.status == .published)
+      #expect(live.publishedAt == goLive)
    }
 
-   /// Updates need the current ETag; a stale one yields 412 with the current ETag and a conflict disposition.
-   @Test func updateRequiresCurrentETag() async throws {
-      let (service, _, _) = try await makeMockService()
-      let post = try await service.createPost(PostCreate(body: "v1", linkUrl: "https://example.com/a"), idempotencyKey: "k-etag-1")
-      #expect(post.link?.url == "https://example.com/a")
-      let updated = try await service.updatePost(id: post.id, PostUpdate(body: "v2"), clearLink: true, ifMatch: post.version)
-      #expect(updated.body == "v2")
-      #expect(updated.link == nil)
-      #expect(updated.version != post.version)
-
-      let stale = await #expect(throws: APIError.self) {
-         try await service.updatePost(id: post.id, PostUpdate(body: "v3"), ifMatch: post.version)
-      }
-      #expect(stale?.status == 412)
-      #expect(stale?.currentETag == "\"\(updated.version)\"")
-      let conflict = try #require(stale)
-      #expect(ErrorClassifier.disposition(for: conflict) == .conflict)
+   @Test func updatesReplaceTheStateAndClearEmptiedFields() async throws {
+      let (service, _, _) = try await Self.make()
+      let post = try await service.createPost(
+         PostComposition(title: "Edit me", body: "b", tags: ["Swift"], linkURL: "https://example.com/a", locationLabel: "Here").draft())
+      var edit = PostComposition(post: post)
+      edit.locationLabel = ""
+      edit.slug = "renamed"
+      edit.tags = []
+      let updated = try await service.updatePost(id: post.id, edit.draft(), ifMatch: post.version)
+      #expect(updated.locationLabel == nil)
+      #expect(updated.slug == "renamed")
+      #expect(updated.tags.isEmpty)
+      #expect(updated.link?.title == post.link?.title)
+      #expect(updated.publishedAt == post.publishedAt)
+      edit.linkURL = ""
+      let unlinked = try await service.updatePost(id: post.id, edit.draft(), ifMatch: SiteService.anyVersion)
+      #expect(unlinked.link == nil)
    }
 
-   /// Cursor paging returns disjoint pages and ends with a nil cursor; the status filter applies.
-   @Test func listPagesWithCursor() async throws {
-      let (service, _, _) = try await makeMockService()
-      for index in 0..<5 {
-         _ = try await service.createPost(PostCreate(body: "post \(index)"), idempotencyKey: "k-page-\(index)-xx")
-      }
-      let first = try await service.myPosts(limit: 4)
-      #expect(first.items.count == 4)
-      let second = try await service.myPosts(cursor: first.nextCursor, limit: 4)
-      #expect(second.nextCursor == nil)
-      #expect(Set(first.items.map(\.id)).isDisjoint(with: second.items.map(\.id)))
-      let drafts = try await service.myPosts(status: .draft)
-      #expect(drafts.items.allSatisfy { $0.status == .draft })
+   @Test func aStaleEditOrDeleteIsAConflict() async throws {
+      let (service, _, clock) = try await Self.make()
+      let post = try await service.createPost(PostComposition(body: "v1").draft())
+      clock.advance(by: 1)
+      var web = PostComposition(post: post)
+      web.body = "changed elsewhere"
+      _ = try await service.updatePost(id: post.id, web.draft(), ifMatch: post.version)
+      let stale = await #expect(throws: APIError.self) { try await service.updatePost(id: post.id, web.draft(), ifMatch: post.version) }
+      #expect(stale?.status == Self.preconditionFailed)
+      #expect(stale?.code == "precondition_failed")
+      let staleDelete = await #expect(throws: APIError.self) { try await service.deletePost(id: post.id, ifMatch: post.version) }
+      #expect(staleDelete?.status == Self.preconditionFailed)
+      try await service.deletePost(id: post.id, ifMatch: SiteService.anyVersion)
+      await #expect(throws: APIError.self) { try await service.post(id: post.id) }
    }
 
-   /// A deleted post is gone: fetching it returns 404.
-   @Test func deleteRemovesThePost() async throws {
-      let (service, _, _) = try await makeMockService()
-      let post = try await service.createPost(PostCreate(body: "bye"), idempotencyKey: "k-delete-1")
-      try await service.deletePost(id: post.id, ifMatch: post.version)
-      let error = await #expect(throws: APIError.self) { try await service.post(id: post.id) }
-      #expect(error?.status == 404)
+   @Test func deletingWithTheCurrentVersionOrNoneWorks() async throws {
+      let (service, _, _) = try await Self.make()
+      let first = try await service.createPost(PostComposition(body: "one").draft())
+      try await service.deletePost(id: first.id, ifMatch: first.version)
+      let second = try await service.createPost(PostComposition(body: "two").draft())
+      try await service.deletePost(id: second.id, ifMatch: nil)
+      #expect(try await service.myPosts().items.allSatisfy { $0.id != first.id && $0.id != second.id })
    }
 
-   /// Tag autocomplete lists prefix matches before substring matches.
-   @Test func tagAutocompleteOrdersPrefixMatchesFirst() async throws {
-      let (service, _, _) = try await makeMockService()
-      _ = try await service.createPost(PostCreate(body: "x", tags: ["Unixy", "MiniUnix"]), idempotencyKey: "k-tags-1")
-      let names = try await service.tags(matching: "uni", blog: "quick-bits").map(\.name)
-      #expect(names == ["Unix", "Unixy", "MiniUnix"])
+   @Test func movingAPostToAnotherBlogKeepsItsSlugUnique() async throws {
+      let (service, _, _) = try await Self.make()
+      _ = try await service.createPost(PostComposition(blog: "deep-thoughts", title: "Same", body: "a").draft())
+      let post = try await service.createPost(PostComposition(title: "Same", body: "b").draft())
+      var edit = PostComposition(post: post)
+      edit.blog = "deep-thoughts"
+      let moved = try await service.updatePost(id: post.id, edit.draft(), ifMatch: post.version)
+      #expect(moved.blog == "deep-thoughts")
+      #expect(moved.slug == "same-2")
    }
 
-   /// HEIC uploads are refused with 415, matching the production server.
-   @Test func heicUploadIsRefusedLikeProduction() async throws {
-      let (service, _, _) = try await makeMockService()
-      let error = await #expect(throws: APIError.self) {
-         try await service.createUpload(UploadCreate(fileName: "a.heic", contentType: .imageHeic, byteSize: 10), idempotencyKey: "k-heic-1")
-      }
-      #expect(error?.status == 415)
-      #expect(error?.code == "heic_conversion_unavailable")
+   @Test func anUnknownBlogIsRefusedBeforeSending() async throws {
+      let (service, _, _) = try await Self.make()
+      let error = await #expect(throws: APIError.self) { try await service.createPost(PostComposition(blog: "nope", body: "x").draft()) }
+      #expect(error?.details.first?.field == "blog")
    }
 
-   /// Link previews refuse non-HTTP URLs and resolve a web page title.
-   @Test func linkPreviewRejectsNonHTTP() async throws {
-      let (service, _, _) = try await makeMockService()
-      let error = await #expect(throws: APIError.self) { try await service.linkPreview(for: "file:///etc/passwd") }
-      #expect(error?.code == "link_not_allowed")
-      #expect(try await service.linkPreview(for: "https://www.apple.com/").title?.contains("apple.com") == true)
+   @Test func tagsAreSuggestedResolvedAndCreated() async throws {
+      let (service, _, _) = try await Self.make()
+      #expect(try await service.tags(matching: "sw", blog: nil).map(\.name) == ["Swift"])
+      #expect(try await service.tags(matching: " ", blog: "deep-thoughts").map(\.name) == ["Apple", "Unix"])
+      let ids = try await service.tagIds(["swift", "Brand new", "", "SWIFT"], blogId: 1)
+      #expect(ids.count == 2)
+      #expect(try await service.tags(matching: "brand", blog: nil).map(\.name) == ["Brand new"])
    }
 
-   /// A simulated offline backend raises a URL error that is classified as retry-later.
-   @Test func offlineIsRetryable() async throws {
-      let (service, backend, _) = try await makeMockService()
-      await backend.setSimulateOffline(true)
-      let error = await #expect(throws: URLError.self) { try await service.me() }
-      let offline = try #require(error)
-      #expect(ErrorClassifier.disposition(for: offline) == .retryLater(after: nil))
-   }
-}
-
-/// Tests for the client middlewares: token refresh on 401, explicit nulls and ETag quoting.
-@Suite struct MiddlewareTests {
-   /// Replies 401 to the first request and records the bearer tokens it saw.
-   final class UnauthorizedOnceTransport: ClientTransport, @unchecked Sendable {
-      /// Guards `tokens`, which concurrent requests append to.
-      let lock = NSLock()
-      /// The `Authorization` header of each request, in order.
-      var tokens: [String] = []
-
-      /// Answers the first call with 401 and every later call with the mock profile.
-      func send(_ request: HTTPRequest, body: HTTPBody?, baseURL: URL, operationID: String) async throws -> (HTTPResponse, HTTPBody?) {
-         let count = lock.withLock {
-            tokens.append(request.headerFields[.authorization] ?? "")
-            return tokens.count
-         }
-         if count == 1 {
-            return (
-               HTTPResponse(status: .unauthorized, headerFields: [.contentType: "application/json"]),
-               HTTPBody(#"{"error":{"code":"unauthorized","message":"expired","status":401}}"#)
-            )
-         }
-         let profile = try MockBackend.encoder.encode(await MockBackend(directory: nil).me())
-         return (HTTPResponse(status: .ok, headerFields: [.contentType: "application/json"]), HTTPBody(profile))
-      }
+   @Test func tagNamesAreLookedUpForPostsFromElsewhere() async throws {
+      let backend = MockBackend(directory: nil)
+      let (service, _) = try await makeSignedInService(backend)
+      let page = try await service.myPosts()
+      #expect(page.items.allSatisfy { $0.tags.count == 0 })
+      let seeded = try #require(page.items.first { $0.status == .published })
+      #expect(try await service.post(id: seeded.id).tags == ["Swift"])
+      #expect(try await service.tagNames([]).isEmpty == false)
    }
 
-   /// A 401 makes the client refresh the token once and replay the request with the new token.
-   @Test func unauthorizedTriggersOneRefreshAndReplay() async throws {
-      let auth = AuthSession(mode: .mock, store: MemorySecureStore())
-      try await auth.signIn(using: NoWebAuthenticator())
-      let transport = UnauthorizedOnceTransport()
-      let service = SiteService(
-         serverURL: AppConfig.mockAPIBaseURL, transport: transport, auth: auth,
-         uploader: MockUploadPerformer(backend: MockBackend(directory: nil)))
-      _ = try await service.me()
-      #expect(transport.tokens.count == 2)
-      #expect(transport.tokens[0] != transport.tokens[1])
-      #expect(transport.tokens.allSatisfy { $0.hasPrefix("Bearer mock-access-") })
+   @Test func anAccountWithoutAnAuthorCannotList() async throws {
+      let transport = FixtureTransport(["me": .init(status: 200, body: Data(#"{"canPost":false,"blogs":[]}"#.utf8))])
+      let error = await #expect(throws: APIError.self) { try await fixtureService(transport).myPosts() }
+      #expect(error?.code == "forbidden")
    }
 
-   /// The null sentinel is rewritten to a JSON `null`, other fields are left alone.
-   @Test func explicitNullRewritesSentinel() throws {
-      let input = Data(#"{"body":"b","linkUrl":"__kof22_null__"}"#.utf8)
-      let output = try #require(try JSONSerialization.jsonObject(with: ExplicitNullMiddleware.rewrite(input)) as? [String: Any])
-      #expect(output["linkUrl"] is NSNull)
-      #expect(output["body"] as? String == "b")
+   @Test func aCreateAnswerWithoutAnIdIsReported() async throws {
+      let caller = #"{"canPost":true,"author":{"id":1,"name":"A"},"blogs":[{"id":1,"slug":"quick-bits","name":"Q","isDefault":true}]}"#
+      let transport = FixtureTransport([
+         "me": .init(status: 200, body: Data(caller.utf8)),
+         "queryBlogPost": .init(status: 200, body: Data(#"{"records":[]}"#.utf8)),
+         "createBlogPost": .init(status: 201, body: Data("{}".utf8)),
+      ])
+      let error = await #expect(throws: APIError.self) { try await fixtureService(transport).createPost(PostComposition(body: "x").draft()) }
+      #expect(error?.code == "bad_response")
    }
 
-   /// ETags are wrapped in quotes once, and the `*` wildcard is left as is.
-   @Test func etagsAreQuotedOnTheWire() {
-      #expect(SiteService.quoted("abc") == "\"abc\"")
-      #expect(SiteService.quoted("\"abc\"") == "\"abc\"")
-      #expect(SiteService.quoted("*") == "*")
+   @Test func uploadsGoThroughTicketPutAndComplete() async throws {
+      let (service, _, _) = try await Self.make()
+      let file = try KitFiles.makeDirectory().appending(path: "a.jpg")
+      try KitFiles.writeImage(to: file)
+      let ticket = try await service.createUpload(UploadRequest(fileName: "a.jpg", contentType: "image/jpeg", byteSize: 10))
+      try await service.putUpload(fileURL: file, ticket: ticket)
+      let media = try await service.completeUpload(id: ticket.uploadId, UploadCompletion(altText: "Alt", caption: nil, keepLocation: true))
+      #expect(media.altText == "Alt")
+      #expect(media.locationRemoved == false)
+      let post = try await service.createPost(
+         PostComposition(body: "photo", photos: [ComposedPhoto(mediaId: media.mediaId, caption: "Cap")]).draft())
+      #expect(post.media.first?.caption == "Cap")
+      #expect(post.media.first?.altText == "Alt")
+      #expect(post.featuredMediaId == media.mediaId)
+      #expect(post.featuredImage == media.url)
    }
 }
 
-/// Tests for headers as they appear on the wire.
-@Suite struct WireFormatTests {
-   /// Records the `If-Match` header of the last request and replies 204.
-   final class CapturingTransport: ClientTransport, @unchecked Sendable {
-      /// The `If-Match` header seen on the last request.
-      var ifMatch: String?
-
-      /// Captures `If-Match` and answers with No Content.
-      func send(_ request: HTTPRequest, body: HTTPBody?, baseURL: URL, operationID: String) async throws -> (HTTPResponse, HTTPBody?) {
-         let name = try #require(HTTPField.Name("If-Match"))
-         ifMatch = request.headerFields[name]
-         return (HTTPResponse(status: .noContent), nil)
-      }
+/// Converting between records and the app's post.
+@Suite struct APIMappingTests {
+   @Test func statusFollowsPublishedAndSchedule() {
+      #expect(APIMapping.status(isPublished: true, scheduledPublishAt: .now) == .published)
+      #expect(APIMapping.status(isPublished: false, scheduledPublishAt: .now) == .scheduled)
+      #expect(APIMapping.status(isPublished: nil, scheduledPublishAt: nil) == .draft)
+      #expect(APIMapping.version(of: nil) == APIMapping.unknownVersion)
    }
 
-   /// An unquoted ETag is sent in quotes exactly once in `If-Match`.
-   @Test func ifMatchIsSentVerbatim() async throws {
-      let auth = AuthSession(mode: .mock, store: MemorySecureStore())
-      try await auth.signIn(using: NoWebAuthenticator())
-      let transport = CapturingTransport()
-      let service = SiteService(
-         serverURL: AppConfig.mockAPIBaseURL, transport: transport, auth: auth,
-         uploader: MockUploadPerformer(backend: MockBackend(directory: nil)))
-      try await service.deletePost(id: 1, ifMatch: "0123456789abcdef0123")
-      #expect(transport.ifMatch == "\"0123456789abcdef0123\"")
+   @Test func incompleteRecordsMapToSafeDefaults() {
+      let post = APIMapping.post(BlogPostRecord(), blogSlugs: [:], tagNames: [:])
+      #expect(post.id == 0)
+      #expect(post.blog.isEmpty)
+      #expect(post.status == .draft)
+      #expect(post.link == nil)
+      #expect(APIMapping.photo(BlogPostMediaRecord(mediaId: 1)) == nil)
+      #expect(post.media.first?.id == nil)
+   }
+
+   @Test func photosAreSortedAndIdentifiedByMedia() {
+      var record = BlogPostRecord()
+      record.media = [
+         BlogPostMediaRecord(id: 2, mediaId: 20, sortOrder: 1, url: "b"), BlogPostMediaRecord(id: 1, mediaId: 10, sortOrder: 0, url: "a"),
+      ]
+      let post = APIMapping.post(record, blogSlugs: [:], tagNames: [:])
+      #expect(post.media.map(\.id) == [10, 20])
+   }
+
+   @Test func longLinkDetailsAreClippedAndOversizedImagesDropped() {
+      let draft = PostComposition(body: "b", linkURL: "https://x.example").draft()
+      let link = LinkPreview(
+         url: "https://x.example", title: String(repeating: "t", count: 400), description: String(repeating: "d", count: 1_200),
+         imageUrl: String(repeating: "i", count: PostFieldLimits.link + 1))
+      let record = APIMapping.record(draft, .init(blogId: 1, authorId: 1, slug: "s", tagIds: [], link: link, publishDate: nil))
+      #expect((record.linkTitle?.count ?? 0) <= APIMapping.linkTitleLength)
+      #expect((record.linkDescription?.count ?? 0) <= APIMapping.linkDescriptionLength)
+      #expect(record.linkImageUrl == nil)
+      #expect(APIMapping.clearedFields(record) == ["locationLabel", "featuredMediaId", "scheduledPublishAt"])
    }
 }

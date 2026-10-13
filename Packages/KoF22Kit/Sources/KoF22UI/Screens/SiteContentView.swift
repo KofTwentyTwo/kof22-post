@@ -143,7 +143,7 @@
             if let excerpt = post.excerpt ?? post.description, !excerpt.isEmpty {
                Text(excerpt).font(.callout).foregroundStyle(Theme.body).lineLimit(Theme.LineLimit.excerpt)
             }
-            let names = (post.tags ?? []).compactMap { $0.tagId.flatMap { tagNames[$0] } }
+            let names = (post.tags ?? []).compactMap { $0.blogTagId.flatMap { tagNames[$0] } }
             if !names.isEmpty {
                FlowLayout(spacing: Theme.Spacing.small) { ForEach(names, id: \.self) { TagChip($0) } }
             }
@@ -162,8 +162,10 @@
       /// Tag names by tag id.
       let tagNames: [Int: String]
 
-      /// The website address `https://www.kof22.com/blogs/<blog>/<post>`, when both slugs are known.
+      /// The post's page on the website: the server's `siteUrl`, else
+      /// `https://www.kof22.com/blogs/<blog>/<post>` when both slugs are known.
       private var websiteURL: URL? {
+         if let siteUrl = post.siteUrl, let url = URL(string: siteUrl) { return url }
          guard let blogSlug, let slug = post.slug else { return nil }
          return URL(literal: "https://www.kof22.com/blogs").appending(path: blogSlug).appending(path: slug)
       }
@@ -183,7 +185,7 @@
                   .clipShape(RoundedRectangle(cornerRadius: Theme.Radius.card))
                   .accessibilityLabel(photo.altText ?? "Photo")
                }
-               let names = (post.tags ?? []).compactMap { $0.tagId.flatMap { tagNames[$0] } }
+               let names = (post.tags ?? []).compactMap { $0.blogTagId.flatMap { tagNames[$0] } }
                if !names.isEmpty {
                   FlowLayout(spacing: Theme.Spacing.small) { ForEach(names, id: \.self) { TagChip($0) } }
                }

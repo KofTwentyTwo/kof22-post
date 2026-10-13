@@ -3,15 +3,23 @@ generate:
   - client
 accessModifier: public
 namingStrategy: idiomatic
+# Site API v2 is the whole CMS model; generate only the operations the app calls.
+# The process endpoints (/me, /media/createUpload, /media/completeUpload/{uploadId},
+# /blogPost/linkPreview) have no request or response schemas in the spec, so they are
+# called by hand in KoF22Kit (SiteProcesses).
 filter:
-  tags:
-    - Authoring
-    - Discovery
-  # Anonymous reads the app uses; the rest of the Content tag is not generated.
   operations:
-    - queryPost
-    - getPost
+    - createBlogPost
+    - getBlogPost
+    - updateBlogPost
+    - deleteBlogPost
+    - queryBlogPost
+    - createBlogTag
+    - queryBlogTag
     - queryBlog
     - getBlog
-    - queryTag
-    - getTag
+    - queryAuthor
+    - getAuthor
+    - getMedia
+    - querySite
+    - getSite

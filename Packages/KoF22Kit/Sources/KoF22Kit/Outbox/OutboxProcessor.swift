@@ -25,12 +25,13 @@ public struct SilentNotifier: OutboxNotifier {
 
 /// Sends queued items: uploads photos (create ticket, PUT, complete), then creates,
 /// updates or deletes the post. Every step is retry-safe:
-///   - creates and upload tickets carry idempotency keys derived from the item, and a
-///     retry reuses the same key so a lost response replays instead of duplicating;
-///   - an expired presigned URL restarts that photo's upload with a new key;
+///   - a create that is retried after a lost response finds the post the first attempt
+///     made (`SiteService.createPost`) instead of creating a second one;
+///   - an expired presigned URL restarts that photo's upload;
 ///   - uploaded `mediaId`s are written back before the post call, so a retry
 ///     never uploads a photo twice;
-///   - updates send `If-Match`, and a 412 stops for the user instead of overwriting.
+///   - updates and deletes check the post's version first, and a 412 stops for the
+///     user instead of overwriting.
 public actor OutboxProcessor {
    /// Supplies the service for the current sign-in, or nil when there is none.
    public typealias ServiceProvider = @Sendable () async -> SiteService?
@@ -56,8 +57,8 @@ public actor OutboxProcessor {
    private var current: Task<Void, Never>?
    /// Set when a drain arrives during a pass, asking for one more.
    private var rerun = false
-   /// The server's limits, fetched once per processor before the first upload.
-   private var limits: AuthoringLimits?
+   /// The server's photo rules, fetched once per processor before the first upload.
+   private var limits: PhotoLimits?
 
    /// Attempts before an item stops retrying on its own.
    public static let maxAutomaticAttempts = 6
@@ -194,14 +195,13 @@ public actor OutboxProcessor {
       let composition = try await uploadPhotos(item, service: service)
       let post: Post
       if item.operation == .create {
-         post = try await service.createPost(composition.createBody(), idempotencyKey: item.idempotencyKey)
+         post = try await service.createPost(composition.draft())
       }
       else {
          guard let postID = item.serverPostID, let ifMatch = item.ifMatch else {
             throw APIError(status: Self.badRequestStatus, code: "bad_request", message: "Missing post id or version")
          }
-         let (update, clearLink) = composition.updateBody()
-         post = try await service.updatePost(id: postID, update, clearLink: clearLink, ifMatch: ifMatch)
+         post = try await service.updatePost(id: postID, composition.draft(), ifMatch: ifMatch)
       }
       await bestEffort("cache post \(post.id)") { [store] in try await store.cache([post]) }
       await bestEffort("carry version of post \(post.id) forward") { [store] in
@@ -226,8 +226,8 @@ public actor OutboxProcessor {
       await notifier.posted(summary: composition.summary, status: post.status, url: post.url)
    }
 
-   /// The server's limits, fetched on first use and then reused.
-   func currentLimits(_ service: SiteService) async throws -> AuthoringLimits {
+   /// The server's photo rules, fetched on first use and then reused.
+   func currentLimits(_ service: SiteService) async throws -> PhotoLimits {
       if let limits { return limits }
       let fetched = try await service.me().limits
       limits = fetched
