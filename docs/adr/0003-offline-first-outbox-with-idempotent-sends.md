@@ -1,6 +1,6 @@
 # ADR-0003: Send every write through an offline-first outbox
 
-- **Status:** Accepted
+- **Status:** Accepted; double-post protection changed by ADR-0009 (v2 has no idempotency keys)
 - **Date:** 2026-10-11
 - **Pull request:** none (initial build on `main`)
 

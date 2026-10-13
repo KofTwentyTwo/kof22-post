@@ -22,11 +22,13 @@ is James Maes. Read `docs/BRIEF.md` first. When `docs/REQUIREMENTS.md`,
   recorded in `docs/standards-conformance.md`). Never push without asking.
 - Never commit secrets, signing assets, or tokens. The OAuth client is public
   (PKCE), so there is no client secret to begin with.
-- Do not invent backend behaviour. The contract is the KoF22 Site API v1 in
-  Website-Backend (`siteapi/`, `src/main/resources/site-api/openapi-extensions.yaml`).
-  `openapi/openapi.yaml` is the live spec from `https://api.kof22.com/v1/openapi.yaml`
-  (`make update-spec`). After every update, make the mock
-  (`Packages/KoF22Kit/Sources/KoF22Kit/Mock`) follow any contract change.
+- Do not invent backend behaviour. The contract is KoF22 Site API v2 (the CMS model, generated
+  by Website-Backend `siteapi/SiteApiV2.java` and `siteapi/processes/SiteApiProcesses.java`).
+  `openapi/openapi.yaml` is the live spec from `https://api.kof22.com/v2/openapi.yaml`, filtered
+  to the operations the app uses (`make update-spec`; the filter is in
+  `openapi/openapi-generator-config.yaml`). After every update, make the fake
+  (`Packages/KoF22Kit/Sources/KoF22Kit/Mock`) follow any contract change. Only v2 is supported
+  (ADR-0009).
 - Push back on technical direction when there is a concrete reason, then
   follow the owner's decision.
 

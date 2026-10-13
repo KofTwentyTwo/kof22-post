@@ -6,7 +6,7 @@
 
 KoF22 Post is a personal iPhone app (with a Share Extension, widgets and App
 Intents) that its owner uses to publish posts and photos to kof22.com through the
-KoF22 Site API v1. It signs in with the KoF22 Authentik identity provider, keeps a
+KoF22 Site API v2. It signs in with the KoF22 Authentik identity provider, keeps a
 local outbox of posts waiting to be sent, and can run against an in-process mock of
 the API. It has access to the user's photo library (full access, on request), precise
 location (when in use, on request), the camera, and an App Group container shared
@@ -46,9 +46,9 @@ flowchart LR
 | Interface | Direction | Data | Authenticated? | Validated where? |
 | --- | --- | --- | --- | --- |
 | Authentik authorize/token/revoke | Out/In | PKCE code, tokens | Public client + PKCE; `state` checked | `OAuthClient` (state, error, missing code) |
-| Site API `/v1/me/*` | Out/In | Posts, tags, photos metadata | Bearer JWT (`kof22:publish`) | Generated client decodes typed JSON; `ErrorEnvelopeMiddleware` maps errors |
+| Site API v2 (`/v2/blogPost`, `/v2/blogTag`, `/v2/author`, `/v2/blog`, `/v2/media`, `/v2/me`, upload and link processes) | Out/In | Posts, tags, photo metadata, author and blog records | Bearer JWT (`kof22:publish`) on every request; the user's admin permissions apply | Generated client and hand-written process types decode JSON; `ErrorEnvelopeMiddleware` maps both error envelopes |
 | Presigned upload URL | Out | Photo bytes (background `URLSession`, shared with the Share Extension) | Signature in URL (15 min); no bearer token | Server sniffs and sanitizes the file |
-| Anonymous reads (`/v1/post`, `/v1/blog`, `/v1/tag`, `/versions.json`) | Out/In | Published content | None by design; the bearer token is never attached outside `/v1/me` | Generated Codable types; unknown fields ignored |
+| On-device language model (Foundation Models) | In-process | Post text, tags, blog name, place label | Stays on the iPhone: only `SystemLanguageModel` is used, never Private Cloud Compute | Output is clipped to field limits and shown for review before posting |
 | Diagnostics checks | Out/In | OIDC discovery, versions, one anonymous read | None | Status and `issuer` comparison only |
 | Custom URL scheme `com.kof22.post://` | In | OAuth callback, `compose`/`outbox`/`posts`/`settings` routes | No | `AppModel.open(url:)` accepts only known hosts; compose text is placed in the editor, never sent automatically |
 | Share Extension input | In | Text, URLs, images | No | Images copied as files; URLs must be http(s) to be previewed; nothing is sent without the owner tapping Post |
@@ -69,14 +69,15 @@ flowchart LR
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | T1 | OAuth redirect | Spoofing | Another app registers `com.kof22.post://` to capture the code | Low | High | PKCE (S256) makes a stolen code useless; `state` checked; `ASWebAuthenticationSession` delivers the callback only to this app | Mitigated |
 | T2 | Tokens at rest | Information disclosure | Tokens read from disk or backups | Low | High | Keychain only, `AfterFirstUnlockThisDeviceOnly`, never logged (K22-SEC-71) | Mitigated |
-| T3 | Outbox retries | Tampering / integrity | A retry after a lost response publishes twice | Medium | Medium | Idempotency keys per item and per photo; tests cover lost responses | Mitigated |
-| T4 | Edits | Tampering | An offline edit overwrites a newer web edit | Medium | Medium | `If-Match` on every edit; 412 becomes an explicit overwrite decision | Mitigated |
+| T3 | Outbox retries | Tampering / integrity | A retry after a lost response publishes twice | Medium | Medium | v2 has no idempotency keys: a create adopts the post an earlier attempt made (blog, author, slug family, body); the database keeps `(slug, blogId)` unique; tests cover lost responses (ADR-0009) | Mitigated |
+| T4 | Edits | Tampering | An offline edit overwrites a newer web edit | Medium | Medium | v2 has no ETags: the post's `modifyDate` is compared before every edit and delete; a mismatch becomes an explicit overwrite decision. Read-then-write leaves a window of moments | Mitigated (best effort) |
 | T5 | Photos | Information disclosure | GPS location published with a photo | Medium | High | GPS removed on device unless the post opts in; server strips EXIF again | Mitigated |
 | T6 | Share Extension / URL scheme | Tampering | Shared or linked content triggers a post without consent | Low | Medium | Input only pre-fills the composer; posting needs an explicit tap or a user-run Shortcut | Mitigated |
 | T7 | Link preview | Information disclosure / SSRF | A link makes something fetch an internal URL | Low | Medium | The server fetches previews with its SSRF guard (public IPs only); the app never fetches arbitrary URLs itself | Mitigated (server) |
 | T8 | Network | Information disclosure | Traffic interception | Low | High | HTTPS only (ATS defaults, no exceptions) | Mitigated |
 | T9 | Lost device | Elevation of privilege | Someone with the unlocked phone posts | Low | Medium | Device passcode; sign-out revokes tokens; tokens can be revoked in Authentik | Accepted |
-| T11 | Token scope | Information disclosure | The bearer token is sent to endpoints that do not need it | Low | Medium | Path allow-list in `AuthMiddleware` (`/v1/me` only), tested (ADR-0008) | Mitigated |
+| T11 | Token scope | Information disclosure | The bearer token reaches a host other than the API | Low | Medium | v2 expects the token on every request (it also returns drafts); the client only talks to `api.kof22.com` and the presigned upload URL, which gets no token (ADR-0009, superseding ADR-0008) | Mitigated |
+| T13 | Generated text | Integrity | The on-device model invents facts in a title or description that gets published | Medium | Low | Suggestions only describe the post's own text (instructions), are shown in Details & SEO for review and edit, and a typed field is never overwritten automatically (ADR-0010) | Mitigated |
 | T12 | Background uploads | Information disclosure | Prepared photos linger on disk after an upload | Low | Low | Files live in the App Group container and are removed once the media ID is recorded; GPS stripped unless the photo opts in | Mitigated |
 | T10 | Dependencies | Tampering | A compromised Swift package | Low | High | Exact pins and `Package.resolved`; Dependabot with cooldown; Trivy/OSV in CI | Mitigated |
 
@@ -92,4 +93,5 @@ flowchart LR
 | Date | Version | Reviewer | Changes |
 | --- | --- | --- | --- |
 | 2026-10-11 | 0.1.0 | James Maes (with Claude Opus 5.5) | Initial model |
+| 2026-10-13 | 0.2.0 | James Maes (with Claude Opus 5.5) | Site API v2 (token on every request, client-side duplicate and conflict checks), on-device suggestions |
 | 2026-10-12 | 0.1.0 | James Maes (with Claude Opus 5.5) | Background uploads, anonymous reads, bearer allow-list, diagnostics, per-photo location |

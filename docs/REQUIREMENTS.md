@@ -60,10 +60,8 @@ Status: draft for owner review (2026-10-11). Supersedes `BRIEF.md` where they di
 
 ## Post metadata and publishing controls (v1.1, draft 2026-10-12)
 
-Status: draft for owner review. Waits on the new Site API that exposes every post field
-for writing (owner, 2026-10-12). The 1.2.0 contract accepts only `blog, title, body,
-status, publishAt, tags, locationLabel, linkUrl, media` on `/v1/me/posts` and silently
-ignores other fields, so nothing below is sent until the new contract is live.
+Status: in build (2026-10-13) on Site API v2, which exposes every post field (ADR-0009). The owner
+decided v2 only: the v1 client and mock are removed.
 
 **Must**
 
@@ -80,7 +78,11 @@ ignores other fields, so nothing below is sent until the new contract is live.
   author, and the post detail shows what the server stored.
 - M21. Publishing is explicit: Draft, Publish now (as soon as uploaded) or Schedule with
   a date and time for the publish-at field. An "is featured" toggle is visible.
-- M22. Location is better populated (scope to confirm, see open questions).
+- M22. Location is better populated: a richer label from the nearest place and the town
+  ("Smith's Diner, Chester, IL"), with nearby alternatives to pick (owner, 2026-10-13). v2 has no
+  coordinate fields on a post.
+- M24. The author is shown ("Posting as") and can be chosen from the authors the account may see,
+  defaulting to the account's own author (owner, 2026-10-13).
 - M23. Suggestions come from the on-device model (Apple Foundation Models); no post
   content leaves the phone for them. Without Apple Intelligence the fields fall back
   to rules (first sentence, trimmed body, tags as keywords).
@@ -91,13 +93,13 @@ ignores other fields, so nothing below is sent until the new contract is live.
   output: counting is exact in code and unreliable in a language model. Owner may
   revisit.
 
-**Open questions**
+**Answers (2026-10-13)**
 
-1. Location: richer label ("Place, City, State"), stored coordinates, or a place
-   suggested from photo GPS?
-2. Author: display only, or a choice among authors the account may post as?
-3. "Site": a separate field, or the blog the post appears under on kof22.com?
-4. Phone model: Apple Intelligence needs iPhone 15 Pro or newer.
+1. Location: richer label (above).
+2. Author: picker, default the account's author (above).
+3. Site: a blog belongs to a site (`blog.siteId`); uploaded media belong to the public site and the
+   server refuses a featured image from another site, so blog, site and media agree.
+4. Phone model: not confirmed; without Apple Intelligence the rules fill the same fields (ADR-0010).
 
 ## Non-goals (v1)
 

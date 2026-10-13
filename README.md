@@ -15,9 +15,9 @@ See [SECURITY.md](SECURITY.md) to report a vulnerability and
 
 ## Status
 
-Phase 1 is done. The API client is generated from the live Site API v1 spec at
-`api.kof22.com`; the app defaults to an in-process **mock** of that contract.
-Live mode (Settings) needs the Authentik `kof22-post-ios` provider. See `docs/PLAN.md`.
+The app talks to KoF22 Site API v2 at `api.kof22.com` (client generated from the live spec,
+filtered to the operations the app uses). Mock mode runs an in-process fake of the same
+operations, used by App Review and the tests. See `docs/PLAN.md`.
 
 ## Install
 

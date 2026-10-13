@@ -1,6 +1,6 @@
 # ADR-0008: Read published content anonymously; send tokens only to /me
 
-- **Status:** Accepted
+- **Status:** Superseded by ADR-0009 (Site API v2 sends the token on every request)
 - **Date:** 2026-10-12
 - **Pull request:** none (work on `main` until the first published version)
 

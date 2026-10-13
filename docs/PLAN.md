@@ -40,13 +40,17 @@ Blocked on the Authentik `kof22-post-ios` provider (discovery URL 404).
 - Progress per byte in the outbox.
 - HEIC passthrough once the server converter is enabled (automatic via limits).
 
-## Phase 5: Post metadata (waits on the new Site API)
+## Phase 5: Site API v2 and post metadata (in progress 2026-10-13)
 
-Requirements M16-M23. Can start before the API ships: slug rule and tests, the
-on-device suggestion service with rule fallback, the Draft / Publish now / Schedule
-control, the "Details & SEO" section (held locally). When the contract lands:
-`make update-spec`, send the new fields, update the mock, verify a real post on
-kof22.com (name, slug, SEO, featured image, gallery, author, blog).
+Requirements M16-M24, ADR-0009, ADR-0010.
+
+- Done: v2 client from the filtered spec; v1 client and mock removed; v2 fake for tests and
+  Mock mode; client-side duplicate (adoption) and conflict (`modifyDate`) checks; every post
+  field sent (name, short name, slug, description, SEO, excerpt, read time, featured, featured
+  image, author, schedule); on-device suggestions with rule fallback; Details & SEO and Publish
+  sections; author picker; nearby place labels; post detail shows every stored field.
+- Open: live sign-in and a real post on kof22.com checked end to end (name, slug, SEO, featured
+  image, gallery, author, blog), then delete it; a new 1.0.0 build for App Review.
 
 ## Later (designed for, not built)
 
