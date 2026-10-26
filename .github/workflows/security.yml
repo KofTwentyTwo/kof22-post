@@ -19,7 +19,7 @@ concurrency:
 
 jobs:
   security:
-    uses: KofTwentyTwo/standards/.github/workflows/security.yml@7c6936844323230546a9bcf6aa7610f5c43e1013 # v1.0.0
+    uses: KofTwentyTwo/standards/.github/workflows/security.yml@70b555bd5658273090769991bfc4c9b6681dde18 # v1.2.1
     permissions:
       contents: read
       security-events: write
